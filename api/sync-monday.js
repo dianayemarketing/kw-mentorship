@@ -1,0 +1,89 @@
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
+
+const MONDAY_API_URL = 'https://api.monday.com/v2';
+const BOARD_ID = '18383986088';
+
+async function fetchMondayMentees() {
+  const query = `
+    query {
+      boards(ids: [${BOARD_ID}]) {
+        items_page(limit: 100) {
+          items {
+            id
+            name
+            column_values(ids: ["text_mkxv9drn","text_mkxvtxbk","email_mm1wde8k","date4"]) {
+              id
+              text
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const res = await fetch(MONDAY_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': process.env.MONDAY_API_TOKEN
+    },
+    body: JSON.stringify({ query })
+  });
+
+  const data = await res.json();
+  return data.data.boards[0].items_page.items;
+}
+
+export default async function handler(req, res) {
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
+  // Simple password check
+  const auth = req.headers['x-mentor-password'];
+  if (auth !== process.env.MENTOR_PASSWORD) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const mondayItems = await fetchMondayMentees();
+    let added = 0, updated = 0;
+
+    for (const item of mondayItems) {
+      const colMap = {};
+      item.column_values.forEach(c => { colMap[c.id] = c.text; });
+
+      const menteeData = {
+        monday_item_id: item.id,
+        name: item.name,
+        mobile: colMap['text_mkxv9drn'] || null,
+        work_email: colMap['text_mkxvtxbk'] || null,
+        personal_email: colMap['email_mm1wde8k'] || null,
+        onboard_date: colMap['date4'] || null,
+        is_active: true
+      };
+
+      const { data: existing } = await supabase
+        .from('mentees')
+        .select('id')
+        .eq('monday_item_id', item.id)
+        .single();
+
+      if (existing) {
+        await supabase.from('mentees').update(menteeData).eq('monday_item_id', item.id);
+        updated++;
+      } else {
+        await supabase.from('mentees').insert(menteeData);
+        added++;
+      }
+    }
+
+    return res.status(200).json({ success: true, added, updated });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message });
+  }
+}
