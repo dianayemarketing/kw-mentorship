@@ -5,7 +5,9 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-const TOTAL_TASKS = 113; // total tasks across all weeks
+const TOTAL_TASKS = 113;
+const sectionCounts = [20, 17, 11, 10, 6, 27, 18, 15, 13];
+const weekLabels = ['Prerequisites','Week 1','Week 2','Week 3','Week 4','Weeks 5–6','Weeks 7–8','Weeks 9–10','Weeks 11–12'];
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -16,14 +18,15 @@ export default async function handler(req, res) {
   }
 
   try {
+    // ← Only fetch ACTIVE mentees
     const { data: mentees, error } = await supabase
       .from('mentees')
       .select('*')
+      .eq('is_active', true)
       .order('name');
 
     if (error) throw error;
 
-    // For each mentee, get their progress
     const results = await Promise.all(mentees.map(async (m) => {
       const { data: progress } = await supabase
         .from('checklist_progress')
@@ -34,20 +37,13 @@ export default async function handler(req, res) {
       const doneTasks = progress?.length || 0;
       const pct = Math.round((doneTasks / TOTAL_TASKS) * 100);
 
-      // Determine current week based on sections completed
-      const sectionCounts = [20, 17, 11, 10, 6, 27, 18, 15, 13]; // tasks per section
-      let sectionsDone = 0;
+      let currentWeekIdx = 0;
       for (let si = 0; si < sectionCounts.length; si++) {
         const sectionDone = progress?.filter(p => p.section_index === si).length || 0;
-        if (sectionDone < sectionCounts[si]) {
-          sectionsDone = si;
-          break;
-        }
-        sectionsDone = si + 1;
+        if (sectionDone < sectionCounts[si]) { currentWeekIdx = si; break; }
+        currentWeekIdx = si + 1;
       }
-
-      const weekLabels = ['Prerequisites','Week 1','Week 2','Week 3','Week 4','Weeks 5–6','Weeks 7–8','Weeks 9–10','Weeks 11–12'];
-      const currentWeek = sectionsDone >= weekLabels.length ? 'Completed' : weekLabels[sectionsDone];
+      const currentWeek = currentWeekIdx >= weekLabels.length ? 'Completed' : weekLabels[currentWeekIdx];
 
       const lastActivity = progress?.length
         ? progress.sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at))[0]?.updated_at
