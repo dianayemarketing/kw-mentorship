@@ -1,0 +1,29 @@
+[
+  {
+    "date": "Apr 18, 2026",
+    "day": "Friday",
+    "time": "10:00 AM",
+    "title": "Agent Mastermind",
+    "description": "Weekly group training & accountability session",
+    "location": "KW Thrive Office",
+    "type": "weekly"
+  },
+  {
+    "date": "Apr 22, 2026",
+    "day": "Wednesday",
+    "time": "9:00 AM",
+    "title": "Broker Tour",
+    "description": "Preview new listings with the team",
+    "location": "Meet at Office",
+    "type": "tour"
+  },
+  {
+    "date": "Apr 24, 2026",
+    "day": "Friday",
+    "time": "10:00 AM",
+    "title": "Agent Mastermind",
+    "description": "Weekly group training & accountability session",
+    "location": "KW Thrive Office",
+    "type": "weekly"
+  }
+]
