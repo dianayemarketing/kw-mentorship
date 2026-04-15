@@ -1,35 +1,6 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/mentee/([^/]+)",
-      "dest": "/mentee.html"
-    },
-    {
-      "src": "/events.json",
-      "dest": "/public/events.json"
-    },
-    {
-      "src": "/",
-      "dest": "/index.html"
-    }
+  "rewrites": [
+    { "source": "/mentee/(.*)", "destination": "/mentee.html" },
+    { "source": "/events.json", "destination": "/public/events.json" }
   ]
 }
