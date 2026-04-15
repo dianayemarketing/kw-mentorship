@@ -7,18 +7,24 @@ const supabase = createClient(
 
 const MONDAY_API_URL = 'https://api.monday.com/v2';
 const BOARD_ID = '18383986088';
+const ACTIVE_GROUP_ID = 'topics';        // Signed Mentee
+const PAUSED_GROUP_ID = 'group_mm12kcan'; // Paused
 
 async function fetchMondayMentees() {
   const query = `
     query {
       boards(ids: [${BOARD_ID}]) {
-        items_page(limit: 100) {
-          items {
-            id
-            name
-            column_values(ids: ["text_mkxv9drn","text_mkxvtxbk","email_mm1wde8k","date4"]) {
+        groups {
+          id
+          title
+          items_page(limit: 100) {
+            items {
               id
-              text
+              name
+              column_values(ids: ["text_mkxv9drn","text_mkxvtxbk","email_mm1wde8k","date4"]) {
+                id
+                text
+              }
             }
           }
         }
@@ -36,48 +42,56 @@ async function fetchMondayMentees() {
   });
 
   const data = await res.json();
-  return data.data.boards[0].items_page.items;
+  return data.data.boards[0].groups;
 }
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // Simple password check
   const auth = req.headers['x-mentor-password'];
   if (auth !== process.env.MENTOR_PASSWORD) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
-    const mondayItems = await fetchMondayMentees();
+    const groups = await fetchMondayMentees();
     let added = 0, updated = 0;
 
-    for (const item of mondayItems) {
-      const colMap = {};
-      item.column_values.forEach(c => { colMap[c.id] = c.text; });
+    for (const group of groups) {
+      // Only process Signed Mentee and Paused groups
+      if (group.id !== ACTIVE_GROUP_ID && group.id !== PAUSED_GROUP_ID) continue;
 
-      const menteeData = {
-        monday_item_id: item.id,
-        name: item.name,
-        mobile: colMap['text_mkxv9drn'] || null,
-        work_email: colMap['text_mkxvtxbk'] || null,
-        personal_email: colMap['email_mm1wde8k'] || null,
-        onboard_date: colMap['date4'] || null,
-        is_active: true
-      };
+      const isActive = group.id === ACTIVE_GROUP_ID;
 
-      const { data: existing } = await supabase
-        .from('mentees')
-        .select('id')
-        .eq('monday_item_id', item.id)
-        .single();
+      for (const item of group.items_page.items) {
+        const colMap = {};
+        item.column_values.forEach(c => { colMap[c.id] = c.text; });
 
-      if (existing) {
-        await supabase.from('mentees').update(menteeData).eq('monday_item_id', item.id);
-        updated++;
-      } else {
-        await supabase.from('mentees').insert(menteeData);
-        added++;
+        const menteeData = {
+          monday_item_id: item.id,
+          name: item.name,
+          mobile: colMap['text_mkxv9drn'] || null,
+          work_email: colMap['text_mkxvtxbk'] || null,
+          personal_email: colMap['email_mm1wde8k'] || null,
+          onboard_date: colMap['date4'] || null,
+          is_active: isActive  // true for Signed Mentee, false for Paused
+        };
+
+        const { data: existing } = await supabase
+          .from('mentees')
+          .select('id')
+          .eq('monday_item_id', item.id)
+          .single();
+
+        if (existing) {
+          await supabase.from('mentees')
+            .update(menteeData)
+            .eq('monday_item_id', item.id);
+          updated++;
+        } else {
+          await supabase.from('mentees').insert(menteeData);
+          added++;
+        }
       }
     }
 
