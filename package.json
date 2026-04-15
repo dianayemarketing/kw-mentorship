@@ -2,6 +2,7 @@
   "name": "kw-mentorship",
   "version": "1.0.0",
   "description": "KW Thrive Chinese Mentorship Program",
+  "type": "module",
   "scripts": {
     "dev": "vercel dev"
   },
