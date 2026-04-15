@@ -1,0 +1,11 @@
+{
+  "name": "kw-mentorship",
+  "version": "1.0.0",
+  "description": "KW Thrive Chinese Mentorship Program",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  }
+}

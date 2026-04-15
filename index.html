@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KW Thrive · Mentor Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --red: #C8102E;
+  --red-light: #fdf0f2;
+  --red-mid: #f5c6ce;
+  --dark: #0f0f0f;
+  --gray-900: #1a1a1a;
+  --gray-700: #444;
+  --gray-500: #777;
+  --gray-200: #e8e8e8;
+  --gray-100: #f5f5f5;
+  --white: #ffffff;
+  --green: #00875a;
+  --green-light: #e3f5ef;
+  --amber: #b45309;
+  --amber-light: #fef3cd;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: var(--dark); min-height: 100vh; }
+
+/* LOGIN */
+#login-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: var(--dark);
+}
+.login-box {
+  background: var(--white); border-radius: 20px; padding: 3rem 2.5rem;
+  width: 360px; text-align: center;
+}
+.login-logo { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--red); margin-bottom: 4px; }
+.login-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 2rem; }
+.login-box input {
+  width: 100%; padding: 12px 16px; border: 1.5px solid var(--gray-200);
+  border-radius: 8px; font-size: 15px; font-family: inherit;
+  margin-bottom: 12px; outline: none; transition: border-color 0.2s;
+}
+.login-box input:focus { border-color: var(--red); }
+.login-btn {
+  width: 100%; padding: 13px; background: var(--red); color: white;
+  border: none; border-radius: 8px; font-size: 15px; font-family: inherit;
+  font-weight: 500; cursor: pointer; transition: opacity 0.2s;
+}
+.login-btn:hover { opacity: 0.88; }
+.login-error { font-size: 13px; color: var(--red); margin-top: 8px; display: none; }
+
+/* APP */
+#app { display: none; }
+.topbar {
+  background: var(--dark); color: white; padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px; position: sticky; top: 0; z-index: 100;
+}
+.topbar-brand { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--red); }
+.topbar-sub { font-size: 12px; color: #888; margin-left: 10px; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.sync-btn {
+  background: transparent; border: 1px solid #444; color: white;
+  padding: 6px 14px; border-radius: 6px; font-size: 12px;
+  font-family: inherit; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.sync-btn:hover { border-color: var(--red); color: var(--red); }
+.sync-icon { display: inline-block; transition: transform 0.5s; }
+.sync-btn.syncing .sync-icon { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.main { max-width: 1280px; margin: 0 auto; padding: 2rem; }
+
+/* METRICS */
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 2rem; }
+.metric-card {
+  background: var(--white); border-radius: var(--radius); padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow); border-top: 3px solid var(--gray-200);
+}
+.metric-card.red { border-top-color: var(--red); }
+.metric-card.green { border-top-color: var(--green); }
+.metric-card.amber { border-top-color: #f59e0b; }
+.metric-label { font-size: 12px; color: var(--gray-500); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+.metric-value { font-size: 32px; font-weight: 600; color: var(--dark); line-height: 1; }
+.metric-sub { font-size: 12px; color: var(--gray-500); margin-top: 4px; }
+
+/* TWO COLUMN LAYOUT */
+.content-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+
+/* SECTION HEADER */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.section-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--dark); }
+
+/* MENTEE CARDS */
+.mentee-grid { display: flex; flex-direction: column; gap: 12px; }
+.mentee-card {
+  background: var(--white); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 1.25rem 1.5rem;
+  cursor: pointer; transition: box-shadow 0.2s, transform 0.15s;
+  border: 1.5px solid transparent; text-decoration: none; color: inherit;
+  display: block;
+}
+.mentee-card:hover { box-shadow: 0 4px 20px rgba(200,16,46,0.12); border-color: var(--red-mid); transform: translateY(-1px); }
+.mentee-card-top { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--red); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 600; flex-shrink: 0;
+}
+.mentee-info { flex: 1; min-width: 0; }
+.mentee-name { font-weight: 600; font-size: 15px; color: var(--dark); }
+.mentee-meta { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+.mentee-right { text-align: right; flex-shrink: 0; }
+.mentee-pct { font-size: 20px; font-weight: 700; color: var(--dark); }
+.mentee-pct-label { font-size: 11px; color: var(--gray-500); }
+.progress-bar-bg { height: 5px; background: var(--gray-200); border-radius: 3px; margin-bottom: 10px; }
+.progress-bar-fill { height: 5px; border-radius: 3px; background: var(--red); transition: width 0.6s ease; }
+.mentee-card-bottom { display: flex; align-items: center; justify-content: space-between; }
+.week-badge {
+  font-size: 11px; font-weight: 500; padding: 3px 10px;
+  border-radius: 20px; background: var(--gray-100); color: var(--gray-700);
+}
+.form-badge {
+  font-size: 11px; font-weight: 500; padding: 3px 10px;
+  border-radius: 20px; display: flex; align-items: center; gap: 4px;
+}
+.form-badge.submitted { background: var(--green-light); color: var(--green); }
+.form-badge.not-submitted { background: var(--amber-light); color: var(--amber); }
+.last-active { font-size: 11px; color: var(--gray-500); }
+
+/* COPY LINK */
+.copy-link-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--gray-500); font-size: 11px; padding: 0;
+  display: flex; align-items: center; gap: 4px;
+  transition: color 0.2s;
+}
+.copy-link-btn:hover { color: var(--red); }
+
+/* RIGHT SIDEBAR */
+.sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+/* FORM SUMMARY */
+.panel {
+  background: var(--white); border-radius: var(--radius);
+  box-shadow: var(--shadow); overflow: hidden;
+}
+.panel-header {
+  padding: 1rem 1.25rem; border-bottom: 1px solid var(--gray-200);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.panel-title { font-weight: 600; font-size: 14px; color: var(--dark); }
+.panel-meta { font-size: 11px; color: var(--gray-500); }
+.form-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 1.25rem; border-bottom: 1px solid var(--gray-100);
+  font-size: 13px;
+}
+.form-row:last-child { border-bottom: none; }
+.form-row-name { color: var(--dark); font-weight: 500; }
+.form-status { font-size: 11px; font-weight: 600; }
+.form-status.yes { color: var(--green); }
+.form-status.no { color: var(--amber); }
+
+/* EVENTS */
+.event-item {
+  padding: 14px 1.25rem; border-bottom: 1px solid var(--gray-100);
+  display: flex; gap: 14px;
+}
+.event-item:last-child { border-bottom: none; }
+.event-date-block {
+  flex-shrink: 0; width: 44px; text-align: center;
+  background: var(--red-light); border-radius: 8px; padding: 6px 0;
+}
+.event-month { font-size: 10px; font-weight: 600; color: var(--red); text-transform: uppercase; }
+.event-day-num { font-size: 20px; font-weight: 700; color: var(--red); line-height: 1; }
+.event-details { flex: 1; }
+.event-title { font-size: 13px; font-weight: 600; color: var(--dark); margin-bottom: 2px; }
+.event-time { font-size: 12px; color: var(--gray-500); }
+.event-loc { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+
+/* LOADING */
+.loading { text-align: center; padding: 3rem; color: var(--gray-500); font-size: 14px; }
+.spinner {
+  width: 32px; height: 32px; border: 3px solid var(--gray-200);
+  border-top-color: var(--red); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+}
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; background: var(--dark);
+  color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px;
+  opacity: 0; transform: translateY(8px); transition: all 0.25s;
+  pointer-events: none; z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 900px) {
+  .content-grid { grid-template-columns: 1fr; }
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">KW Thrive</div>
+    <div class="login-sub">Chinese Mentorship Program · Mentor Dashboard</div>
+    <input type="password" id="pwd-input" placeholder="Enter dashboard password" />
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="login-error">Incorrect password. Please try again.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="topbar-brand">KW Thrive</span>
+      <span class="topbar-sub">Mentor Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <button class="sync-btn" onclick="syncMonday()" id="sync-btn">
+        <span class="sync-icon">⟳</span> Sync from Monday
+      </button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Metrics -->
+    <div class="metrics">
+      <div class="metric-card red">
+        <div class="metric-label">Total Mentees</div>
+        <div class="metric-value" id="m-total">—</div>
+        <div class="metric-sub">Active in program</div>
+      </div>
+      <div class="metric-card green">
+        <div class="metric-label">Avg. Completion</div>
+        <div class="metric-value" id="m-avg">—</div>
+        <div class="metric-sub">Across all mentees</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">On Track</div>
+        <div class="metric-value" id="m-ontrack">—</div>
+        <div class="metric-sub">≥ 50% complete</div>
+      </div>
+      <div class="metric-card amber">
+        <div class="metric-label">Form Submitted</div>
+        <div class="metric-value" id="m-forms">—</div>
+        <div class="metric-sub">This week's coaching prep</div>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <!-- Mentee List -->
+      <div>
+        <div class="section-header">
+          <div class="section-title">Mentees</div>
+        </div>
+        <div class="mentee-grid" id="mentee-list">
+          <div class="loading"><div class="spinner"></div>Loading mentees...</div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+
+        <!-- Coaching Prep Summary -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Weekly Coaching Prep</div>
+            <div class="panel-meta" id="form-week-label">This week</div>
+          </div>
+          <div id="form-list">
+            <div class="loading" style="padding:1.5rem">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Upcoming Events</div>
+          </div>
+          <div id="events-list">
+            <div class="loading" style="padding:1.5rem">Loading...</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let mentorPassword = '';
+let allMentees = [];
+let submitters = [];
+
+// ── LOGIN ──
+document.getElementById('pwd-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+async function doLogin() {
+  const pwd = document.getElementById('pwd-input').value.trim();
+  if (!pwd) return;
+  mentorPassword = pwd;
+
+  try {
+    const res = await fetch('/api/mentees', {
+      headers: { 'x-mentor-password': pwd }
+    });
+    if (res.status === 401) {
+      document.getElementById('login-error').style.display = 'block';
+      return;
+    }
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadDashboard();
+  } catch(e) {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+// ── DASHBOARD ──
+async function loadDashboard() {
+  await Promise.all([loadMentees(), loadFormResponses(), loadEvents()]);
+}
+
+async function loadMentees() {
+  const res = await fetch('/api/mentees', {
+    headers: { 'x-mentor-password': mentorPassword }
+  });
+  const data = await res.json();
+  allMentees = data.mentees || [];
+  renderMentees();
+  updateMetrics();
+}
+
+async function loadFormResponses() {
+  try {
+    const res = await fetch('/api/form-responses', {
+      headers: { 'x-mentor-password': mentorPassword }
+    });
+    const data = await res.json();
+    submitters = data.submitters || [];
+
+    const weekStart = data.week_start ? new Date(data.week_start) : new Date();
+    document.getElementById('form-week-label').textContent =
+      'Week of ' + weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    renderFormList();
+    updateMetrics();
+  } catch(e) {
+    document.getElementById('form-list').innerHTML = '<div style="padding:1rem;font-size:13px;color:#777">Could not load responses</div>';
+  }
+}
+
+async function loadEvents() {
+  try {
+    const res = await fetch('/events.json');
+    const events = await res.json();
+    const el = document.getElementById('events-list');
+    if (!events.length) { el.innerHTML = '<div style="padding:1rem;font-size:13px;color:#777">No upcoming events</div>'; return; }
+    el.innerHTML = events.map(ev => {
+      const d = new Date(ev.date);
+      const month = d.toLocaleDateString('en-US', { month: 'short' });
+      const day = d.getDate();
+      return `
+        <div class="event-item">
+          <div class="event-date-block">
+            <div class="event-month">${month}</div>
+            <div class="event-day-num">${day}</div>
+          </div>
+          <div class="event-details">
+            <div class="event-title">${ev.title}</div>
+            <div class="event-time">${ev.day} · ${ev.time}</div>
+            <div class="event-loc">${ev.location}</div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('events-list').innerHTML = '<div style="padding:1rem;font-size:13px;color:#777">Could not load events</div>';
+  }
+}
+
+function didSubmit(mentee) {
+  const emails = [
+    (mentee.work_email || '').toLowerCase(),
+    (mentee.personal_email || '').toLowerCase()
+  ];
+  return submitters.some(s =>
+    emails.includes(s.email) ||
+    s.name.toLowerCase().includes(mentee.name.split(' ')[0].toLowerCase())
+  );
+}
+
+function renderMentees() {
+  const el = document.getElementById('mentee-list');
+  if (!allMentees.length) {
+    el.innerHTML = '<div class="loading">No mentees yet. Click "Sync from Monday" to load.</div>';
+    return;
+  }
+  el.innerHTML = allMentees.map(m => {
+    const initials = m.name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
+    const submitted = didSubmit(m);
+    const lastActive = m.last_activity
+      ? 'Active ' + timeAgo(new Date(m.last_activity))
+      : 'No activity yet';
+    const onboardText = m.onboard_date
+      ? 'Onboarded ' + new Date(m.onboard_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : 'Pending onboard';
+    const menteeUrl = `/mentee/${m.token}`;
+
+    return `
+      <div class="mentee-card" onclick="window.location='${menteeUrl}'">
+        <div class="mentee-card-top">
+          <div class="avatar">${initials}</div>
+          <div class="mentee-info">
+            <div class="mentee-name">${m.name}</div>
+            <div class="mentee-meta">${onboardText}</div>
+          </div>
+          <div class="mentee-right">
+            <div class="mentee-pct">${m.pct}%</div>
+            <div class="mentee-pct-label">complete</div>
+          </div>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width:${m.pct}%"></div>
+        </div>
+        <div class="mentee-card-bottom">
+          <span class="week-badge">${m.current_week}</span>
+          <span class="form-badge ${submitted ? 'submitted' : 'not-submitted'}">
+            ${submitted ? '✓ Form submitted' : '○ Form pending'}
+          </span>
+          <button class="copy-link-btn" onclick="event.stopPropagation();copyLink('${menteeUrl}','${m.name}')">
+            ⎘ Copy link
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderFormList() {
+  const el = document.getElementById('form-list');
+  if (!allMentees.length) { el.innerHTML = '<div style="padding:1rem;font-size:13px;color:#777">Loading mentees...</div>'; return; }
+  el.innerHTML = allMentees.map(m => {
+    const submitted = didSubmit(m);
+    return `
+      <div class="form-row">
+        <span class="form-row-name">${m.name}</span>
+        <span class="form-status ${submitted ? 'yes' : 'no'}">${submitted ? '✓ Submitted' : '○ Pending'}</span>
+      </div>`;
+  }).join('');
+}
+
+function updateMetrics() {
+  const active = allMentees.filter(m => m.is_active);
+  const avg = active.length ? Math.round(active.reduce((a, m) => a + m.pct, 0) / active.length) : 0;
+  const onTrack = active.filter(m => m.pct >= 50).length;
+  const formsCount = allMentees.filter(m => didSubmit(m)).length;
+
+  document.getElementById('m-total').textContent = active.length;
+  document.getElementById('m-avg').textContent = avg + '%';
+  document.getElementById('m-ontrack').textContent = onTrack;
+  document.getElementById('m-forms').textContent = `${formsCount}/${allMentees.length}`;
+}
+
+function timeAgo(date) {
+  const diff = Math.floor((Date.now() - date) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+  return Math.floor(diff / 86400) + 'd ago';
+}
+
+async function syncMonday() {
+  const btn = document.getElementById('sync-btn');
+  btn.classList.add('syncing');
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/sync-monday', {
+      method: 'POST',
+      headers: { 'x-mentor-password': mentorPassword }
+    });
+    const data = await res.json();
+    showToast(`Synced! ${data.added} added, ${data.updated} updated.`);
+    await loadMentees();
+  } catch(e) {
+    showToast('Sync failed. Check your Monday API token.');
+  }
+  btn.classList.remove('syncing');
+  btn.disabled = false;
+}
+
+function copyLink(url, name) {
+  const full = window.location.origin + url;
+  navigator.clipboard.writeText(full);
+  showToast(`Copied link for ${name.split(' ')[0]}`);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
