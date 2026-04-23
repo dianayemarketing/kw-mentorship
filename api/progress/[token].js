@@ -75,7 +75,7 @@ async function fetchResources() {
               column_values(ids: ["color_mm2pg0xb"]) { id text }
               subitems {
                 id name
-                column_values(ids: ["link_mm2pxcz1", "text_mm2p7s61", "long_text_mm2p1234"]) {
+                column_values(ids: ["link_mm2pev2e", "dropdown_mm2pkbpn", "long_text_mm2p4681"]) {
                   id text value
                 }
               }
