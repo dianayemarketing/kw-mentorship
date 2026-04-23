@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>KW Thrive · Resource Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --red:#C8102E; --red-light:#fdf0f2; --dark:#0f0f0f;
+  --gray-700:#444; --gray-500:#777; --gray-400:#999;
+  --gray-300:#ccc; --gray-200:#e8e8e8; --gray-100:#f5f5f5;
+  --white:#fff; --green:#00875a; --green-light:#e3f5ef;
+  --gold:#B8922A; --gold-pale:#FBF5E8;
+  --radius:12px; --shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 16px rgba(0,0,0,0.04);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--gray-100);color:var(--dark);}
+
+.topbar{background:var(--dark);color:white;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+.topbar-brand{font-family:'DM Serif Display',serif;font-size:18px;color:var(--red);}
+.access-badge{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:4px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);color:#aaa;}
+.access-badge.l1{border-color:rgba(200,16,46,0.4);color:var(--red);}
+.access-badge.l2{border-color:rgba(184,146,42,0.4);color:var(--gold);}
+.access-badge.l3{border-color:rgba(0,135,90,0.4);color:var(--green);}
+
+.layout{display:flex;min-height:calc(100vh - 56px);}
+
+.sidebar{width:220px;flex-shrink:0;background:var(--white);border-right:1px solid var(--gray-200);padding:24px 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+.sidebar-label{font-size:9px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:var(--gray-400);padding:0 20px 10px;}
+.nav-item{display:flex;align-items:center;justify-content:space-between;padding:11px 20px;cursor:pointer;border-left:3px solid transparent;transition:all 0.15s;font-size:13px;color:var(--gray-700);}
+.nav-item:hover{background:var(--gray-100);}
+.nav-item.active{background:var(--red-light);border-left-color:var(--red);color:var(--red);font-weight:600;}
+.nav-item.locked{color:var(--gray-300);cursor:not-allowed;}
+.nav-item.locked:hover{background:none;}
+
+.content{flex:1;padding:40px 48px;max-width:900px;}
+
+.res-section{display:none;}
+.res-section.active{display:block;}
+.res-header{margin-bottom:32px;}
+.res-eyebrow{font-size:10px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+.res-title{font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:6px;}
+.res-desc{font-size:13px;color:var(--gray-500);line-height:1.6;}
+
+/* Timeline */
+.timeline-track{display:flex;position:relative;overflow-x:auto;padding-bottom:4px;margin-bottom:24px;}
+.timeline-track::before{content:'';position:absolute;top:19px;left:20px;right:20px;height:2px;background:var(--gray-200);}
+.t-stage{flex:1;min-width:110px;display:flex;flex-direction:column;align-items:center;cursor:pointer;position:relative;z-index:1;}
+.t-node{width:38px;height:38px;border-radius:50%;border:2px solid var(--gray-200);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:10px;transition:all 0.2s;box-shadow:var(--shadow);}
+.t-stage:hover .t-node{border-color:var(--red);box-shadow:0 0 0 4px var(--red-light);}
+.t-stage.active .t-node{border-color:var(--red);background:var(--red-light);box-shadow:0 0 0 4px var(--red-light);}
+.t-label{font-size:11px;color:var(--gray-500);text-align:center;line-height:1.3;padding:0 4px;}
+.t-stage.active .t-label{color:var(--red);font-weight:600;}
+
+.detail-panel{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem;display:none;animation:fadeUp 0.2s ease;margin-bottom:16px;}
+.detail-panel.open{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--gray-200);}
+.panel-title{font-weight:600;font-size:16px;}
+.panel-stage{font-size:11px;color:var(--gray-400);margin-top:2px;}
+.btn-close{width:28px;height:28px;border-radius:50%;border:1px solid var(--gray-200);background:transparent;cursor:pointer;color:var(--gray-500);display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.15s;}
+.btn-close:hover{background:var(--gray-100);}
+
+/* Resource list */
+.res-group-label{font-size:9px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:var(--gray-400);padding:14px 0 6px;border-bottom:1px solid var(--gray-100);margin-bottom:6px;}
+.res-group-label:first-child{padding-top:0;}
+.res-list{display:flex;flex-direction:column;gap:5px;margin-bottom:4px;}
+.res-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:9px;border:1px solid transparent;text-decoration:none;color:var(--dark);transition:all 0.15s;background:var(--gray-100);}
+.res-row:hover{background:var(--white);border-color:var(--gray-200);box-shadow:var(--shadow);transform:translateX(2px);}
+.r-icon{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.r-video{background:#FEE2E2;}.r-pdf{background:#FEF3C7;}.r-doc{background:#DBEAFE;}
+.r-ppt{background:#FCE7F3;}.r-sheet{background:#D1FAE5;}.r-folder{background:#EDE9FE;}
+.r-name{flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.r-type{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray-400);flex-shrink:0;}
+.r-arrow{color:var(--gray-300);font-size:12px;flex-shrink:0;transition:all 0.15s;}
+.res-row:hover .r-arrow{color:var(--red);transform:translateX(2px);}
+
+/* Locked */
+.locked-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:3rem;text-align:center;}
+.lock-big{font-size:40px;margin-bottom:14px;}
+.locked-title{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:10px;}
+.locked-desc{font-size:14px;color:var(--gray-500);line-height:1.6;margin-bottom:24px;}
+.request-btn{display:inline-block;background:var(--dark);color:white;border:none;border-radius:8px;padding:12px 24px;font-size:13px;font-family:inherit;font-weight:500;cursor:pointer;text-decoration:none;transition:opacity 0.2s;}
+.request-btn:hover{opacity:0.8;}
+.request-btn.sent{background:var(--green);cursor:default;}
+
+.res-loading{text-align:center;padding:4rem;color:var(--gray-500);font-size:14px;}
+.res-empty{text-align:center;padding:2rem;color:var(--gray-500);font-size:13px;font-style:italic;}
+
+@media(max-width:680px){.sidebar{display:none;}.content{padding:24px 20px;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-brand">KW Thrive</span>
+  <span class="access-badge" id="access-badge">Loading...</span>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="sidebar-label">Modules</div>
+    <div id="res-nav"></div>
+  </nav>
+  <main class="content">
+    <div id="res-loading" class="res-loading">Loading resources...</div>
+    <div id="res-sections"></div>
+  </main>
+</div>
+
+<script>
+// ── ACCESS KEYS — change these to whatever you want ──
+const ACCESS_KEYS = {
+  l2: 'kw2025l2',   // URL: ?access=kw2025l2
+  l3: 'kw2025l3'    // URL: ?access=kw2025l3
+};
+
+// ── MONDAY CONFIG ──
+const MONDAY_TOKEN = 'YOUR_READ_ONLY_MONDAY_TOKEN'; // replace with read-only token
+const BOARD_ID = '18409934917';
+
+// ── Which groups are timeline vs list vs level-locked ──
+const TIMELINE_GROUPS = ['buyer process','seller process'];
+const LEVEL_MAP = {'level 1 - building foundations':null,'level 2 - expand market':'l2','level 3 - consistency & delegation':'l3'};
+const LEVEL_LABELS = {'level 1 - building foundations':'⭐ Level 1 - Building Foundations','level 2 - expand market':'⭐⭐ Level 2 - Expand Market','level 3 - consistency & delegation':'⭐⭐⭐ Level 3 - Consistency & Delegation'};
+const STAGE_EMOJIS = ['🏡','🤝','✍️','📄','🔑','📋','🏠','✅'];
+const FILE_ICONS = {video:'🎬',pdf:'📄',doc:'📝',pptx:'📊',sheet:'📊',folder:'📁'};
+const FILE_CLS   = {video:'r-video',pdf:'r-pdf',doc:'r-doc',pptx:'r-ppt',sheet:'r-sheet',folder:'r-folder'};
+
+// ── Determine access level from URL ──
+const params = new URLSearchParams(window.location.search);
+const accessKey = params.get('access') || '';
+const hasL2 = accessKey === ACCESS_KEYS.l2 || accessKey === ACCESS_KEYS.l3;
+const hasL3 = accessKey === ACCESS_KEYS.l3;
+
+// Set badge
+const badge = document.getElementById('access-badge');
+if (hasL3) { badge.textContent = 'Full Access'; badge.classList.add('l3'); }
+else if (hasL2) { badge.textContent = 'Level 1 + 2'; badge.classList.add('l2'); }
+else { badge.textContent = 'Level 1'; badge.classList.add('l1'); }
+
+function icon(type){return FILE_ICONS[(type||'').toLowerCase()]||'📎';}
+function cls(type){return FILE_CLS[(type||'').toLowerCase()]||'r-folder';}
+function isLocked(title){const k=LEVEL_MAP[title.toLowerCase()];if(k===undefined)return false;if(k===null)return false;if(k==='l2')return !hasL2;if(k==='l3')return !hasL3;return false;}
+function isTimeline(title){return TIMELINE_GROUPS.some(t=>title.toLowerCase().includes(t));}
+
+function buildRow(s){
+  const linkCol=s.column_values?.find(c=>c.id==='link_mm2pev2e');
+  const typeCol=s.column_values?.find(c=>c.id==='dropdown_mm2pkbpn');
+  const url=linkCol?.value?(()=>{try{return JSON.parse(linkCol.value).url;}catch{return '#';}})():'#';
+  const type=typeCol?.text||'';
+  return `<a href="${url}" target="_blank" class="res-row"><div class="r-icon ${cls(type)}">${icon(type)}</div><div class="r-name">${s.name}</div><div class="r-type">${type}</div><div class="r-arrow">→</div></a>`;
+}
+
+let activePanel=null;
+
+function openPanel(groupId,idx,total,el){
+  for(let i=0;i<total;i++){
+    document.getElementById(`panel-${groupId}-${i}`)?.classList.remove('open');
+    document.getElementById(`tstage-${groupId}-${i}`)?.classList.remove('active');
+  }
+  const pid=`panel-${groupId}-${idx}`;
+  if(activePanel===pid){activePanel=null;return;}
+  document.getElementById(pid)?.classList.add('open');
+  el.classList.add('active');
+  activePanel=pid;
+  setTimeout(()=>document.getElementById(pid)?.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+function closePanel(groupId,total){
+  for(let i=0;i<total;i++){
+    document.getElementById(`panel-${groupId}-${i}`)?.classList.remove('open');
+    document.getElementById(`tstage-${groupId}-${i}`)?.classList.remove('active');
+  }
+  activePanel=null;
+}
+function switchSection(id){
+  document.querySelectorAll('.res-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+  document.getElementById('nav-'+id)?.classList.add('active');
+}
+
+function requestAccess(level, btn){
+  const lvl = level === 'l2' ? 2 : 3;
+  btn.textContent = '✓ Request Sent';
+  btn.classList.add('sent');
+  // Opens default email client pre-filled to Diana
+  const subject = encodeURIComponent(`Level ${lvl} Access Request — KW Thrive Resource Portal`);
+  const body = encodeURIComponent(`Hi Diana,\n\nI'd like to request access to Level ${lvl} resources in the KW Thrive Resource Portal.\n\nPlease send me the Level ${lvl} link when ready.\n\nThank you!`);
+  window.location.href = `mailto:diana@kwthrive.com?subject=${subject}&body=${body}`;
+}
+
+async function loadResources(){
+  const query=`query{boards(ids:[${BOARD_ID}]){groups{id title items_page(limit:100){items{id name column_values(ids:["color_mm2pg0xb"]){id text}subitems{id name column_values(ids:["link_mm2pev2e","dropdown_mm2pkbpn"]){id text value}}}}}}}`;
+  try{
+    const res=await fetch('https://api.monday.com/v2',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':MONDAY_TOKEN},
+      body:JSON.stringify({query})
+    });
+    const json=await res.json();
+    return json?.data?.boards?.[0]?.groups||[];
+  }catch(e){return[];}
+}
+
+async function init(){
+  const groups=await loadResources();
+  document.getElementById('res-loading').style.display='none';
+  const nav=document.getElementById('res-nav'), sections=document.getElementById('res-sections');
+  let firstId=null;
+
+  groups.forEach((group,gi)=>{
+    const id=`rsec-${gi}`;
+    if(!firstId) firstId=id;
+    const locked=isLocked(group.title);
+    const label=LEVEL_LABELS[group.title.toLowerCase()]||group.title;
+    const items=(group.items_page?.items||[]).filter(item=>{
+      const s=item.column_values?.find(c=>c.id==='color_mm2pg0xb');
+      return !s||s.text!=='Draft';
+    });
+
+    nav.innerHTML+=`<div class="nav-item ${locked?'locked':''}" id="nav-${id}" onclick="${locked?'':` switchSection('${id}')`}">${label} ${locked?'🔒':''}</div>`;
+
+    let html='';
+    if(locked){
+      const lvl=group.title.includes('2')?'l2':'l3';
+      const lvlNum=group.title.includes('2')?2:3;
+      html=`<div class="locked-card"><div class="lock-big">🔒</div><div class="locked-title">Level ${lvlNum} is Locked</div><div class="locked-desc">This content is available to agents who have been granted Level ${lvlNum} access.<br>Request access below and Diana will send you the link.</div><button class="request-btn" onclick="requestAccess('${lvl}',this)">Request Level ${lvlNum} Access</button></div>`;
+    } else if(isTimeline(group.title)){
+      const nodes=items.map((item,idx)=>`<div class="t-stage" id="tstage-${id}-${idx}" onclick="openPanel('${id}',${idx},${items.length},this)"><div class="t-node">${STAGE_EMOJIS[idx]||'📌'}</div><div class="t-label">${item.name}</div></div>`).join('');
+      const panels=items.map((item,idx)=>{
+        const rows=(item.subitems||[]).map(buildRow).join('')||'<div class="res-empty">Resources coming soon</div>';
+        return `<div class="detail-panel" id="panel-${id}-${idx}"><div class="panel-head"><div><div class="panel-title">${item.name}</div><div class="panel-stage">Stage ${idx+1} of ${items.length}</div></div><button class="btn-close" onclick="closePanel('${id}',${items.length})">✕</button></div><div class="res-list">${rows}</div></div>`;
+      }).join('');
+      html=`<div class="res-header"><div class="res-eyebrow">${group.title}</div><div class="res-title">${group.title}</div></div><div class="timeline-track">${nodes}</div>${panels}`;
+    } else {
+      const content=items.map(item=>{
+        if(!(item.subitems||[]).length)return '';
+        return `<div class="res-group-label">${item.name}</div><div class="res-list">${item.subitems.map(buildRow).join('')}</div>`;
+      }).join('')||'<div class="res-empty">Resources coming soon</div>';
+      html=`<div class="res-header"><div class="res-eyebrow">${group.title}</div><div class="res-title">${group.title}</div></div>${content}`;
+    }
+
+    sections.innerHTML+=`<div class="res-section" id="${id}">${html}</div>`;
+  });
+
+  if(firstId) switchSection(firstId);
+}
+
+init();
+</script>
+</body>
+</html>
