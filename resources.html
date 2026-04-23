@@ -130,6 +130,138 @@
 <script>
 // ── CONFIG ── change access keys to whatever you prefer
 const ACCESS_KEYS  = { l2:'kw2025l2', l3:'kw2025l3' };
+const MONDAY_TOKEN = '<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KW Thrive · Resource Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #B8922A; --gold-light: #D4AA4A; --gold-pale: #FBF5E8;
+    --gold-border: rgba(184,146,42,0.2);
+    --white: #FFFFFF; --off-white: #FAFAF9; --gray-50: #F7F6F4;
+    --gray-100: #EEECE8; --gray-200: #DDD9D2; --gray-400: #A8A099;
+    --gray-600: #6B6560; --gray-800: #2E2A26; --gray-900: #1A1714;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--off-white); color:var(--gray-900); font-family:'Outfit',sans-serif; font-weight:300; min-height:100vh; }
+
+  .header { background:var(--white); border-bottom:1px solid var(--gray-100); padding:28px 48px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:var(--shadow-sm); }
+  .brand { display:flex; align-items:center; gap:14px; }
+  .brand-mark { width:38px; height:38px; background:var(--gray-900); border-radius:8px; display:flex; align-items:center; justify-content:center; }
+  .brand-mark svg { width:22px; height:22px; }
+  .brand-name { font-family:'Cormorant Garamond',serif; font-size:19px; font-weight:500; color:var(--gray-900); letter-spacing:0.02em; line-height:1; margin-bottom:2px; }
+  .brand-sub { font-size:10px; font-weight:400; letter-spacing:0.18em; text-transform:uppercase; color:var(--gold); }
+  .access-pill { background:var(--gold-pale); border:1px solid var(--gold-border); border-radius:20px; padding:6px 16px; font-size:12px; font-weight:500; color:var(--gold); letter-spacing:0.05em; }
+
+  .layout { display:flex; min-height:calc(100vh - 81px); }
+
+  .sidebar { width:260px; flex-shrink:0; background:var(--white); border-right:1px solid var(--gray-100); padding:32px 0; position:sticky; top:81px; height:calc(100vh - 81px); overflow-y:auto; }
+  .sidebar-section-label { font-size:9px; font-weight:600; letter-spacing:0.25em; text-transform:uppercase; color:var(--gray-400); padding:0 24px 12px; }
+  .nav-item { display:flex; align-items:center; gap:12px; padding:12px 24px; cursor:pointer; transition:all 0.15s; border-left:3px solid transparent; }
+  .nav-item:hover { background:var(--gray-50); }
+  .nav-item.active { background:var(--gold-pale); border-left-color:var(--gold); }
+  .nav-item.locked { opacity:0.4; cursor:not-allowed; }
+  .nav-item.locked:hover { background:none; }
+  .nav-icon { width:32px; height:32px; border-radius:7px; background:var(--gray-100); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+  .nav-label { flex:1; font-size:13px; font-weight:400; color:var(--gray-800); line-height:1.3; }
+  .nav-item.active .nav-label { font-weight:500; color:var(--gray-900); }
+  .nav-count { font-size:10px; font-weight:500; color:var(--gray-400); background:var(--gray-100); border-radius:10px; padding:2px 8px; min-width:24px; text-align:center; }
+  .nav-item.active .nav-count { background:rgba(184,146,42,0.15); color:var(--gold); }
+
+  .content { flex:1; padding:48px 52px; max-width:960px; }
+  .tab-section { display:none; }
+  .tab-section.active { display:block; }
+
+  .section-header { margin-bottom:40px; }
+  .section-eyebrow { font-size:10px; font-weight:600; letter-spacing:0.25em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
+  .section-title { font-family:'Cormorant Garamond',serif; font-size:32px; font-weight:400; color:var(--gray-900); line-height:1.15; margin-bottom:10px; }
+
+  .timeline-track { display:flex; align-items:flex-start; position:relative; margin-bottom:40px; padding-bottom:4px; overflow-x:auto; gap:0; }
+  .timeline-track::before { content:''; position:absolute; top:20px; left:20px; right:20px; height:2px; background:var(--gray-100); z-index:0; }
+  .t-stage { flex:1; min-width:130px; display:flex; flex-direction:column; align-items:center; cursor:pointer; position:relative; z-index:1; }
+  .t-node { width:40px; height:40px; border-radius:50%; border:2px solid var(--gray-200); background:var(--white); display:flex; align-items:center; justify-content:center; font-size:16px; margin-bottom:14px; transition:all 0.25s; box-shadow:var(--shadow-sm); position:relative; z-index:2; }
+  .t-stage:hover .t-node { border-color:var(--gold-light); box-shadow:0 0 0 5px var(--gold-pale); }
+  .t-stage.active .t-node { border-color:var(--gold); background:var(--gold-pale); box-shadow:0 0 0 5px rgba(184,146,42,0.12); }
+  .t-label { font-size:12px; font-weight:400; color:var(--gray-600); text-align:center; line-height:1.4; padding:0 6px; transition:color 0.2s; }
+  .t-stage:hover .t-label { color:var(--gray-900); }
+  .t-stage.active .t-label { color:var(--gray-900); font-weight:500; }
+
+  .detail-panel { background:var(--white); border:1px solid var(--gray-100); border-radius:16px; padding:32px; display:none; box-shadow:var(--shadow-md); animation:fadeUp 0.25s ease; margin-bottom:24px; }
+  .detail-panel.open { display:block; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);} }
+  .panel-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; padding-bottom:20px; border-bottom:1px solid var(--gray-100); }
+  .panel-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:400; color:var(--gray-900); }
+  .panel-subtitle { font-size:12px; color:var(--gray-400); margin-top:2px; }
+  .btn-close { width:30px; height:30px; border:1px solid var(--gray-200); border-radius:50%; background:transparent; cursor:pointer; color:var(--gray-600); font-size:14px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; flex-shrink:0; }
+  .btn-close:hover { background:var(--gray-50); border-color:var(--gray-400); }
+
+  .resource-group-label { font-size:9px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:var(--gray-400); padding:16px 0 8px; border-bottom:1px solid var(--gray-100); margin-bottom:8px; }
+  .resource-group-label:first-child { padding-top:0; }
+  .resource-list { display:flex; flex-direction:column; gap:6px; margin-bottom:4px; }
+  .resource-row { display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:9px; border:1px solid transparent; text-decoration:none; color:var(--gray-800); transition:all 0.15s; background:var(--gray-50); }
+  .resource-row:hover { background:var(--white); border-color:var(--gray-200); box-shadow:var(--shadow-sm); transform:translateX(2px); }
+  .r-icon { width:30px; height:30px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+  .r-video{background:#FEE2E2;} .r-pdf{background:#FEF3C7;} .r-doc{background:#DBEAFE;}
+  .r-ppt{background:#FCE7F3;} .r-sheet{background:#D1FAE5;} .r-folder{background:#EDE9FE;}
+  .r-name { flex:1; font-size:13px; font-weight:400; color:var(--gray-800); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .r-type { font-size:10px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--gray-400); flex-shrink:0; }
+  .r-arrow { color:var(--gray-200); font-size:12px; flex-shrink:0; transition:all 0.15s; }
+  .resource-row:hover .r-arrow { color:var(--gold); transform:translateX(2px); }
+
+  .locked-card { background:var(--white); border:1px solid var(--gray-100); border-radius:16px; padding:60px; text-align:center; box-shadow:var(--shadow-sm); }
+  .lock-big { font-size:44px; margin-bottom:16px; }
+  .locked-title { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:400; color:var(--gray-900); margin-bottom:10px; }
+  .locked-desc { font-size:14px; color:var(--gray-600); line-height:1.7; margin-bottom:28px; max-width:420px; margin-left:auto; margin-right:auto; }
+  .request-btn { display:inline-block; background:var(--gray-900); color:white; border:none; border-radius:8px; padding:12px 28px; font-size:13px; font-family:'Outfit',sans-serif; font-weight:500; cursor:pointer; text-decoration:none; transition:opacity 0.2s; letter-spacing:0.03em; }
+  .request-btn:hover { opacity:0.8; }
+  .request-btn.sent { background:#2E8B6A; cursor:default; }
+
+  .loading-state { text-align:center; padding:80px 40px; color:var(--gray-400); font-size:14px; }
+  .spinner { width:32px; height:32px; border-radius:50%; border:2px solid var(--gray-200); border-top-color:var(--gold); animation:spin 0.8s linear infinite; margin:0 auto 16px; }
+  @keyframes spin { to{transform:rotate(360deg);} }
+  .empty-msg { text-align:center; padding:32px; color:var(--gray-400); font-size:14px; font-style:italic; }
+
+  @media(max-width:768px){ .sidebar{display:none;} .content{padding:24px 20px;} .header{padding:18px 20px;} }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M11 2L4 7V20H18V7L11 2Z" stroke="#C9A84C" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M8 20V13H14V20" stroke="#C9A84C" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M11 2V7" stroke="#C9A84C" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">KW Thrive Mentorship</div>
+      <div class="brand-sub">Resource Portal</div>
+    </div>
+  </div>
+  <div class="access-pill" id="access-pill">Level 1 Access</div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="sidebar-section-label">Training Modules</div>
+    <div id="res-nav"><div class="loading-state" style="padding:24px"><div class="spinner"></div></div></div>
+  </nav>
+  <main class="content">
+    <div id="res-loading" class="loading-state"><div class="spinner"></div>Loading resources...</div>
+    <div id="res-sections"></div>
+  </main>
+</div>
+
+<script>
+// ── CONFIG ── change access keys to whatever you prefer
+const ACCESS_KEYS  = { l2:'kw2025l2', l3:'kw2025l3' };
 const MONDAY_TOKEN = 'YOUR_READ_ONLY_MONDAY_TOKEN'; // ← replace this
 const BOARD_ID     = '18409934917';
 
@@ -230,6 +362,231 @@ function requestAccess(lvlKey, btn) {
   const s = encodeURIComponent(`Level ${n} Access Request — KW Thrive Resource Portal`);
   const b = encodeURIComponent(`Hi Diana,\n\nI'd like to request access to Level ${n} resources.\n\nThank you!`);
   window.location.href = `mailto:diana@kwthrive.com?subject=${s}&body=${b}`;
+}
+
+// ── Fetch & Render ──
+async function init() {
+  let groups = [];
+  try {
+    const res  = await fetch('https://api.monday.com/v2', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':MONDAY_TOKEN},
+      body: JSON.stringify({ query:`query{boards(ids:[${BOARD_ID}]){groups{id title items_page(limit:100){items{id name column_values(ids:["color_mm2pg0xb"]){id text}subitems{id name column_values(ids:["link_mm2pev2e","dropdown_mm2pkbpn"]){id text value}}}}}}}` })
+    });
+    const json = await res.json();
+    groups = json?.data?.boards?.[0]?.groups || [];
+  } catch(e) {
+    document.getElementById('res-loading').innerHTML = '<p style="color:#A8A099;font-size:14px">Unable to load resources. Please try again later.</p>';
+    return;
+  }
+
+  document.getElementById('res-loading').style.display = 'none';
+  document.getElementById('res-nav').innerHTML = '';
+  const nav = document.getElementById('res-nav');
+  const sections = document.getElementById('res-sections');
+  let firstId = null;
+
+  groups.forEach((group, gi) => {
+    const id     = `rsec-${gi}`;
+    if (!firstId) firstId = id;
+    const locked = isLocked(group.title);
+    const icon   = getModuleIcon(group.title);
+    const items  = (group.items_page?.items||[]).filter(item => {
+      const s = item.column_values?.find(c=>c.id==='color_mm2pg0xb');
+      return !s || s.text !== 'Draft';
+    });
+
+    // Sidebar nav
+    nav.innerHTML += `
+      <div class="nav-item ${locked?'locked':''}" id="nav-${id}"
+           onclick="${locked?'':` switchSection('${id}')`}">
+        <div class="nav-icon">${icon}</div>
+        <div class="nav-label">${group.title}</div>
+        ${locked
+          ? '<span style="font-size:11px;color:#A8A099">🔒</span>'
+          : `<span class="nav-count">${items.length}</span>`}
+      </div>`;
+
+    let html = '';
+
+    if (locked) {
+      const t = group.title.toLowerCase();
+      const lvlKey = Object.entries(LEVEL_LOCK).find(([k])=>t.includes(k))?.[1];
+      const lvlNum = lvlKey==='l2'?2:3;
+      html = `
+        <div class="section-header">
+          <div class="section-eyebrow">Training Module</div>
+          <div class="section-title">${group.title}</div>
+        </div>
+        <div class="locked-card">
+          <div class="lock-big">🔒</div>
+          <div class="locked-title">Level ${lvlNum} is Locked</div>
+          <div class="locked-desc">
+            This content is available to agents with Level ${lvlNum} access.<br>
+            Request access below and Diana will send you the link.
+          </div>
+          <button class="request-btn" onclick="requestAccess('${lvlKey}',this)">
+            Request Level ${lvlNum} Access
+          </button>
+        </div>`;
+
+    } else if (isTimeline(group.title)) {
+      const nodes = items.map((item,idx)=>`
+        <div class="t-stage" id="tstage-${id}-${idx}"
+             onclick="openPanel('${id}',${idx},${items.length},this)">
+          <div class="t-node">${STAGE_EMOJIS[idx]||'📌'}</div>
+          <div class="t-label">${item.name}</div>
+        </div>`).join('');
+
+      const panels = items.map((item,idx)=>{
+        const rows = (item.subitems||[]).map(buildRow).join('') ||
+          '<div class="empty-msg">Resources coming soon</div>';
+        return `
+          <div class="detail-panel" id="panel-${id}-${idx}">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">${item.name}</div>
+                <div class="panel-subtitle">Stage ${idx+1} of ${items.length}</div>
+              </div>
+              <button class="btn-close" onclick="closePanel('${id}',${items.length})">✕</button>
+            </div>
+            <div class="resource-list">${rows}</div>
+          </div>`;
+      }).join('');
+
+      html = `
+        <div class="section-header">
+          <div class="section-eyebrow">Process Flow</div>
+          <div class="section-title">${group.title}</div>
+        </div>
+        <div class="timeline-track">${nodes}</div>
+        ${panels}`;
+
+    } else {
+      const content = items.map(item => {
+        const subs = item.subitems||[];
+        if (!subs.length) return '';
+        return `<div class="resource-group-label">${item.name}</div>
+                <div class="resource-list">${subs.map(buildRow).join('')}</div>`;
+      }).join('') || '<div class="empty-msg">Resources coming soon</div>';
+
+      html = `
+        <div class="section-header">
+          <div class="section-eyebrow">Training Module</div>
+          <div class="section-title">${group.title}</div>
+        </div>
+        ${content}`;
+    }
+
+    sections.innerHTML += `<div class="tab-section" id="${id}">${html}</div>`;
+  });
+
+  if (firstId) switchSection(firstId);
+}
+
+init();
+</script>
+</body>
+</html>'; // ← replace this
+const BOARD_ID     = '18409934917';
+
+// ── Rules ──
+const TIMELINE_GROUPS = ['buyer process','seller process'];
+const LEVEL_LOCK = {
+  'level 1 - building foundations': null,
+  'level 2 - expand market':        'l2',
+  'level 3 - consistency & delegation': 'l3'
+};
+const MODULE_ICONS = {
+  'ignite videos':'🎬', 'buyer process':'🏠', 'seller process':'📋',
+  'level 1':'⭐', 'level 2':'⭐⭐', 'level 3':'⭐⭐⭐'
+};
+const STAGE_EMOJIS = ['🏡','🤝','✍️','📄','🔑','📋','🏠','✅'];
+const FILE_ICONS   = {video:'🎬',pdf:'📄',doc:'📝',pptx:'📊',sheet:'📊',folder:'📁'};
+const FILE_CLS     = {video:'r-video',pdf:'r-pdf',doc:'r-doc',pptx:'r-ppt',sheet:'r-sheet',folder:'r-folder'};
+
+// ── Access level ──
+const params = new URLSearchParams(window.location.search);
+const key    = params.get('access') || '';
+const hasL2  = key === ACCESS_KEYS.l2 || key === ACCESS_KEYS.l3;
+const hasL3  = key === ACCESS_KEYS.l3;
+const pill   = document.getElementById('access-pill');
+if (hasL3) pill.textContent = 'Full Access';
+else if (hasL2) pill.textContent = 'Level 1 + 2 Access';
+
+// ── Helpers ──
+const fileIcon = t => FILE_ICONS[(t||'').toLowerCase()] || '📎';
+const fileCls  = t => FILE_CLS[(t||'').toLowerCase()]   || 'r-folder';
+
+function isLocked(title) {
+  const t = title.toLowerCase();
+  const k = Object.entries(LEVEL_LOCK).find(([key]) => t.includes(key));
+  if (!k) return false;
+  const lockKey = k[1];
+  if (lockKey === null) return false;
+  return lockKey === 'l2' ? !hasL2 : !hasL3;
+}
+
+function isTimeline(title) {
+  return TIMELINE_GROUPS.some(t => title.toLowerCase().includes(t));
+}
+
+function getModuleIcon(title) {
+  const t = title.toLowerCase();
+  const match = Object.entries(MODULE_ICONS).find(([k]) => t.includes(k));
+  return match ? match[1] : '📁';
+}
+
+function buildRow(s) {
+  const linkCol = s.column_values?.find(c => c.id === 'link_mm2pev2e');
+  const typeCol = s.column_values?.find(c => c.id === 'dropdown_mm2pkbpn');
+  const url  = (() => { try { return JSON.parse(linkCol?.value||'{}').url||'#'; } catch{ return '#'; } })();
+  const type = typeCol?.text || '';
+  return `<a href="${url}" target="_blank" class="resource-row">
+    <div class="r-icon ${fileCls(type)}">${fileIcon(type)}</div>
+    <div class="r-name">${s.name}</div>
+    <div class="r-type">${type}</div>
+    <div class="r-arrow">→</div>
+  </a>`;
+}
+
+// ── Panel state ──
+let activePanel = null;
+
+function openPanel(gid, idx, total, el) {
+  for (let i=0;i<total;i++) {
+    document.getElementById(`panel-${gid}-${i}`)?.classList.remove('open');
+    document.getElementById(`tstage-${gid}-${i}`)?.classList.remove('active');
+  }
+  const pid = `panel-${gid}-${idx}`;
+  if (activePanel===pid) { activePanel=null; return; }
+  document.getElementById(pid)?.classList.add('open');
+  el.classList.add('active');
+  activePanel = pid;
+  setTimeout(()=>document.getElementById(pid)?.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+function closePanel(gid, total) {
+  for (let i=0;i<total;i++) {
+    document.getElementById(`panel-${gid}-${i}`)?.classList.remove('open');
+    document.getElementById(`tstage-${gid}-${i}`)?.classList.remove('active');
+  }
+  activePanel = null;
+}
+
+function switchSection(id) {
+  document.querySelectorAll('.tab-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+  document.getElementById('nav-'+id)?.classList.add('active');
+}
+
+function requestAccess(lvlKey, btn) {
+  btn.textContent = '✓ Request Sent'; btn.classList.add('sent');
+  const n = lvlKey==='l2'?2:3;
+  const s = encodeURIComponent(`Level ${n} Access Request — KW Thrive Resource Portal`);
+  const b = encodeURIComponent(`Hi Diana,\n\nI'd like to request access to Level ${n} resources.\n\nThank you!`);
+  window.location.href = `mailto:dianaye@kw.com?subject=${s}&body=${b}`;
 }
 
 // ── Fetch & Render ──
