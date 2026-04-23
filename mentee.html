@@ -3,26 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>KW Thrive · My Checklist</title>
+<title>KW Thrive · My Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
 :root {
-  --red: #C8102E;
-  --red-light: #fdf0f2;
-  --red-mid: #f5c6ce;
-  --dark: #0f0f0f;
-  --gray-700: #444;
-  --gray-500: #777;
-  --gray-300: #ccc;
-  --gray-200: #e8e8e8;
-  --gray-100: #f5f5f5;
-  --white: #ffffff;
-  --green: #00875a;
-  --green-light: #e3f5ef;
-  --amber: #b45309;
-  --amber-light: #fef3cd;
-  --radius: 12px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+  --red: #C8102E; --red-light: #fdf0f2; --red-mid: #f5c6ce;
+  --dark: #0f0f0f; --gray-700: #444; --gray-500: #777;
+  --gray-300: #ccc; --gray-200: #e8e8e8; --gray-100: #f5f5f5;
+  --white: #ffffff; --green: #00875a; --green-light: #e3f5ef;
+  --amber: #b45309; --amber-light: #fef3cd;
+  --gold: #B8922A; --gold-pale: #FBF5E8; --gold-border: rgba(184,146,42,0.2);
+  --radius: 12px; --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: var(--dark); }
@@ -33,6 +24,20 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
   height: 56px; position: sticky; top: 0; z-index: 100;
 }
 .topbar-brand { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--red); }
+
+.tab-nav {
+  background: var(--white); border-bottom: 1px solid var(--gray-200);
+  display: flex; padding: 0 1.5rem;
+  position: sticky; top: 56px; z-index: 99;
+}
+.tab-btn {
+  padding: 14px 20px; font-size: 13px; font-weight: 500; color: var(--gray-500);
+  cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;
+  background: none; border-top: none; border-left: none; border-right: none;
+  font-family: inherit; white-space: nowrap;
+}
+.tab-btn:hover { color: var(--dark); }
+.tab-btn.active { color: var(--red); border-bottom-color: var(--red); }
 
 .hero {
   background: var(--dark); color: white;
@@ -47,549 +52,402 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 }
 .overall-pct { font-size: 48px; font-weight: 700; color: var(--red); line-height: 1; }
 .overall-label { font-size: 12px; color: #aaa; margin-top: 2px; }
-.hero-progress-bg {
-  width: 100%; max-width: 400px; height: 6px;
-  background: rgba(255,255,255,0.12); border-radius: 3px;
-  margin: 0 auto;
-}
+.hero-progress-bg { width: 100%; max-width: 400px; height: 6px; background: rgba(255,255,255,0.12); border-radius: 3px; margin: 0 auto; }
 .hero-progress-fill { height: 6px; border-radius: 3px; background: var(--red); transition: width 0.8s ease; }
 
 .main { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
 
-/* FORM REMINDER */
 .form-banner {
-  border-radius: var(--radius); padding: 1rem 1.25rem;
-  margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; box-shadow: var(--shadow);
+  border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: var(--shadow);
 }
 .form-banner.pending { background: var(--amber-light); border: 1.5px solid #fcd34d; }
 .form-banner.submitted { background: var(--green-light); border: 1.5px solid #6ee7b7; }
 .banner-text { font-size: 14px; font-weight: 500; }
 .banner-sub { font-size: 12px; color: var(--gray-700); margin-top: 2px; }
 .form-btn {
-  background: var(--red); color: white; border: none;
-  border-radius: 8px; padding: 8px 16px; font-size: 13px;
-  font-family: inherit; font-weight: 500; cursor: pointer;
-  white-space: nowrap; text-decoration: none; display: inline-block;
-  transition: opacity 0.2s;
+  background: var(--red); color: white; border: none; border-radius: 8px;
+  padding: 8px 16px; font-size: 13px; font-family: inherit; font-weight: 500;
+  cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; transition: opacity 0.2s;
 }
 .form-btn:hover { opacity: 0.85; }
 .form-btn.done { background: var(--green); }
 
-/* EVENTS */
-.events-card {
-  background: var(--white); border-radius: var(--radius);
-  box-shadow: var(--shadow); margin-bottom: 1.5rem; overflow: hidden;
-}
-.events-header {
-  padding: 1rem 1.25rem; border-bottom: 1px solid var(--gray-200);
-  font-weight: 600; font-size: 14px;
-}
-.event-item {
-  display: flex; gap: 14px; padding: 12px 1.25rem;
-  border-bottom: 1px solid var(--gray-100);
-}
+.events-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1.5rem; overflow: hidden; }
+.events-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--gray-200); font-weight: 600; font-size: 14px; }
+.event-item { display: flex; gap: 14px; padding: 12px 1.25rem; border-bottom: 1px solid var(--gray-100); }
 .event-item:last-child { border-bottom: none; }
-.event-date-block {
-  flex-shrink: 0; width: 42px; text-align: center;
-  background: var(--red-light); border-radius: 8px; padding: 5px 0;
-}
+.event-date-block { flex-shrink: 0; width: 42px; text-align: center; background: var(--red-light); border-radius: 8px; padding: 5px 0; }
 .event-month { font-size: 10px; font-weight: 600; color: var(--red); text-transform: uppercase; }
 .event-day-num { font-size: 19px; font-weight: 700; color: var(--red); line-height: 1; }
 .event-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
 .event-time { font-size: 12px; color: var(--gray-500); }
 
-/* CHECKLIST */
-.checklist-section {
-  background: var(--white); border-radius: var(--radius);
-  box-shadow: var(--shadow); margin-bottom: 14px; overflow: hidden;
-}
-.section-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 1.25rem; cursor: pointer; user-select: none;
-  transition: background 0.15s;
-}
+.checklist-section { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 14px; overflow: hidden; }
+.section-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 1.25rem; cursor: pointer; user-select: none; transition: background 0.15s; }
 .section-header:hover { background: var(--gray-100); }
 .section-left { display: flex; align-items: center; gap: 12px; }
-.section-num {
-  width: 28px; height: 28px; border-radius: 50%;
-  background: var(--red-light); color: var(--red);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700; flex-shrink: 0;
-}
+.section-num { width: 28px; height: 28px; border-radius: 50%; background: var(--red-light); color: var(--red); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
 .section-name { font-weight: 600; font-size: 15px; }
 .section-right { display: flex; align-items: center; gap: 10px; }
-.section-pill {
-  font-size: 11px; padding: 3px 10px; border-radius: 20px;
-  font-weight: 500;
-}
+.section-pill { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
 .section-pill.complete { background: var(--green-light); color: var(--green); }
 .section-pill.partial { background: var(--red-light); color: var(--red); }
 .section-pill.empty { background: var(--gray-100); color: var(--gray-500); }
 .chevron { font-size: 12px; color: var(--gray-500); transition: transform 0.25s; }
 .chevron.open { transform: rotate(180deg); }
-
 .task-list { display: none; padding: 4px 0 8px; }
 .task-list.open { display: block; }
-.task-row {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 10px 1.25rem; border-top: 1px solid var(--gray-100);
-  cursor: pointer; transition: background 0.1s;
-}
+.task-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 1.25rem; border-top: 1px solid var(--gray-100); cursor: pointer; transition: background 0.1s; }
 .task-row:hover { background: var(--gray-100); }
-.task-cb {
-  width: 18px; height: 18px; border-radius: 4px;
-  border: 2px solid var(--gray-300); flex-shrink: 0; margin-top: 2px;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.15s; background: white;
-}
+.task-cb { width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--gray-300); flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; background: white; }
 .task-cb.checked { background: var(--red); border-color: var(--red); }
 .task-cb.checked::after { content: '✓'; font-size: 11px; color: white; font-weight: 700; }
 .task-text { font-size: 14px; line-height: 1.5; color: var(--dark); transition: color 0.15s; }
 .task-text.done { color: var(--gray-300); text-decoration: line-through; }
 
-/* SAVING INDICATOR */
-.saving-dot {
-  position: fixed; bottom: 20px; right: 20px;
-  background: var(--dark); color: white; font-size: 12px;
-  padding: 8px 14px; border-radius: 20px;
-  opacity: 0; transition: opacity 0.2s; pointer-events: none;
-}
+.saving-dot { position: fixed; bottom: 20px; right: 20px; background: var(--dark); color: white; font-size: 12px; padding: 8px 14px; border-radius: 20px; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
 .saving-dot.show { opacity: 1; }
-
-/* ERROR STATE */
-.error-state {
-  text-align: center; padding: 4rem 2rem; color: var(--gray-500);
-}
+.error-state { text-align: center; padding: 4rem 2rem; color: var(--gray-500); }
 .error-state h2 { font-size: 18px; margin-bottom: 8px; color: var(--dark); }
+
+/* ── RESOURCES ── */
+.resources-main { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
+.resources-layout { display: flex; gap: 16px; align-items: flex-start; }
+.res-sidebar { width: 190px; flex-shrink: 0; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; position: sticky; top: 116px; }
+.res-sidebar-label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray-500); padding: 14px 16px 8px; }
+.res-nav-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; font-size: 12px; color: var(--gray-700); }
+.res-nav-item:hover { background: var(--gray-100); }
+.res-nav-item.active { background: var(--red-light); border-left-color: var(--red); color: var(--red); font-weight: 600; }
+.res-nav-item.locked { color: var(--gray-300); cursor: not-allowed; }
+.res-nav-item.locked:hover { background: none; }
+.res-content { flex: 1; min-width: 0; }
+.res-section { display: none; }
+.res-section.active { display: block; }
+.res-section-header { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem; margin-bottom: 12px; }
+.res-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+.res-title { font-family: 'DM Serif Display', serif; font-size: 20px; }
+
+.timeline-track { display: flex; position: relative; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; }
+.timeline-track::before { content: ''; position: absolute; top: 19px; left: 20px; right: 20px; height: 2px; background: var(--gray-200); }
+.t-stage { flex: 1; min-width: 90px; display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; z-index: 1; }
+.t-node { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--gray-200); background: var(--white); display: flex; align-items: center; justify-content: center; font-size: 14px; margin-bottom: 8px; transition: all 0.2s; box-shadow: var(--shadow); }
+.t-stage:hover .t-node { border-color: var(--red); box-shadow: 0 0 0 4px var(--red-light); }
+.t-stage.active .t-node { border-color: var(--red); background: var(--red-light); box-shadow: 0 0 0 4px var(--red-light); }
+.t-label { font-size: 10px; color: var(--gray-500); text-align: center; line-height: 1.3; padding: 0 3px; }
+.t-stage.active .t-label { color: var(--red); font-weight: 600; }
+
+.detail-panel { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem; display: none; animation: fadeUp 0.2s ease; margin-bottom: 12px; }
+.detail-panel.open { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+.panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--gray-200); }
+.panel-title { font-weight: 600; font-size: 15px; }
+.panel-stage { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+.btn-close { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--gray-200); background: transparent; cursor: pointer; color: var(--gray-500); display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.15s; }
+.btn-close:hover { background: var(--gray-100); }
+
+.res-group-label { font-size: 9px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray-500); padding: 12px 0 6px; border-bottom: 1px solid var(--gray-100); margin-bottom: 6px; }
+.res-group-label:first-child { padding-top: 0; }
+.res-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 4px; }
+.res-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid transparent; text-decoration: none; color: var(--dark); transition: all 0.15s; background: var(--gray-100); }
+.res-row:hover { background: var(--white); border-color: var(--gray-200); box-shadow: var(--shadow); transform: translateX(2px); }
+.r-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.r-video { background: #FEE2E2; } .r-pdf { background: #FEF3C7; } .r-doc { background: #DBEAFE; }
+.r-ppt { background: #FCE7F3; } .r-sheet { background: #D1FAE5; } .r-folder { background: #EDE9FE; }
+.r-name { flex: 1; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.r-type { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-500); flex-shrink: 0; }
+.r-arrow { color: var(--gray-300); font-size: 11px; flex-shrink: 0; transition: all 0.15s; }
+.res-row:hover .r-arrow { color: var(--red); transform: translateX(2px); }
+
+.locked-overlay { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2.5rem; text-align: center; }
+.lock-big { font-size: 36px; margin-bottom: 12px; }
+.locked-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 8px; }
+.locked-desc { font-size: 13px; color: var(--gray-500); line-height: 1.6; }
+.res-loading { text-align: center; padding: 3rem; color: var(--gray-500); font-size: 14px; }
+.res-empty { text-align: center; padding: 1.5rem; color: var(--gray-500); font-size: 13px; font-style: italic; }
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <span class="topbar-brand">KW Thrive</span>
-  <span style="font-size:12px;color:#888">My Mentorship Checklist</span>
+  <span style="font-size:12px;color:#888">My Mentorship Portal</span>
+</div>
+
+<div class="tab-nav" id="tab-nav" style="display:none">
+  <button class="tab-btn active" onclick="switchTab('checklist',this)">📋 My Checklist</button>
+  <button class="tab-btn" onclick="switchTab('resources',this)">📚 Resources</button>
 </div>
 
 <div id="content">
-  <div class="hero">
-    <div class="hero-name" id="hero-name">Loading...</div>
-    <div class="hero-sub" id="hero-sub">Chinese Mentorship Program · KW Thrive</div>
-    <div class="overall-ring">
-      <div class="overall-pct" id="overall-pct">0%</div>
-      <div class="overall-label">overall completion</div>
-    </div>
-    <div class="hero-progress-bg">
-      <div class="hero-progress-fill" id="hero-bar" style="width:0%"></div>
-    </div>
-  </div>
 
-  <div class="main" id="main-content" style="display:none">
-
-    <!-- Form Banner -->
-    <div id="form-banner" class="form-banner pending">
-      <div>
-        <div class="banner-text">📋 Weekly Coaching Prep Form</div>
-        <div class="banner-sub" id="banner-sub">Submit by Sunday 10 PM — your mentor reviews this before your 1-on-1</div>
+  <!-- CHECKLIST TAB -->
+  <div id="tab-checklist">
+    <div class="hero">
+      <div class="hero-name" id="hero-name">Loading...</div>
+      <div class="hero-sub" id="hero-sub">Chinese Mentorship Program · KW Thrive</div>
+      <div class="overall-ring">
+        <div class="overall-pct" id="overall-pct">0%</div>
+        <div class="overall-label">overall completion</div>
       </div>
-      <a href="https://forms.gle/X1c5rBzLaQhd1o6b6" target="_blank" class="form-btn" id="form-action-btn">Fill Out Form</a>
+      <div class="hero-progress-bg"><div class="hero-progress-fill" id="hero-bar" style="width:0%"></div></div>
     </div>
-
-    <!-- Upcoming Events -->
-    <div class="events-card" id="events-card" style="display:none">
-      <div class="events-header">Upcoming Events This Week</div>
-      <div id="events-body"></div>
+    <div class="main" id="main-content" style="display:none">
+      <div id="form-banner" class="form-banner pending">
+        <div>
+          <div class="banner-text">📋 Weekly Coaching Prep Form</div>
+          <div class="banner-sub" id="banner-sub">Submit by Sunday 10 PM — your mentor reviews this before your 1-on-1</div>
+        </div>
+        <a href="https://forms.gle/X1c5rBzLaQhd1o6b6" target="_blank" class="form-btn" id="form-action-btn">Fill Out Form</a>
+      </div>
+      <div class="events-card" id="events-card" style="display:none">
+        <div class="events-header">Upcoming Events This Week</div>
+        <div id="events-body"></div>
+      </div>
+      <div id="checklist-container"></div>
     </div>
-
-    <!-- Checklist Sections -->
-    <div id="checklist-container"></div>
-
   </div>
+
+  <!-- RESOURCES TAB -->
+  <div id="tab-resources" style="display:none">
+    <div class="resources-main">
+      <div id="res-loading" class="res-loading">Loading resources...</div>
+      <div id="res-body" style="display:none" class="resources-layout">
+        <nav class="res-sidebar">
+          <div class="res-sidebar-label">Modules</div>
+          <div id="res-nav"></div>
+        </nav>
+        <div class="res-content" id="res-sections"></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <div class="saving-dot" id="saving-dot">Saving...</div>
 
 <script>
 const CHECKLIST = [
-  {week:"Prerequisites", tasks:[
-    "KW Thrive New Agent Orientation",
-    "Explore KW's Mission, Vision, Values, and Beliefs",
-    "Explore KW Circle",
-    "Complete KPA and Finish KPA Verification Process",
-    "Sign Mentorship Agreement and Complete Self Assessment",
-    "Join one of the Associations (SILVAR or SCCAOR) and Finish Real Estate Board Orientation",
-    "Get a professional headshot and send the office your professional digital photo",
-    "Order Business Card",
-    "Build your KW Website with Minimal Customization",
-    "Join MLS Listings and Finish MLS Matrix Training",
-    "Gather 100 contacts and put them into a database",
-    "Purchase the Millionaire Real Estate Agent (MREA)",
-    "MREA Reading: Pages Preface–65",
-    "Write all vacations and cross through the days you are taking off",
-    "Time block all appointments with family (date night, kids, events)",
-    "Record all holidays that you are taking off",
-    "Schedule team meetings for the entire year",
-    "Schedule broker tours on Wednesday, Thursday, and Friday Mornings",
-    "Schedule Recurring Weekly Meeting with Diana",
-    "Review Monthly Training Schedule during First Meeting of the Month"
-  ]},
-  {week:"Week 1", tasks:[
-    "Attend weekly meetings with Diana",
-    "Add 20 new contacts to your database",
-    "Contact 20 people in your database with new agent script",
-    "Preview 20 homes per week",
-    "Pick Appropriate Training with Diana monthly",
-    "Attend the Insider Meeting",
-    "Set Goals and Business Planning",
-    "Attend All BRLG Training in the Future",
-    "Know your Value Proposition and Prepare bio",
-    "Read / Listen to the \"Mindset\" Book",
-    "Build Your Morning Affirmations, time block every morning",
-    "Watch Ignite Course for week 1–2",
-    "Start Reading Diana's Open House Guidebook",
-    "Pick an Area, Build Your Expertise, Know Your Market",
-    "Learn municipal sign placement restrictions (find in SILVAR or SCCAOR)",
-    "Review your calendar",
-    "Review planned activities for next week using KW 4-1-1 and send calendar to Diana on Sunday at 10PM"
-  ]},
-  {week:"Week 2", tasks:[
-    "Attend weekly meetings with Diana",
-    "Add 30 new contacts to your database",
-    "Contact 30 people in your database with new agent script",
-    "Preview 30 homes per week",
-    "Break down your business plan into an actionable daily plan",
-    "Look for a partner, practice scripts daily for at least 30 mins",
-    "Call all people added to database last week — leave message about upcoming announcement in the mail",
-    "Meet and introduce yourself to 10 agents in the office",
-    "Set up CRM (KW COMMAND) with MET and NOT-MET categories",
-    "Set up your Sphere of Influence (SOI) within your MET database",
-    "Complete all assignments from last week given by your coach"
-  ]},
-  {week:"Week 3", tasks:[
-    "Attend weekly meetings with Diana",
-    "Attend weekly office sales meetings",
-    "Time block and spend 30 mins a day reviewing MLS stats, new listings, sales",
-    "Send an announcement card or letter of your new real estate affiliation to your entire database",
-    "Set up a 12-Direct program for all names in your NOT-MET database",
-    "Open House: Shadow an open house held by an agent in the office",
-    "Meet with two title company reps to determine how they can help you",
-    "Meet with lenders to develop your understanding of the loan process",
-    "Review with Mentor planned activities for next week using KW 4-1-1",
-    "MREA reading: Pages 65–97"
-  ]},
-  {week:"Week 4", tasks:[
-    "Attend weekly meetings with Diana",
-    "Attend weekly office sales meetings",
-    "Set up a 36-Touch program for all names in your MET database",
-    "Open House: Commit to hold an open house 4 times a month, if possible",
-    "Prepare a CMA for all people in your database who own a property",
-    "Call people you mailed announcements to — confirm receipt and update contact info"
-  ]},
-  {week:"Weeks 5–6", tasks:[
-    "Attend weekly meetings with Mentor",
-    "Attend weekly office sales meetings",
-    "Attend the local Association of Realtors Board meeting and broker's tour",
-    "Set up a daily prospecting schedule for the next two weeks",
-    "Make 70 new contacts (5 contacts/day for 2 weeks)",
-    "Add 28 METs to your CRM (2/day for 2 weeks)",
-    "Participate in Power Hour/MAD activities at the Market Center",
-    "Call five (5) FSBO listings and try to set appointments",
-    "Talk to people about real estate and add them to your SOI database",
-    "Study the Residential Purchase Agreement (RPA) and review with Mentor",
-    "Observe a buyer consultation with Mentor if possible",
-    "Prepare your buyer consultation and review with Mentor",
-    "Write a practice RPA using ZipForms and review with Mentor",
-    "Conduct at least one open house per week",
-    "Preview competing listings",
-    "Prepare the open house fact sheet",
-    "Write a practice ad for your open house and review with Mentor",
-    "Walk the neighborhood before your open house to distribute fact sheets",
-    "Set up a geographical farm in your target market",
-    "Continue announcement follow-up calls; make appointments where possible",
-    "Schedule and take key SOI contacts to coffee/tea/meal",
-    "Write personal thank you notes to anyone who has helped you",
-    "Watch RPA Contract Class",
-    "Complete Docusign Training",
-    "Read CAR and local association code of ethics",
-    "Watch LPA contract class and complete Ignite transaction system training",
-    "MREA: Pages 97–117"
-  ]},
-  {week:"Weeks 7–8", tasks:[
-    "Attend weekly meetings with Mentor",
-    "Attend weekly office sales meetings",
-    "Attend the local Association of Realtors Board meeting and broker's tour",
-    "Set up a daily prospecting schedule for the next two weeks",
-    "Make 70 new contacts",
-    "Add 28 METs to your CRM",
-    "Participate in Power Hour/MAD activities at the Market Center",
-    "Call five (5) expired listings and try to get appointments",
-    "Talk to people about real estate and add them to your SOI database",
-    "Study the Residential Listing Agreement (RLA) and review with Mentor",
-    "Observe a listing presentation with Mentor if possible",
-    "Prepare your Listing Presentation and review with Mentor",
-    "Write a practice RLA using ZipForms and review with Mentor",
-    "Conduct at least one open house per week",
-    "Preview competing listings",
-    "Prepare the open house fact sheet",
-    "Walk the neighborhood before your open house to distribute fact sheets",
-    "Continue announcement follow-up calls; make appointments where possible",
-    "Schedule and take key SOI contacts to coffee/tea/meal",
-    "Write personal thank you notes to prospects and helpers",
-    "Participate in office events",
-    "Review with Mentor planned activities using KW 4-1-1"
-  ]},
-  {week:"Weeks 9–10", tasks:[
-    "Attend weekly meetings with Mentor",
-    "Attend weekly office sales meetings",
-    "Attend local Association of Realtors Board meeting and broker's tour",
-    "Set up a daily prospecting schedule for the next two weeks",
-    "Make 70 new contacts",
-    "Add 28 METs to your CRM",
-    "Participate in Power Hour/MAD activities",
-    "Talk to people about real estate and add them to your SOI database",
-    "Review the KWBAE Hot Sheet and MLS Coming Soon listings",
-    "Preview KWBAE office listings",
-    "Conduct at least one open house per week",
-    "Preview competing listings and prepare the open house fact sheet",
-    "Continue announcement follow-up calls; make appointments where possible",
-    "Schedule and take key SOI contacts to coffee/tea/meal",
-    "Take some personal time to recharge"
-  ]},
-  {week:"Weeks 11–12", tasks:[
-    "Attend weekly meetings with Mentor",
-    "Attend weekly office sales meetings",
-    "Attend local Association of Realtors Board meeting and broker's tour",
-    "Make 70 new contacts (5/day)",
-    "Add 28 METs to your CRM",
-    "Review the KWBAE Hot Sheet and MLS Coming Soon listings",
-    "Preview KWBAE office listings",
-    "Conduct at least one open house per week",
-    "Schedule and take key SOI contacts to coffee/tea/meal",
-    "Write personal thank you notes to prospects and helpers",
-    "Seek membership in community organizations to increase exposure to new leads",
-    "Participate in office events",
-    "Prepare your 1-year and 5-year business plan and review with Mentor",
-    "Prepare your 1-year budget and review with Mentor",
-    "Prepare your 4-1-1 and review with Mentor"
-  ]}
+  {week:"Prerequisites",tasks:["KW Thrive New Agent Orientation","Explore KW's Mission, Vision, Values, and Beliefs","Explore KW Circle","Complete KPA and Finish KPA Verification Process","Sign Mentorship Agreement and Complete Self Assessment","Join one of the Associations (SILVAR or SCCAOR) and Finish Real Estate Board Orientation","Get a professional headshot and send the office your professional digital photo","Order Business Card","Build your KW Website with Minimal Customization","Join MLS Listings and Finish MLS Matrix Training","Gather 100 contacts and put them into a database","Purchase the Millionaire Real Estate Agent (MREA)","MREA Reading: Pages Preface–65","Write all vacations and cross through the days you are taking off","Time block all appointments with family (date night, kids, events)","Record all holidays that you are taking off","Schedule team meetings for the entire year","Schedule broker tours on Wednesday, Thursday, and Friday Mornings","Schedule Recurring Weekly Meeting with Diana","Review Monthly Training Schedule during First Meeting of the Month"]},
+  {week:"Week 1",tasks:["Attend weekly meetings with Diana","Add 20 new contacts to your database","Contact 20 people in your database with new agent script","Preview 20 homes per week","Pick Appropriate Training with Diana monthly","Attend the Insider Meeting","Set Goals and Business Planning","Attend All BRLG Training in the Future","Know your Value Proposition and Prepare bio","Read / Listen to the \"Mindset\" Book","Build Your Morning Affirmations, time block every morning","Watch Ignite Course for week 1–2","Start Reading Diana's Open House Guidebook","Pick an Area, Build Your Expertise, Know Your Market","Learn municipal sign placement restrictions (find in SILVAR or SCCAOR)","Review your calendar","Review planned activities for next week using KW 4-1-1 and send calendar to Diana on Sunday at 10PM"]},
+  {week:"Week 2",tasks:["Attend weekly meetings with Diana","Add 30 new contacts to your database","Contact 30 people in your database with new agent script","Preview 30 homes per week","Break down your business plan into an actionable daily plan","Look for a partner, practice scripts daily for at least 30 mins","Call all people added to database last week — leave message about upcoming announcement in the mail","Meet and introduce yourself to 10 agents in the office","Set up CRM (KW COMMAND) with MET and NOT-MET categories","Set up your Sphere of Influence (SOI) within your MET database","Complete all assignments from last week given by your coach"]},
+  {week:"Week 3",tasks:["Attend weekly meetings with Diana","Attend weekly office sales meetings","Time block and spend 30 mins a day reviewing MLS stats, new listings, sales","Send an announcement card or letter of your new real estate affiliation to your entire database","Set up a 12-Direct program for all names in your NOT-MET database","Open House: Shadow an open house held by an agent in the office","Meet with two title company reps to determine how they can help you","Meet with lenders to develop your understanding of the loan process","Review with Mentor planned activities for next week using KW 4-1-1","MREA reading: Pages 65–97"]},
+  {week:"Week 4",tasks:["Attend weekly meetings with Diana","Attend weekly office sales meetings","Set up a 36-Touch program for all names in your MET database","Open House: Commit to hold an open house 4 times a month, if possible","Prepare a CMA for all people in your database who own a property","Call people you mailed announcements to — confirm receipt and update contact info"]},
+  {week:"Weeks 5–6",tasks:["Attend weekly meetings with Mentor","Attend weekly office sales meetings","Attend the local Association of Realtors Board meeting and broker's tour","Set up a daily prospecting schedule for the next two weeks","Make 70 new contacts (5 contacts/day for 2 weeks)","Add 28 METs to your CRM (2/day for 2 weeks)","Participate in Power Hour/MAD activities at the Market Center","Call five (5) FSBO listings and try to set appointments","Talk to people about real estate and add them to your SOI database","Study the Residential Purchase Agreement (RPA) and review with Mentor","Observe a buyer consultation with Mentor if possible","Prepare your buyer consultation and review with Mentor","Write a practice RPA using ZipForms and review with Mentor","Conduct at least one open house per week","Preview competing listings","Prepare the open house fact sheet","Write a practice ad for your open house and review with Mentor","Walk the neighborhood before your open house to distribute fact sheets","Set up a geographical farm in your target market","Continue announcement follow-up calls; make appointments where possible","Schedule and take key SOI contacts to coffee/tea/meal","Write personal thank you notes to anyone who has helped you","Watch RPA Contract Class","Complete Docusign Training","Read CAR and local association code of ethics","Watch LPA contract class and complete Ignite transaction system training","MREA: Pages 97–117"]},
+  {week:"Weeks 7–8",tasks:["Attend weekly meetings with Mentor","Attend weekly office sales meetings","Attend the local Association of Realtors Board meeting and broker's tour","Set up a daily prospecting schedule for the next two weeks","Make 70 new contacts","Add 28 METs to your CRM","Participate in Power Hour/MAD activities at the Market Center","Call five (5) expired listings and try to get appointments","Talk to people about real estate and add them to your SOI database","Study the Residential Listing Agreement (RLA) and review with Mentor","Observe a listing presentation with Mentor if possible","Prepare your Listing Presentation and review with Mentor","Write a practice RLA using ZipForms and review with Mentor","Conduct at least one open house per week","Preview competing listings","Prepare the open house fact sheet","Walk the neighborhood before your open house to distribute fact sheets","Continue announcement follow-up calls; make appointments where possible","Schedule and take key SOI contacts to coffee/tea/meal","Write personal thank you notes to prospects and helpers","Participate in office events","Review with Mentor planned activities using KW 4-1-1"]},
+  {week:"Weeks 9–10",tasks:["Attend weekly meetings with Mentor","Attend weekly office sales meetings","Attend local Association of Realtors Board meeting and broker's tour","Set up a daily prospecting schedule for the next two weeks","Make 70 new contacts","Add 28 METs to your CRM","Participate in Power Hour/MAD activities","Talk to people about real estate and add them to your SOI database","Review the KWBAE Hot Sheet and MLS Coming Soon listings","Preview KWBAE office listings","Conduct at least one open house per week","Preview competing listings and prepare the open house fact sheet","Continue announcement follow-up calls; make appointments where possible","Schedule and take key SOI contacts to coffee/tea/meal","Take some personal time to recharge"]},
+  {week:"Weeks 11–12",tasks:["Attend weekly meetings with Mentor","Attend weekly office sales meetings","Attend local Association of Realtors Board meeting and broker's tour","Make 70 new contacts (5/day)","Add 28 METs to your CRM","Review the KWBAE Hot Sheet and MLS Coming Soon listings","Preview KWBAE office listings","Conduct at least one open house per week","Schedule and take key SOI contacts to coffee/tea/meal","Write personal thank you notes to prospects and helpers","Seek membership in community organizations to increase exposure to new leads","Participate in office events","Prepare your 1-year and 5-year business plan and review with Mentor","Prepare your 1-year budget and review with Mentor","Prepare your 4-1-1 and review with Mentor"]}
 ];
 
-// Extract token from URL path
+// Which group titles are timeline vs list, and which are locked levels
+const TIMELINE_GROUPS = ['02_buyer process','03_seller process'];
+const LEVEL_MAP = { '04_level 1': null, '05_level 2': 'l2', '06_level 3': 'l3' };
+const LEVEL_LABELS = { '04_level 1':'⭐ Level 1','05_level 2':'⭐⭐ Level 2','06_level 3':'⭐⭐⭐ Level 3' };
+const FILE_ICONS = { video:'🎬', pdf:'📄', doc:'📝', pptx:'📊', sheet:'📊', folder:'📁' };
+const FILE_CLS   = { video:'r-video', pdf:'r-pdf', doc:'r-doc', pptx:'r-ppt', sheet:'r-sheet', folder:'r-folder' };
+const STAGE_EMOJIS = ['🏡','🤝','✍️','📄','🔑','📋','🏠','✅'];
+
 const token = window.location.pathname.split('/').pop();
-let menteeData = null;
-let progressMap = {}; // key: "si-ti" => boolean
-let saveTimeout = null;
+let menteeData=null, progressMap={}, saveTimeout=null, accessFlags={l2:false,l3:false};
+let activeStagePanel=null;
 
 async function init() {
   try {
     const res = await fetch(`/api/progress/${token}`);
-    if (!res.ok) throw new Error('Not found');
+    if (!res.ok) throw new Error();
     const data = await res.json();
     menteeData = data.mentee;
-
-    // Build progress map
-    (data.progress || []).forEach(p => {
-      progressMap[`${p.section_index}-${p.task_index}`] = p.completed;
-    });
-
+    accessFlags = data.access || {l2:false,l3:false};
+    (data.progress||[]).forEach(p => { progressMap[`${p.section_index}-${p.task_index}`] = p.completed; });
     renderHero();
+    document.getElementById('tab-nav').style.display = 'flex';
     document.getElementById('main-content').style.display = 'block';
     await loadEvents();
     renderChecklist();
     checkFormSubmission();
+    renderResources(data.resources || []);
   } catch(e) {
-    document.getElementById('content').innerHTML = `
-      <div class="error-state">
-        <h2>Page not found</h2>
-        <p>This checklist link may be invalid. Please contact your mentor.</p>
-      </div>`;
+    document.getElementById('content').innerHTML = `<div class="error-state"><h2>Page not found</h2><p>This link may be invalid. Please contact your mentor.</p></div>`;
   }
 }
 
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-checklist').style.display = tab==='checklist'?'block':'none';
+  document.getElementById('tab-resources').style.display  = tab==='resources'?'block':'none';
+}
+
 function renderHero() {
-  document.title = `${menteeData.name} · KW Thrive Checklist`;
+  document.title = `${menteeData.name} · KW Thrive`;
   document.getElementById('hero-name').textContent = menteeData.name;
   const onboard = menteeData.onboard_date
-    ? 'Onboarded ' + new Date(menteeData.onboard_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    ? 'Onboarded '+new Date(menteeData.onboard_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})
     : 'Chinese Mentorship Program · KW Thrive';
   document.getElementById('hero-sub').textContent = onboard;
   updateOverallProgress();
 }
 
 function calcOverall() {
-  const total = CHECKLIST.reduce((a, s) => a + s.tasks.length, 0);
+  const total = CHECKLIST.reduce((a,s)=>a+s.tasks.length,0);
   const done = Object.values(progressMap).filter(Boolean).length;
-  return { done, total, pct: Math.round((done / total) * 100) };
+  return { done, total, pct: Math.round((done/total)*100) };
 }
-
 function updateOverallProgress() {
-  const { pct } = calcOverall();
-  document.getElementById('overall-pct').textContent = pct + '%';
-  document.getElementById('hero-bar').style.width = pct + '%';
+  const {pct}=calcOverall();
+  document.getElementById('overall-pct').textContent=pct+'%';
+  document.getElementById('hero-bar').style.width=pct+'%';
 }
 
 async function loadEvents() {
   try {
-    const res = await fetch('/events.json');
-    const events = await res.json();
-    if (!events.length) return;
-    const card = document.getElementById('events-card');
-    card.style.display = 'block';
-    document.getElementById('events-body').innerHTML = events.map(ev => {
-      const d = new Date(ev.date);
-      const month = d.toLocaleDateString('en-US', { month: 'short' });
-      const day = d.getDate();
-      return `
-        <div class="event-item">
-          <div class="event-date-block">
-            <div class="event-month">${month}</div>
-            <div class="event-day-num">${day}</div>
-          </div>
-          <div>
-            <div class="event-title">${ev.title}</div>
-            <div class="event-time">${ev.day} · ${ev.time} · ${ev.location}</div>
-          </div>
-        </div>`;
+    const res=await fetch('/events.json'); const events=await res.json();
+    if(!events.length) return;
+    document.getElementById('events-card').style.display='block';
+    document.getElementById('events-body').innerHTML=events.map(ev=>{
+      const d=new Date(ev.date);
+      return `<div class="event-item"><div class="event-date-block"><div class="event-month">${d.toLocaleDateString('en-US',{month:'short'})}</div><div class="event-day-num">${d.getDate()}</div></div><div><div class="event-title">${ev.title}</div><div class="event-time">${ev.day} · ${ev.time} · ${ev.location}</div></div></div>`;
     }).join('');
-  } catch(e) {}
+  } catch(e){}
 }
 
 function checkFormSubmission() {
-  // Check if they submitted this week based on current date
-  // The banner always shows — submitted state tracked via mentor dashboard
-  // We show it as pending by default; mentee confirms by clicking
-  const banner = document.getElementById('form-banner');
-  const btn = document.getElementById('form-action-btn');
-  const sub = document.getElementById('banner-sub');
-
-  const alreadyClicked = localStorage.getItem('form-clicked-' + getWeekKey());
-  if (alreadyClicked) {
-    banner.className = 'form-banner submitted';
-    btn.textContent = '✓ Submitted';
-    btn.className = 'form-btn done';
-    btn.removeAttribute('href');
-    sub.textContent = 'Thank you! Your mentor will review this before your 1-on-1.';
+  const banner=document.getElementById('form-banner'), btn=document.getElementById('form-action-btn'), sub=document.getElementById('banner-sub');
+  const clicked=localStorage.getItem('form-clicked-'+getWeekKey());
+  if(clicked){
+    banner.className='form-banner submitted'; btn.textContent='✓ Submitted'; btn.className='form-btn done';
+    btn.removeAttribute('href'); sub.textContent='Thank you! Your mentor will review this before your 1-on-1.';
   } else {
-    btn.addEventListener('click', () => {
-      setTimeout(() => {
-        localStorage.setItem('form-clicked-' + getWeekKey(), '1');
-        banner.className = 'form-banner submitted';
-        btn.textContent = '✓ Submitted';
-        btn.className = 'form-btn done';
-        btn.removeAttribute('href');
-        sub.textContent = 'Thank you! Your mentor will review this before your 1-on-1.';
-      }, 500);
-    });
+    btn.addEventListener('click',()=>setTimeout(()=>{
+      localStorage.setItem('form-clicked-'+getWeekKey(),'1');
+      banner.className='form-banner submitted'; btn.textContent='✓ Submitted'; btn.className='form-btn done';
+      btn.removeAttribute('href'); sub.textContent='Thank you! Your mentor will review this before your 1-on-1.';
+    },500));
   }
 }
-
-function getWeekKey() {
-  const now = new Date();
-  const day = now.getDay();
-  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-  const monday = new Date(now.setDate(diff));
-  return monday.toISOString().split('T')[0];
-}
+function getWeekKey(){const n=new Date(),d=n.getDay(),diff=n.getDate()-d+(d===0?-6:1),m=new Date(n.setDate(diff));return m.toISOString().split('T')[0];}
 
 function renderChecklist() {
-  const container = document.getElementById('checklist-container');
-  container.innerHTML = CHECKLIST.map((section, si) => {
-    const done = section.tasks.filter((_, ti) => progressMap[`${si}-${ti}`]).length;
-    const total = section.tasks.length;
-    const pillClass = done === total ? 'complete' : done > 0 ? 'partial' : 'empty';
-    const pillText = done === total ? '✓ Complete' : `${done}/${total}`;
-
-    const tasks = section.tasks.map((task, ti) => {
-      const checked = !!progressMap[`${si}-${ti}`];
-      return `
-        <div class="task-row" onclick="toggleTask(${si},${ti})" id="row-${si}-${ti}">
-          <div class="task-cb ${checked ? 'checked' : ''}" id="cb-${si}-${ti}"></div>
-          <div class="task-text ${checked ? 'done' : ''}" id="txt-${si}-${ti}">${task}</div>
-        </div>`;
+  document.getElementById('checklist-container').innerHTML = CHECKLIST.map((section,si)=>{
+    const done=section.tasks.filter((_,ti)=>progressMap[`${si}-${ti}`]).length, total=section.tasks.length;
+    const pillClass=done===total?'complete':done>0?'partial':'empty';
+    const tasks=section.tasks.map((task,ti)=>{
+      const checked=!!progressMap[`${si}-${ti}`];
+      return `<div class="task-row" onclick="toggleTask(${si},${ti})"><div class="task-cb ${checked?'checked':''}" id="cb-${si}-${ti}"></div><div class="task-text ${checked?'done':''}" id="txt-${si}-${ti}">${task}</div></div>`;
     }).join('');
-
-    return `
-      <div class="checklist-section" id="section-${si}">
-        <div class="section-header" onclick="toggleSection(${si})">
-          <div class="section-left">
-            <div class="section-num">${si + 1}</div>
-            <div class="section-name">${section.week}</div>
-          </div>
-          <div class="section-right">
-            <span class="section-pill ${pillClass}" id="pill-${si}">${pillText}</span>
-            <span class="chevron" id="chev-${si}">▼</span>
-          </div>
-        </div>
-        <div class="task-list" id="tasks-${si}">${tasks}</div>
-      </div>`;
+    return `<div class="checklist-section"><div class="section-header" onclick="toggleSection(${si})"><div class="section-left"><div class="section-num">${si+1}</div><div class="section-name">${section.week}</div></div><div class="section-right"><span class="section-pill ${pillClass}" id="pill-${si}">${done===total?'✓ Complete':`${done}/${total}`}</span><span class="chevron" id="chev-${si}">▼</span></div></div><div class="task-list" id="tasks-${si}">${tasks}</div></div>`;
   }).join('');
-
-  // Auto-open first incomplete section
-  for (let si = 0; si < CHECKLIST.length; si++) {
-    const done = CHECKLIST[si].tasks.filter((_, ti) => progressMap[`${si}-${ti}`]).length;
-    if (done < CHECKLIST[si].tasks.length) {
+  for(let si=0;si<CHECKLIST.length;si++){
+    if(CHECKLIST[si].tasks.filter((_,ti)=>progressMap[`${si}-${ti}`]).length<CHECKLIST[si].tasks.length){
       document.getElementById(`tasks-${si}`).classList.add('open');
-      document.getElementById(`chev-${si}`).classList.add('open');
-      break;
+      document.getElementById(`chev-${si}`).classList.add('open'); break;
     }
   }
 }
+function toggleSection(si){document.getElementById(`tasks-${si}`).classList.toggle('open');document.getElementById(`chev-${si}`).classList.toggle('open');}
+function toggleTask(si,ti){
+  const key=`${si}-${ti}`, newVal=!progressMap[key]; progressMap[key]=newVal;
+  document.getElementById(`cb-${si}-${ti}`).className='task-cb'+(newVal?' checked':'');
+  document.getElementById(`txt-${si}-${ti}`).className='task-text'+(newVal?' done':'');
+  const done=CHECKLIST[si].tasks.filter((_,t)=>progressMap[`${si}-${t}`]).length, total=CHECKLIST[si].tasks.length;
+  const pill=document.getElementById(`pill-${si}`);
+  pill.className='section-pill '+(done===total?'complete':done>0?'partial':'empty');
+  pill.textContent=done===total?'✓ Complete':`${done}/${total}`;
+  updateOverallProgress(); scheduleSave(si,ti,newVal);
+}
+function scheduleSave(si,ti,completed){showSaving();clearTimeout(saveTimeout);saveTimeout=setTimeout(()=>saveTask(si,ti,completed),600);}
+async function saveTask(si,ti,completed){
+  try{await fetch(`/api/progress/${token}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({section_index:si,task_index:ti,completed})});hideSaving();}catch(e){hideSaving();}
+}
+function showSaving(){document.getElementById('saving-dot').classList.add('show');}
+function hideSaving(){document.getElementById('saving-dot').classList.remove('show');}
 
-function toggleSection(si) {
-  const tl = document.getElementById(`tasks-${si}`);
-  const ch = document.getElementById(`chev-${si}`);
-  tl.classList.toggle('open');
-  ch.classList.toggle('open');
+// ── RESOURCES RENDERING ──
+function icon(type){return FILE_ICONS[(type||'').toLowerCase()]||'📎';}
+function cls(type){return FILE_CLS[(type||'').toLowerCase()]||'r-folder';}
+function isLocked(title){const k=LEVEL_MAP[title.toLowerCase()];return k?!accessFlags[k]:false;}
+function isTimeline(title){return TIMELINE_GROUPS.includes(title.toLowerCase());}
+
+function buildResourceRow(s) {
+  const linkCol = s.column_values?.find(c=>c.id==='link_mm2pxcz1');
+  const typeCol = s.column_values?.find(c=>c.id==='text_mm2p7s61');
+  const url = linkCol?.value ? (() => { try { return JSON.parse(linkCol.value).url; } catch { return '#'; } })() : '#';
+  const type = typeCol?.text || '';
+  return `<a href="${url}" target="_blank" class="res-row"><div class="r-icon ${cls(type)}">${icon(type)}</div><div class="r-name">${s.name}</div><div class="r-type">${type}</div><div class="r-arrow">→</div></a>`;
 }
 
-function toggleTask(si, ti) {
-  const key = `${si}-${ti}`;
-  const newVal = !progressMap[key];
-  progressMap[key] = newVal;
+function renderResources(groups) {
+  document.getElementById('res-loading').style.display='none';
+  document.getElementById('res-body').style.display='flex';
+  const nav=document.getElementById('res-nav'), sections=document.getElementById('res-sections');
+  nav.innerHTML=''; sections.innerHTML='';
+  let firstId=null;
 
-  // Update UI immediately
-  const cb = document.getElementById(`cb-${si}-${ti}`);
-  const txt = document.getElementById(`txt-${si}-${ti}`);
-  cb.className = 'task-cb' + (newVal ? ' checked' : '');
-  txt.className = 'task-text' + (newVal ? ' done' : '');
-
-  // Update pill
-  const section = CHECKLIST[si];
-  const done = section.tasks.filter((_, t) => progressMap[`${si}-${t}`]).length;
-  const total = section.tasks.length;
-  const pill = document.getElementById(`pill-${si}`);
-  pill.className = 'section-pill ' + (done === total ? 'complete' : done > 0 ? 'partial' : 'empty');
-  pill.textContent = done === total ? '✓ Complete' : `${done}/${total}`;
-
-  updateOverallProgress();
-  scheduleSave(si, ti, newVal);
-}
-
-function scheduleSave(si, ti, completed) {
-  showSaving();
-  clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(() => saveTask(si, ti, completed), 600);
-}
-
-async function saveTask(si, ti, completed) {
-  try {
-    await fetch(`/api/progress/${token}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ section_index: si, task_index: ti, completed })
+  groups.forEach((group,gi)=>{
+    const id=`rsec-${gi}`;
+    if(!firstId) firstId=id;
+    const locked=isLocked(group.title);
+    const label=LEVEL_LABELS[group.title.toLowerCase()]||group.title;
+    const items=(group.items_page?.items||[]).filter(item=>{
+      const s=item.column_values?.find(c=>c.id==='color_mm2pg0xb');
+      return !s||s.text!=='Draft';
     });
-    hideSaving();
-  } catch(e) {
-    hideSaving();
-    console.error('Save failed', e);
-  }
+
+    // Sidebar nav
+    nav.innerHTML+=`<div class="res-nav-item ${locked?'locked':''}" id="nav-${id}" onclick="${locked?'':` switchResSection('${id}')`}">${label} ${locked?'🔒':''}</div>`;
+
+    let html='';
+    if(locked) {
+      const lvl=group.title.includes('2')?'2':'3';
+      html=`<div class="locked-overlay"><div class="lock-big">🔒</div><div class="locked-title">Level ${lvl} is Locked</div><div class="locked-desc">Your mentor will unlock this when you're ready.<br>Keep working through your checklist!</div></div>`;
+    } else if(isTimeline(group.title)) {
+      const nodes=items.map((item,idx)=>`<div class="t-stage" id="tstage-${id}-${idx}" onclick="openPanel('${id}',${idx},${items.length},this)"><div class="t-node">${STAGE_EMOJIS[idx]||'📌'}</div><div class="t-label">${item.name}</div></div>`).join('');
+      const panels=items.map((item,idx)=>{
+        const rows=(item.subitems||[]).map(buildResourceRow).join('') || '<div class="res-empty">Resources coming soon</div>';
+        return `<div class="detail-panel" id="panel-${id}-${idx}"><div class="panel-head"><div><div class="panel-title">${item.name}</div><div class="panel-stage">Stage ${idx+1} of ${items.length}</div></div><button class="btn-close" onclick="closePanel('${id}',${items.length})">✕</button></div><div class="res-list">${rows}</div></div>`;
+      }).join('');
+      html=`<div class="res-section-header"><div class="res-eyebrow">${group.title}</div><div class="res-title">${group.title.replace(/^\d+_/,'')}</div></div><div class="timeline-track">${nodes}</div>${panels}`;
+    } else {
+      const content=items.map(item=>{
+        if(!(item.subitems||[]).length) return '';
+        return `<div class="res-group-label">${item.name}</div><div class="res-list">${item.subitems.map(buildResourceRow).join('')}</div>`;
+      }).join('') || '<div class="res-empty">Resources coming soon</div>';
+      html=`<div class="res-section-header"><div class="res-eyebrow">${group.title}</div><div class="res-title">${group.title.replace(/^\d+_/,'')}</div></div>${content}`;
+    }
+
+    sections.innerHTML+=`<div class="res-section" id="${id}">${html}</div>`;
+  });
+
+  if(firstId) switchResSection(firstId);
 }
 
-function showSaving() {
-  document.getElementById('saving-dot').classList.add('show');
+function switchResSection(id) {
+  document.querySelectorAll('.res-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.res-nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+  document.getElementById('nav-'+id)?.classList.add('active');
 }
-function hideSaving() {
-  document.getElementById('saving-dot').classList.remove('show');
+
+function openPanel(groupId, idx, total, el) {
+  // Close all in this group
+  for(let i=0;i<total;i++){
+    document.getElementById(`panel-${groupId}-${i}`)?.classList.remove('open');
+    document.getElementById(`tstage-${groupId}-${i}`)?.classList.remove('active');
+  }
+  const panelId=`panel-${groupId}-${idx}`;
+  if(activeStagePanel===panelId){activeStagePanel=null;return;}
+  document.getElementById(panelId)?.classList.add('open');
+  el.classList.add('active');
+  activeStagePanel=panelId;
+  setTimeout(()=>document.getElementById(panelId)?.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+function closePanel(groupId, total) {
+  for(let i=0;i<total;i++){
+    document.getElementById(`panel-${groupId}-${i}`)?.classList.remove('open');
+    document.getElementById(`tstage-${groupId}-${i}`)?.classList.remove('active');
+  }
+  activeStagePanel=null;
 }
 
 init();
