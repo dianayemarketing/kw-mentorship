@@ -240,9 +240,9 @@ const CHECKLIST = [
 ];
 
 // Which group titles are timeline vs list, and which are locked levels
-const TIMELINE_GROUPS = ['02_buyer process','03_seller process'];
-const LEVEL_MAP = { '04_level 1': null, '05_level 2': 'l2', '06_level 3': 'l3' };
-const LEVEL_LABELS = { '04_level 1':'⭐ Level 1','05_level 2':'⭐⭐ Level 2','06_level 3':'⭐⭐⭐ Level 3' };
+const TIMELINE_GROUPS = ['buyer process','seller process'];
+const LEVEL_MAP = { 'level 1 - building foundations': null, 'level 2 - expand market': 'l2', 'level 3 - consistency & delegation': 'l3' };
+const LEVEL_LABELS = { 'level 1 - building foundations':'⭐ Level 1 - Building Foundations','level 2 - expand market':'⭐⭐ Level 2 - Expand Market','level 3 - consistency & delegation':'⭐⭐⭐ Level 3 - Consistency & Delegation' };
 const FILE_ICONS = { video:'🎬', pdf:'📄', doc:'📝', pptx:'📊', sheet:'📊', folder:'📁' };
 const FILE_CLS   = { video:'r-video', pdf:'r-pdf', doc:'r-doc', pptx:'r-ppt', sheet:'r-sheet', folder:'r-folder' };
 const STAGE_EMOJIS = ['🏡','🤝','✍️','📄','🔑','📋','🏠','✅'];
@@ -365,12 +365,12 @@ function hideSaving(){document.getElementById('saving-dot').classList.remove('sh
 // ── RESOURCES RENDERING ──
 function icon(type){return FILE_ICONS[(type||'').toLowerCase()]||'📎';}
 function cls(type){return FILE_CLS[(type||'').toLowerCase()]||'r-folder';}
-function isLocked(title){const k=LEVEL_MAP[title.toLowerCase()];return k?!accessFlags[k]:false;}
-function isTimeline(title){return TIMELINE_GROUPS.includes(title.toLowerCase());}
+function isLocked(title){const k=LEVEL_MAP[title.toLowerCase()];return k!==undefined?(k===null?false:!accessFlags[k]):false;}
+function isTimeline(title){return TIMELINE_GROUPS.some(t=>title.toLowerCase().includes(t));}
 
 function buildResourceRow(s) {
-  const linkCol = s.column_values?.find(c=>c.id==='link_mm2pxcz1');
-  const typeCol = s.column_values?.find(c=>c.id==='text_mm2p7s61');
+  const linkCol = s.column_values?.find(c=>c.id==='link_mm2pev2e');
+  const typeCol = s.column_values?.find(c=>c.id==='dropdown_mm2pkbpn');
   const url = linkCol?.value ? (() => { try { return JSON.parse(linkCol.value).url; } catch { return '#'; } })() : '#';
   const type = typeCol?.text || '';
   return `<a href="${url}" target="_blank" class="res-row"><div class="r-icon ${cls(type)}">${icon(type)}</div><div class="r-name">${s.name}</div><div class="r-type">${type}</div><div class="r-arrow">→</div></a>`;
@@ -406,13 +406,13 @@ function renderResources(groups) {
         const rows=(item.subitems||[]).map(buildResourceRow).join('') || '<div class="res-empty">Resources coming soon</div>';
         return `<div class="detail-panel" id="panel-${id}-${idx}"><div class="panel-head"><div><div class="panel-title">${item.name}</div><div class="panel-stage">Stage ${idx+1} of ${items.length}</div></div><button class="btn-close" onclick="closePanel('${id}',${items.length})">✕</button></div><div class="res-list">${rows}</div></div>`;
       }).join('');
-      html=`<div class="res-section-header"><div class="res-eyebrow">${group.title}</div><div class="res-title">${group.title.replace(/^\d+_/,'')}</div></div><div class="timeline-track">${nodes}</div>${panels}`;
+      html=`<div class="res-section-header"><div class="res-eyebrow">${group.title}</div><div class="res-title">${group.title}</div></div><div class="timeline-track">${nodes}</div>${panels}`;
     } else {
       const content=items.map(item=>{
         if(!(item.subitems||[]).length) return '';
         return `<div class="res-group-label">${item.name}</div><div class="res-list">${item.subitems.map(buildResourceRow).join('')}</div>`;
       }).join('') || '<div class="res-empty">Resources coming soon</div>';
-      html=`<div class="res-section-header"><div class="res-eyebrow">${group.title}</div><div class="res-title">${group.title.replace(/^\d+_/,'')}</div></div>${content}`;
+      html=`<div class="res-section-header"><div class="res-eyebrow">${group.title}</div><div class="res-title">${group.title}</div></div>${content}`;
     }
 
     sections.innerHTML+=`<div class="res-section" id="${id}">${html}</div>`;
