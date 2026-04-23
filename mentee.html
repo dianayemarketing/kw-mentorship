@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>KW Thrive · My Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
 :root {
   --red: #C8102E; --red-light: #fdf0f2; --red-mid: #f5c6ce;
@@ -111,60 +111,81 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 .error-state { text-align: center; padding: 4rem 2rem; color: var(--gray-500); }
 .error-state h2 { font-size: 18px; margin-bottom: 8px; color: var(--dark); }
 
-/* ── RESOURCES ── */
-.resources-main { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
-.resources-layout { display: flex; gap: 16px; align-items: flex-start; }
-.res-sidebar { width: 190px; flex-shrink: 0; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; position: sticky; top: 116px; }
-.res-sidebar-label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray-500); padding: 14px 16px 8px; }
-.res-nav-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; font-size: 12px; color: var(--gray-700); }
-.res-nav-item:hover { background: var(--gray-100); }
-.res-nav-item.active { background: var(--red-light); border-left-color: var(--red); color: var(--red); font-weight: 600; }
-.res-nav-item.locked { color: var(--gray-300); cursor: not-allowed; }
+/* ── RESOURCES — Cormorant/Gold design ── */
+--gold: #B8922A; --gold-light: #D4AA4A; --gold-pale: #FBF5E8; --gold-border: rgba(184,146,42,0.2);
+--off-white: #FAFAF9; --res-gray-50: #F7F6F4; --res-gray-100: #EEECE8;
+--res-gray-200: #DDD9D2; --res-gray-400: #A8A099; --res-gray-600: #6B6560; --res-gray-800: #2E2A26;
+--shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+
+.resources-main { background: var(--off-white); margin: 0; padding: 0; }
+.resources-layout { display: flex; min-height: calc(100vh - 112px); }
+
+/* Sidebar */
+.res-sidebar { width: 240px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--res-gray-100); padding: 28px 0; position: sticky; top: 112px; height: calc(100vh - 112px); overflow-y: auto; }
+.res-sidebar-label { font-size: 9px; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase; color: var(--res-gray-400); padding: 0 20px 12px; }
+.res-nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 20px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; font-size: 13px; color: var(--res-gray-800); font-family: 'Outfit', sans-serif; font-weight: 300; }
+.res-nav-item:hover { background: var(--res-gray-50); }
+.res-nav-item.active { background: var(--gold-pale); border-left-color: var(--gold); }
+.res-nav-item.active .res-nav-label { font-weight: 500; color: #1A1714; }
+.res-nav-item.locked { opacity: 0.4; cursor: not-allowed; }
 .res-nav-item.locked:hover { background: none; }
-.res-content { flex: 1; min-width: 0; }
+.res-nav-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--res-gray-100); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.res-nav-label { flex: 1; line-height: 1.3; }
+.res-nav-count { font-size: 10px; font-weight: 500; color: var(--res-gray-400); background: var(--res-gray-100); border-radius: 10px; padding: 2px 7px; }
+.res-nav-item.active .res-nav-count { background: rgba(184,146,42,0.15); color: var(--gold); }
+
+/* Content */
+.res-content { flex: 1; padding: 40px 44px; max-width: 860px; }
 .res-section { display: none; }
 .res-section.active { display: block; }
-.res-section-header { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem; margin-bottom: 12px; }
-.res-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
-.res-title { font-family: 'DM Serif Display', serif; font-size: 20px; }
 
-.timeline-track { display: flex; position: relative; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; }
-.timeline-track::before { content: ''; position: absolute; top: 19px; left: 20px; right: 20px; height: 2px; background: var(--gray-200); }
-.t-stage { flex: 1; min-width: 90px; display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; z-index: 1; }
-.t-node { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--gray-200); background: var(--white); display: flex; align-items: center; justify-content: center; font-size: 14px; margin-bottom: 8px; transition: all 0.2s; box-shadow: var(--shadow); }
-.t-stage:hover .t-node { border-color: var(--red); box-shadow: 0 0 0 4px var(--red-light); }
-.t-stage.active .t-node { border-color: var(--red); background: var(--red-light); box-shadow: 0 0 0 4px var(--red-light); }
-.t-label { font-size: 10px; color: var(--gray-500); text-align: center; line-height: 1.3; padding: 0 3px; }
-.t-stage.active .t-label { color: var(--red); font-weight: 600; }
+/* Section header */
+.res-section-header { margin-bottom: 36px; }
+.res-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; font-family: 'Outfit', sans-serif; }
+.res-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400; color: #1A1714; line-height: 1.2; }
 
-.detail-panel { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem; display: none; animation: fadeUp 0.2s ease; margin-bottom: 12px; }
+/* Timeline */
+.timeline-track { display: flex; align-items: flex-start; position: relative; margin-bottom: 36px; padding-bottom: 4px; overflow-x: auto; gap: 0; }
+.timeline-track::before { content: ''; position: absolute; top: 20px; left: 20px; right: 20px; height: 2px; background: var(--res-gray-100); z-index: 0; }
+.t-stage { flex: 1; min-width: 110px; display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; z-index: 1; }
+.t-node { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--res-gray-200); background: var(--white); display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 12px; transition: all 0.25s; box-shadow: 0 1px 3px rgba(0,0,0,0.06); position: relative; z-index: 2; }
+.t-stage:hover .t-node { border-color: var(--gold-light); box-shadow: 0 0 0 5px var(--gold-pale); }
+.t-stage.active .t-node { border-color: var(--gold); background: var(--gold-pale); box-shadow: 0 0 0 5px rgba(184,146,42,0.12); }
+.t-label { font-size: 12px; font-weight: 400; color: var(--res-gray-600); text-align: center; line-height: 1.4; padding: 0 6px; transition: color 0.2s; font-family: 'Outfit', sans-serif; }
+.t-stage:hover .t-label { color: #1A1714; }
+.t-stage.active .t-label { color: #1A1714; font-weight: 500; }
+
+/* Detail panel */
+.detail-panel { background: var(--white); border: 1px solid var(--res-gray-100); border-radius: 14px; padding: 28px; display: none; box-shadow: var(--shadow-md); animation: fadeUp 0.25s ease; margin-bottom: 20px; }
 .detail-panel.open { display: block; }
-@keyframes fadeUp { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
-.panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--gray-200); }
-.panel-title { font-weight: 600; font-size: 15px; }
-.panel-stage { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
-.btn-close { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--gray-200); background: transparent; cursor: pointer; color: var(--gray-500); display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.15s; }
-.btn-close:hover { background: var(--gray-100); }
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);} }
+.panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--res-gray-100); }
+.panel-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: #1A1714; }
+.panel-stage { font-size: 11px; color: var(--res-gray-400); margin-top: 2px; }
+.btn-close { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--res-gray-200); background: transparent; cursor: pointer; color: var(--res-gray-600); font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.btn-close:hover { background: var(--res-gray-50); border-color: var(--res-gray-400); }
 
-.res-group-label { font-size: 9px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray-500); padding: 12px 0 6px; border-bottom: 1px solid var(--gray-100); margin-bottom: 6px; }
+/* Resource rows */
+.res-group-label { font-size: 9px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--res-gray-400); padding: 14px 0 7px; border-bottom: 1px solid var(--res-gray-100); margin-bottom: 7px; font-family: 'Outfit', sans-serif; }
 .res-group-label:first-child { padding-top: 0; }
-.res-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 4px; }
-.res-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid transparent; text-decoration: none; color: var(--dark); transition: all 0.15s; background: var(--gray-100); }
-.res-row:hover { background: var(--white); border-color: var(--gray-200); box-shadow: var(--shadow); transform: translateX(2px); }
-.r-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
-.r-video { background: #FEE2E2; } .r-pdf { background: #FEF3C7; } .r-doc { background: #DBEAFE; }
-.r-ppt { background: #FCE7F3; } .r-sheet { background: #D1FAE5; } .r-folder { background: #EDE9FE; }
-.r-name { flex: 1; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.r-type { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-500); flex-shrink: 0; }
-.r-arrow { color: var(--gray-300); font-size: 11px; flex-shrink: 0; transition: all 0.15s; }
-.res-row:hover .r-arrow { color: var(--red); transform: translateX(2px); }
+.res-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; }
+.res-row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 9px; border: 1px solid transparent; text-decoration: none; color: var(--res-gray-800); transition: all 0.15s; background: var(--res-gray-50); font-family: 'Outfit', sans-serif; }
+.res-row:hover { background: var(--white); border-color: var(--res-gray-200); box-shadow: 0 1px 3px rgba(0,0,0,0.06); transform: translateX(2px); }
+.r-icon { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.r-video{background:#FEE2E2;} .r-pdf{background:#FEF3C7;} .r-doc{background:#DBEAFE;}
+.r-ppt{background:#FCE7F3;} .r-sheet{background:#D1FAE5;} .r-folder{background:#EDE9FE;}
+.r-name { flex: 1; font-size: 13px; font-weight: 400; color: var(--res-gray-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.r-type { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--res-gray-400); flex-shrink: 0; }
+.r-arrow { color: var(--res-gray-200); font-size: 12px; flex-shrink: 0; transition: all 0.15s; }
+.res-row:hover .r-arrow { color: var(--gold); transform: translateX(2px); }
 
-.locked-overlay { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2.5rem; text-align: center; }
-.lock-big { font-size: 36px; margin-bottom: 12px; }
-.locked-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 8px; }
-.locked-desc { font-size: 13px; color: var(--gray-500); line-height: 1.6; }
-.res-loading { text-align: center; padding: 3rem; color: var(--gray-500); font-size: 14px; }
-.res-empty { text-align: center; padding: 1.5rem; color: var(--gray-500); font-size: 13px; font-style: italic; }
+/* Locked */
+.locked-overlay { background: var(--white); border: 1px solid var(--res-gray-100); border-radius: 14px; padding: 56px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.lock-big { font-size: 40px; margin-bottom: 14px; }
+.locked-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; color: #1A1714; margin-bottom: 10px; }
+.locked-desc { font-size: 13px; color: var(--res-gray-600); line-height: 1.7; }
+.res-loading { text-align: center; padding: 3rem; color: var(--res-gray-400); font-size: 14px; font-family: 'Outfit', sans-serif; }
+.res-empty { text-align: center; padding: 1.5rem; color: var(--res-gray-400); font-size: 13px; font-style: italic; }
 </style>
 </head>
 <body>
@@ -211,13 +232,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
   <!-- RESOURCES TAB -->
   <div id="tab-resources" style="display:none">
     <div class="resources-main">
-      <div id="res-loading" class="res-loading">Loading resources...</div>
-      <div id="res-body" style="display:none" class="resources-layout">
+      <div id="res-body" class="resources-layout">
         <nav class="res-sidebar">
-          <div class="res-sidebar-label">Modules</div>
-          <div id="res-nav"></div>
+          <div class="res-sidebar-label">Training Modules</div>
+          <div id="res-nav"><div class="res-loading">Loading...</div></div>
         </nav>
-        <div class="res-content" id="res-sections"></div>
+        <div class="res-content" id="res-sections">
+          <div id="res-loading" class="res-loading">Loading resources...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -363,6 +385,11 @@ function showSaving(){document.getElementById('saving-dot').classList.add('show'
 function hideSaving(){document.getElementById('saving-dot').classList.remove('show');}
 
 // ── RESOURCES RENDERING ──
+const MODULE_ICONS_MAP = {
+  'ignite videos':'🎬','buyer process':'🏠','seller process':'📋',
+  'level 1':'⭐','level 2':'⭐⭐','level 3':'⭐⭐⭐'
+};
+function getModIcon(title){const t=title.toLowerCase();const m=Object.entries(MODULE_ICONS_MAP).find(([k])=>t.includes(k));return m?m[1]:'📁';}
 function icon(type){return FILE_ICONS[(type||'').toLowerCase()]||'📎';}
 function cls(type){return FILE_CLS[(type||'').toLowerCase()]||'r-folder';}
 function isLocked(title){const k=LEVEL_MAP[title.toLowerCase()];return k!==undefined?(k===null?false:!accessFlags[k]):false;}
@@ -377,42 +404,84 @@ function buildResourceRow(s) {
 }
 
 function renderResources(groups) {
-  document.getElementById('res-loading').style.display='none';
-  document.getElementById('res-body').style.display='flex';
   const nav=document.getElementById('res-nav'), sections=document.getElementById('res-sections');
   nav.innerHTML=''; sections.innerHTML='';
+  document.getElementById('res-loading')?.remove();
   let firstId=null;
 
   groups.forEach((group,gi)=>{
     const id=`rsec-${gi}`;
     if(!firstId) firstId=id;
     const locked=isLocked(group.title);
-    const label=LEVEL_LABELS[group.title.toLowerCase()]||group.title;
+    const modIcon=getModIcon(group.title);
     const items=(group.items_page?.items||[]).filter(item=>{
       const s=item.column_values?.find(c=>c.id==='color_mm2pg0xb');
       return !s||s.text!=='Draft';
     });
 
-    // Sidebar nav
-    nav.innerHTML+=`<div class="res-nav-item ${locked?'locked':''}" id="nav-${id}" onclick="${locked?'':` switchResSection('${id}')`}">${label} ${locked?'🔒':''}</div>`;
+    // Sidebar nav — gold design with icon + count
+    nav.innerHTML+=`
+      <div class="res-nav-item ${locked?'locked':''}" id="nav-${id}"
+           onclick="${locked?'':` switchResSection('${id}')`}">
+        <div class="res-nav-icon">${modIcon}</div>
+        <div class="res-nav-label">${group.title}</div>
+        ${locked
+          ? '<span style="font-size:11px;color:#A8A099">🔒</span>'
+          : `<span class="res-nav-count">${items.length}</span>`}
+      </div>`;
 
     let html='';
     if(locked) {
-      const lvl=group.title.includes('2')?'2':'3';
-      html=`<div class="locked-overlay"><div class="lock-big">🔒</div><div class="locked-title">Level ${lvl} is Locked</div><div class="locked-desc">Your mentor will unlock this when you're ready.<br>Keep working through your checklist!</div></div>`;
+      const lvlKey=LEVEL_MAP[group.title.toLowerCase()];
+      const lvl=lvlKey==='l3'?3:2;
+      html=`
+        <div class="res-section-header">
+          <div class="res-eyebrow">Training Module</div>
+          <div class="res-title">${group.title}</div>
+        </div>
+        <div class="locked-overlay">
+          <div class="lock-big">🔒</div>
+          <div class="locked-title">Level ${lvl} is Locked</div>
+          <div class="locked-desc">Your mentor will unlock this when you're ready.<br>Keep working through your checklist!</div>
+        </div>`;
     } else if(isTimeline(group.title)) {
-      const nodes=items.map((item,idx)=>`<div class="t-stage" id="tstage-${id}-${idx}" onclick="openPanel('${id}',${idx},${items.length},this)"><div class="t-node">${STAGE_EMOJIS[idx]||'📌'}</div><div class="t-label">${item.name}</div></div>`).join('');
+      const nodes=items.map((item,idx)=>`
+        <div class="t-stage" id="tstage-${id}-${idx}" onclick="openPanel('${id}',${idx},${items.length},this)">
+          <div class="t-node">${STAGE_EMOJIS[idx]||'📌'}</div>
+          <div class="t-label">${item.name}</div>
+        </div>`).join('');
       const panels=items.map((item,idx)=>{
         const rows=(item.subitems||[]).map(buildResourceRow).join('') || '<div class="res-empty">Resources coming soon</div>';
-        return `<div class="detail-panel" id="panel-${id}-${idx}"><div class="panel-head"><div><div class="panel-title">${item.name}</div><div class="panel-stage">Stage ${idx+1} of ${items.length}</div></div><button class="btn-close" onclick="closePanel('${id}',${items.length})">✕</button></div><div class="res-list">${rows}</div></div>`;
+        return `
+          <div class="detail-panel" id="panel-${id}-${idx}">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">${item.name}</div>
+                <div class="panel-stage">Stage ${idx+1} of ${items.length}</div>
+              </div>
+              <button class="btn-close" onclick="closePanel('${id}',${items.length})">✕</button>
+            </div>
+            <div class="res-list">${rows}</div>
+          </div>`;
       }).join('');
-      html=`<div class="res-section-header"><div class="res-eyebrow">${group.title}</div><div class="res-title">${group.title}</div></div><div class="timeline-track">${nodes}</div>${panels}`;
+      html=`
+        <div class="res-section-header">
+          <div class="res-eyebrow">Process Flow</div>
+          <div class="res-title">${group.title}</div>
+        </div>
+        <div class="timeline-track">${nodes}</div>
+        ${panels}`;
     } else {
       const content=items.map(item=>{
         if(!(item.subitems||[]).length) return '';
         return `<div class="res-group-label">${item.name}</div><div class="res-list">${item.subitems.map(buildResourceRow).join('')}</div>`;
       }).join('') || '<div class="res-empty">Resources coming soon</div>';
-      html=`<div class="res-section-header"><div class="res-eyebrow">${group.title}</div><div class="res-title">${group.title}</div></div>${content}`;
+      html=`
+        <div class="res-section-header">
+          <div class="res-eyebrow">Training Module</div>
+          <div class="res-title">${group.title}</div>
+        </div>
+        ${content}`;
     }
 
     sections.innerHTML+=`<div class="res-section" id="${id}">${html}</div>`;
