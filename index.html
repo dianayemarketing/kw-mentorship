@@ -128,12 +128,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
   font-size: 11px; font-weight: 500; padding: 3px 10px;
   border-radius: 20px; background: var(--gray-100); color: var(--gray-700);
 }
-.form-badge {
-  font-size: 11px; font-weight: 500; padding: 3px 10px;
-  border-radius: 20px; display: flex; align-items: center; gap: 4px;
-}
-.form-badge.submitted { background: var(--green-light); color: var(--green); }
-.form-badge.not-submitted { background: var(--amber-light); color: var(--amber); }
 .last-active { font-size: 11px; color: var(--gray-500); }
 
 /* COPY LINK */
@@ -256,9 +250,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
         <div class="metric-sub">≥ 50% complete</div>
       </div>
       <div class="metric-card amber">
-        <div class="metric-label">Form Submitted</div>
+        <div class="metric-label">Coaching Requests</div>
         <div class="metric-value" id="m-forms">—</div>
-        <div class="metric-sub">This week's coaching prep</div>
+        <div class="metric-sub">This week's 1-on-1 requests</div>
       </div>
     </div>
 
@@ -416,7 +410,6 @@ function renderMentees() {
   }
   el.innerHTML = allMentees.map(m => {
     const initials = m.name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
-    const submitted = didSubmit(m);
     const lastActive = m.last_activity
       ? 'Active ' + timeAgo(new Date(m.last_activity))
       : 'No activity yet';
@@ -443,9 +436,6 @@ function renderMentees() {
         </div>
         <div class="mentee-card-bottom">
           <span class="week-badge">${m.current_week}</span>
-          <span class="form-badge ${submitted ? 'submitted' : 'not-submitted'}">
-            ${submitted ? '✓ Form submitted' : '○ Form pending'}
-          </span>
           <button class="copy-link-btn" onclick="event.stopPropagation();copyLink('${menteeUrl}','${m.name}')">
             ⎘ Copy link
           </button>
@@ -493,7 +483,16 @@ function updateMetrics() {
   const active = allMentees.filter(m => m.is_active);
   const avg = active.length ? Math.round(active.reduce((a, m) => a + m.pct, 0) / active.length) : 0;
   const onTrack = active.filter(m => m.pct >= 50).length;
-  const formsCount = allMentees.filter(m => didSubmit(m)).length;
+  // Count only requests from signed mentees
+  const menteeEmails = new Set(
+    allMentees.flatMap(m => [
+      (m.work_email || '').toLowerCase().trim(),
+      (m.personal_email || '').toLowerCase().trim()
+    ]).filter(Boolean)
+  );
+  const formsCount = submitters.filter(s =>
+    menteeEmails.has((s.email || '').toLowerCase().trim())
+  ).length;
 
   document.getElementById('m-total').textContent = active.length;
   document.getElementById('m-avg').textContent = avg + '%';
