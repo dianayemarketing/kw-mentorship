@@ -456,15 +456,37 @@ function renderMentees() {
 
 function renderFormList() {
   const el = document.getElementById('form-list');
-  if (!submitters.length) {
+
+  // Only show submitters whose email matches a signed mentee (work_email or personal_email)
+  const menteeEmails = new Set(
+    allMentees.flatMap(m => [
+      (m.work_email || '').toLowerCase().trim(),
+      (m.personal_email || '').toLowerCase().trim()
+    ]).filter(Boolean)
+  );
+
+  const filtered = submitters.filter(s =>
+    menteeEmails.has((s.email || '').toLowerCase().trim())
+  );
+
+  if (!filtered.length) {
     el.innerHTML = '<div style="padding:1rem;font-size:13px;color:#777;font-style:italic">No requests this week</div>';
     return;
   }
-  el.innerHTML = submitters.map(s => `
+
+  // Use the mentee name from Monday if available, fall back to sheet name
+  el.innerHTML = filtered.map(s => {
+    const mentee = allMentees.find(m =>
+      (m.work_email || '').toLowerCase().trim() === (s.email || '').toLowerCase().trim() ||
+      (m.personal_email || '').toLowerCase().trim() === (s.email || '').toLowerCase().trim()
+    );
+    const displayName = mentee ? mentee.name : (s.name || s.email);
+    return `
     <div class="form-row">
-      <span class="form-row-name">${s.name || s.email}</span>
+      <span class="form-row-name">${displayName}</span>
       <span class="form-status yes">✓ Requested</span>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function updateMetrics() {
