@@ -18,6 +18,15 @@
     "type": "tour"
   },
   {
+    "date": "May 14, 2026",
+    "day": "Thursday",
+    "time": "1:00 PM",
+    "title": "RED Day",
+    "description": "Renew, Energize, Donate!",
+    "location": "10104 Vista Dr, Cupertino, CA 95014",
+    "type": "tour"
+  },
+  {
     "date": "May 15, 2026",
     "day": "Friday",
     "time": "9:00 AM",
