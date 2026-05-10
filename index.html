@@ -279,7 +279,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
         <!-- Coaching Prep Summary -->
         <div class="panel">
           <div class="panel-header">
-            <div class="panel-title">Weekly Coaching Prep</div>
+            <div class="panel-title">Coaching Requests</div>
             <div class="panel-meta" id="form-week-label">This week</div>
           </div>
           <div id="form-list">
@@ -456,15 +456,15 @@ function renderMentees() {
 
 function renderFormList() {
   const el = document.getElementById('form-list');
-  if (!allMentees.length) { el.innerHTML = '<div style="padding:1rem;font-size:13px;color:#777">Loading mentees...</div>'; return; }
-  el.innerHTML = allMentees.map(m => {
-    const submitted = didSubmit(m);
-    return `
-      <div class="form-row">
-        <span class="form-row-name">${m.name}</span>
-        <span class="form-status ${submitted ? 'yes' : 'no'}">${submitted ? '✓ Submitted' : '○ Pending'}</span>
-      </div>`;
-  }).join('');
+  if (!submitters.length) {
+    el.innerHTML = '<div style="padding:1rem;font-size:13px;color:#777;font-style:italic">No requests this week</div>';
+    return;
+  }
+  el.innerHTML = submitters.map(s => `
+    <div class="form-row">
+      <span class="form-row-name">${s.name || s.email}</span>
+      <span class="form-status yes">✓ Requested</span>
+    </div>`).join('');
 }
 
 function updateMetrics() {
