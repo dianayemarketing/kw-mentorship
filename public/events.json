@@ -2,6 +2,15 @@
   {
     "date": "May 11, 2026",
     "day": "Monday",
+    "time": "9:00 AM",
+    "title": "Monday Huddle",
+    "description": "",
+    "location": "KW Thrive Office | Google Meet",
+    "type": "weekly"
+  },  
+  {
+    "date": "May 11, 2026",
+    "day": "Monday",
     "time": "10:00 AM",
     "title": "A Pipeline That Pays: Leads To Loyalty with Brianna Flynn",
     "description": "This class will show you how to build a simple pipeline that turns leads into long-term clients. You’ll learn how to stay organized, follow up the right way, and build strong relationships that lead to repeat business and referrals. It’s designed to help you keep things clear, consistent, and easy to manage.",
@@ -51,6 +60,15 @@
     "title": "Script Practice - Commission",
     "description": "Topic is Commission",
     "location": "KW Thrive Office",
+    "type": "weekly"
+  },
+   {
+    "date": "May 15, 2026",
+    "day": "Friday",
+    "time": "11:00 AM",
+    "title": "Agent Mastermind",
+    "description": "Weekly Guest",
+    "location": "KW Thrive Office | Google Meet",
     "type": "weekly"
   }
 ]
