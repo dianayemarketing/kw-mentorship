@@ -108,12 +108,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 
 /* ── Inline task links ── */
 .task-link {
-  color: var(--red);
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: 3px;
-  font-weight: 500;
-  cursor: pointer;
+  color: var(--red); text-decoration: underline; text-decoration-style: dotted;
+  text-underline-offset: 3px; font-weight: 500; cursor: pointer;
   transition: color 0.15s, opacity 0.15s;
 }
 .task-link:hover { opacity: 0.75; }
@@ -180,6 +176,49 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 .locked-desc { font-size: 13px; color: #6B6560; line-height: 1.7; }
 .res-loading { text-align: center; padding: 3rem; color: #A8A099; font-size: 14px; font-family: 'Outfit', sans-serif; }
 .res-empty { text-align: center; padding: 1.5rem; color: #A8A099; font-size: 13px; font-style: italic; }
+
+/* ── CONFETTI CANVAS ── */
+#confetti-canvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 9000;
+}
+
+/* ── CELEBRATION MODAL ── */
+.celebrate-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9001; opacity: 0; transition: opacity 0.3s; padding: 1.5rem;
+}
+.celebrate-overlay.visible { opacity: 1; }
+.celebrate-box {
+  background: white; border-radius: 20px; padding: 2.5rem 2rem; text-align: center;
+  max-width: 360px; width: 100%; box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+  transform: scale(0.85); transition: transform 0.35s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.celebrate-overlay.visible .celebrate-box { transform: scale(1); }
+.celebrate-icon { font-size: 56px; margin-bottom: 12px; line-height: 1; }
+.celebrate-title { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--dark); margin-bottom: 8px; }
+.celebrate-badge {
+  font-size: 12px; font-weight: 600; color: var(--red); background: var(--red-light);
+  border-radius: 20px; display: inline-block; padding: 4px 14px; margin-bottom: 14px;
+}
+.celebrate-msg { font-size: 14px; color: var(--gray-500); line-height: 1.6; margin-bottom: 20px; }
+.celebrate-pct { font-size: 36px; font-weight: 700; color: var(--red); line-height: 1; }
+.celebrate-pct-label { font-size: 12px; color: var(--gray-500); margin-bottom: 20px; }
+.celebrate-close {
+  background: var(--dark); color: white; border: none; border-radius: 10px;
+  padding: 12px 28px; font-size: 14px; font-weight: 600; font-family: inherit;
+  cursor: pointer; width: 100%; transition: opacity 0.2s;
+}
+.celebrate-close:hover { opacity: 0.85; }
+
+/* ── SECTION GLOW ON COMPLETE ── */
+@keyframes sectionGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(200,16,46,0.45); }
+  50%  { box-shadow: 0 0 0 8px rgba(200,16,46,0.1); }
+  100% { box-shadow: 0 0 0 0 rgba(200,16,46,0); }
+}
+.checklist-section.just-completed { animation: sectionGlow 1.2s ease-out forwards; }
 </style>
 </head>
 <body>
@@ -242,13 +281,27 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 
 <div class="saving-dot" id="saving-dot">Saving...</div>
 
+<!-- Confetti canvas -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- Celebration modal -->
+<div class="celebrate-overlay" id="celebrate-overlay" style="display:none">
+  <div class="celebrate-box">
+    <div class="celebrate-icon" id="cel-icon">🎉</div>
+    <div class="celebrate-title" id="cel-title">Section Complete!</div>
+    <div class="celebrate-badge" id="cel-badge"></div>
+    <div class="celebrate-msg" id="cel-msg"></div>
+    <div class="celebrate-pct" id="cel-pct"></div>
+    <div class="celebrate-pct-label">overall program completion</div>
+    <button class="celebrate-close" id="cel-btn" onclick="closeCelebration()">Keep Going 🚀</button>
+  </div>
+</div>
+
 <script>
 // ─────────────────────────────────────────────────────────────────────────────
 // CHECKLIST DATA
 // Each task is either a plain string OR an object:
 //   { text: "...", links: [{ phrase: "exact phrase in text", url: "https://..." }] }
-// Multiple links per task are supported.
-// To add a URL later: change the string to an object and fill in the url.
 // ─────────────────────────────────────────────────────────────────────────────
 const CHECKLIST = [
   { week: "Prerequisites", tasks: [
@@ -647,18 +700,40 @@ function toggleSection(si) {
   document.getElementById(`chev-${si}`).classList.toggle('open');
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// TASK TOGGLE + SECTION COMPLETION DETECTION
+// ─────────────────────────────────────────────────────────────────────────────
+const celebratedSections = new Set();
+
+function isSectionComplete(si) {
+  return CHECKLIST[si].tasks.every((_, ti) => !!progressMap[`${si}-${ti}`]);
+}
+
 function toggleTask(si, ti) {
   const key = `${si}-${ti}`;
+  const wasComplete = isSectionComplete(si); // capture BEFORE toggle
   const newVal = !progressMap[key];
   progressMap[key] = newVal;
+
   document.getElementById(`cb-${si}-${ti}`).className  = 'task-cb'   + (newVal ? ' checked' : '');
   document.getElementById(`txt-${si}-${ti}`).className = 'task-text' + (newVal ? ' done'    : '');
+
   const done  = CHECKLIST[si].tasks.filter((_, t) => progressMap[`${si}-${t}`]).length;
   const total = CHECKLIST[si].tasks.length;
   const pill  = document.getElementById(`pill-${si}`);
   pill.className = 'section-pill ' + (done === total ? 'complete' : done > 0 ? 'partial' : 'empty');
   pill.textContent = done === total ? '✓ Complete' : `${done}/${total}`;
+
   updateOverallProgress();
+
+  // Detect fresh section completion
+  const nowComplete = isSectionComplete(si);
+  if (newVal && !wasComplete && nowComplete && !celebratedSections.has(si)) {
+    celebratedSections.add(si);
+    const { pct } = calcOverall();
+    setTimeout(() => triggerSectionComplete(si, pct), 350);
+  }
+
   scheduleSave(si, ti, newVal);
 }
 
@@ -675,6 +750,146 @@ async function saveTask(si, ti, completed) {
 function showSaving() { document.getElementById('saving-dot').classList.add('show'); }
 function hideSaving()  { document.getElementById('saving-dot').classList.remove('show'); }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CELEBRATION SYSTEM
+// ─────────────────────────────────────────────────────────────────────────────
+function triggerSectionComplete(si, pct) {
+  const sectionName   = CHECKLIST[si].week;
+  const isFullProgram = CHECKLIST.every((_, idx) => isSectionComplete(idx));
+
+  // 1. Glow the card
+  const card = document.getElementById(`section-${si}`);
+  if (card) {
+    card.classList.add('just-completed');
+    card.addEventListener('animationend', () => card.classList.remove('just-completed'), { once: true });
+  }
+
+  // 2. Confetti
+  fireConfetti(isFullProgram);
+
+  // 3. Modal
+  showCelebration(sectionName, pct, isFullProgram, si);
+
+  // 4. Notify mentor via Gmail (fire-and-forget)
+  notifyMentor(sectionName, si, pct);
+}
+
+function showCelebration(sectionName, pct, isFullProgram, si) {
+  const overlay        = document.getElementById('celebrate-overlay');
+  const completedCount = CHECKLIST.filter((_, idx) => isSectionComplete(idx)).length;
+
+  document.getElementById('cel-icon').textContent  = isFullProgram ? '🏆' : '🎉';
+  document.getElementById('cel-title').textContent = isFullProgram ? 'Program Complete!' : 'Section Complete!';
+  document.getElementById('cel-badge').textContent = sectionName;
+  document.getElementById('cel-pct').textContent   = pct + '%';
+  document.getElementById('cel-btn').textContent   = isFullProgram ? '🎓 Congratulations!' : 'Keep Going 🚀';
+
+  const msgs = isFullProgram
+    ? [`You've finished all ${CHECKLIST.length} sections of the KW Thrive Chinese Mentorship Program. Diana and Mark are so proud of you — time to celebrate! 🌟`]
+    : [
+        `Great work finishing "${sectionName}"! You've completed ${completedCount} of ${CHECKLIST.length} sections. Keep that momentum going!`,
+        `"${sectionName}" is done — you crushed it! Your mentor has been notified. On to the next section!`,
+        `Section complete! 每一步都是进步。Diana has been notified of your progress.`
+      ];
+  document.getElementById('cel-msg').textContent = msgs[si % msgs.length];
+
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add('visible')));
+}
+
+function closeCelebration() {
+  const overlay = document.getElementById('celebrate-overlay');
+  overlay.classList.remove('visible');
+  setTimeout(() => { overlay.style.display = 'none'; }, 300);
+}
+
+// Close on backdrop click
+document.addEventListener('click', e => {
+  if (e.target.id === 'celebrate-overlay') closeCelebration();
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONFETTI ENGINE (zero dependencies)
+// ─────────────────────────────────────────────────────────────────────────────
+function fireConfetti(isFullProgram) {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx    = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const COLORS = isFullProgram
+    ? ['#B8922A','#e0b44a','#f5d58a','#C8102E','#ffffff','#ffd700']
+    : ['#C8102E','#B8922A','#ffffff','#e0b44a','#444444'];
+
+  const COUNT = isFullProgram ? 180 : 100;
+  const particles = Array.from({ length: COUNT }, () => ({
+    x: Math.random() * canvas.width,
+    y: -10 - Math.random() * 100,
+    r: 4 + Math.random() * 6,
+    d: 1 + Math.random() * 3,
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    tiltAngle: Math.random() * Math.PI * 2,
+    tiltSpeed: 0.05 + Math.random() * 0.1,
+    opacity: 1,
+    shape: Math.random() > 0.5 ? 'rect' : 'circle'
+  }));
+
+  let frame = 0;
+  const MAX = isFullProgram ? 280 : 200;
+
+  (function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      ctx.save();
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle   = p.color;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(Math.sin(p.tiltAngle) * 0.4);
+      if (p.shape === 'rect') {
+        ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 1.8);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.r / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+      p.y += p.d + 1;
+      p.x += Math.sin(frame * 0.02 + p.tiltAngle) * 1.5;
+      p.tiltAngle += p.tiltSpeed;
+      if (frame > MAX * 0.6) p.opacity -= 0.012;
+    });
+    frame++;
+    if (frame < MAX) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  })();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MENTOR EMAIL NOTIFICATION (Anthropic API + Gmail MCP)
+// ─────────────────────────────────────────────────────────────────────────────
+async function notifyMentor(sectionName, sectionIndex, pct) {
+  if (!menteeData) return;
+  try {
+    await fetch('/api/notify-section', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        menteeName:     menteeData.name,
+        sectionName,
+        sectionIndex,
+        totalSections:  CHECKLIST.length,
+        pct
+      })
+    });
+  } catch(e) {
+    // Fail silently — never break the mentee experience
+    console.warn('Mentor notification skipped:', e.message);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RESOURCES
+// ─────────────────────────────────────────────────────────────────────────────
 function getModIcon(title) {
   const t = title.toLowerCase();
   const m = Object.entries(MODULE_ICONS_MAP).find(([k]) => t.includes(k));
@@ -694,13 +909,13 @@ function buildResourceRow(s) {
 }
 
 function renderResources(groups) {
-  const nav = document.getElementById('res-nav');
+  const nav      = document.getElementById('res-nav');
   const sections = document.getElementById('res-sections');
   nav.innerHTML = ''; sections.innerHTML = '';
   document.getElementById('res-loading')?.remove();
   let firstId = null;
   groups.forEach((group, gi) => {
-    const id = `rsec-${gi}`;
+    const id      = `rsec-${gi}`;
     if (!firstId) firstId = id;
     const locked  = isLocked(group.title);
     const modIcon = getModIcon(group.title);
