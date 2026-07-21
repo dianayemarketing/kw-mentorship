@@ -9,6 +9,7 @@ const MONDAY_API_URL = 'https://api.monday.com/v2';
 const BOARD_ID = '18383986088';
 const ACTIVE_GROUP_ID = 'topics';        // Signed Mentee
 const PAUSED_GROUP_ID = 'group_mm12kcan'; // Paused
+const SITE_URL = 'https://kw-mentorship.vercel.app';
 
 async function fetchMondayMentees() {
   const query = `
@@ -21,7 +22,7 @@ async function fetchMondayMentees() {
             items {
               id
               name
-              column_values(ids: ["text_mkxv9drn","text_mkxvtxbk","email_mm1wde8k","date4"]) {
+              column_values(ids: ["text_mkxv9drn","text_mkxvtxbk","email_mm1wde8k","date4","link_mm38b5mj"]) {
                 id
                 text
               }
@@ -43,6 +44,39 @@ async function fetchMondayMentees() {
 
   const data = await res.json();
   return data.data.boards[0].groups;
+}
+
+async function writeMondayLink(itemId, token) {
+  const url = `${SITE_URL}/mentee/${token}`;
+  const mutation = `
+    mutation ($boardId: ID!, $itemId: ID!, $columnId: String!, $value: JSON!) {
+      change_column_value(board_id: $boardId, item_id: $itemId, column_id: $columnId, value: $value) {
+        id
+      }
+    }
+  `;
+
+  const res = await fetch(MONDAY_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': process.env.MONDAY_API_TOKEN
+    },
+    body: JSON.stringify({
+      query: mutation,
+      variables: {
+        boardId: BOARD_ID,
+        itemId: itemId,
+        columnId: 'link_mm38b5mj',
+        value: JSON.stringify({ url, text: 'Portal Link' })
+      }
+    })
+  });
+
+  const data = await res.json();
+  if (data.errors) {
+    console.error(`Failed to write link for item ${itemId}:`, data.errors);
+  }
 }
 
 export default async function handler(req, res) {
@@ -79,18 +113,32 @@ export default async function handler(req, res) {
 
         const { data: existing } = await supabase
           .from('mentees')
-          .select('id')
+          .select('id, token')
           .eq('monday_item_id', item.id)
           .single();
 
+        let token;
         if (existing) {
           await supabase.from('mentees')
             .update(menteeData)
             .eq('monday_item_id', item.id);
+          token = existing.token;
           updated++;
         } else {
-          await supabase.from('mentees').insert(menteeData);
+          const { data: inserted } = await supabase
+            .from('mentees')
+            .insert(menteeData)
+            .select('token')
+            .single();
+          token = inserted?.token;
           added++;
+        }
+
+        // Only write the portal link back to Monday if that column is empty —
+        // never overwrite a manually-pasted link.
+        const linkAlreadySet = !!(colMap['link_mm38b5mj'] || '').trim();
+        if (token && !linkAlreadySet) {
+          await writeMondayLink(item.id, token);
         }
       }
     }
