@@ -518,7 +518,8 @@ async function syncMonday() {
       headers: { 'x-mentor-password': mentorPassword }
     });
     const data = await res.json();
-    showToast(`Synced! ${data.added} added, ${data.updated} updated.`);
+    const removedMsg = data.removed ? `, ${data.removed} removed` : '';
+    showToast(`Synced! ${data.added} added, ${data.updated} updated${removedMsg}.`);
     await loadMentees();
   } catch(e) {
     showToast('Sync failed. Check your Monday API token.');
