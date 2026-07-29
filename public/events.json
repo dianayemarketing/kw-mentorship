@@ -1,6 +1,6 @@
 [
   {
-    "date": "June 8, 2026",
+    "date": "August 3, 2026",
     "day": "Monday",
     "time": "9:00 AM",
     "title": "Monday Huddle",
@@ -9,34 +9,25 @@
     "type": "weekly"
   },  
   {
-    "date": "June 11, 2026",
-    "day": "Thursday",
-    "time": "9:30 AM",
-    "title": "Ninja Selling Calls",
-    "description": "",
-    "location": "Google Meet",
-    "type": "tour"
-  },
-  {
-    "date": "June 11, 2026",
+    "date": "August 6, 2026",
     "day": "Thursday",
     "time": "12:00 PM",
-    "title": "The Weekly Real Estate Playbook with Eric Bradley",
-    "description": "Join The Weekly Real Estate Playbook with Eric Bradley, a dynamic class designed to help agents stay informed, focused, and ready to take action. Each session blends timely market stats, economic updates, proven business strategies, and mindset conversations that support long-term success. You’ll also gain insights from top agent interviews, offering real-world perspectives you can apply immediately to your business.",
-    "location": "Zoom",
-    "type": "tour"
-  },
-  {
-    "date": "June 12, 2026",
-    "day": "Friday",
-    "time": "9:00 AM",
-    "title": "The 100 Club with Alan Wang",
-    "description": "See Calendar for details",
-    "location": "Zoom",
+    "title": "Eric's Weekly Market Update",
+    "description": "",
+    "location": "KW Thrive Office",
     "type": "weekly"
   },
   {
-    "date": "June 12, 2026",
+    "date": "August 7, 2026",
+    "day": "Friday",
+    "time": "9:45 AM",
+    "title": "Script Practice",
+    "description": "",
+    "location": "Zoom",
+    "type": "tour"
+  },
+  {
+    "date": "August 7, 2026",
     "day": "Friday",
     "time": "11:00 AM",
     "title": "Agent Mastermind",
