@@ -1,18 +1,45 @@
 [
   {
-    "date": "August 3, 2026",
+    "date": "August 10, 2026",
     "day": "Monday",
     "time": "9:00 AM",
     "title": "Monday Huddle",
     "description": "",
     "location": "KW Thrive Office | Google Meet",
     "type": "weekly"
-  },  
+  },
   {
-    "date": "August 6, 2026",
+    "date": "August 12, 2026",
+    "day": "Wednesday",
+    "time": "10:30 AM",
+    "title": "Insider Meeting",
+    "description": "",
+    "location": "KW Thrive Office | Zoom",
+    "type": "weekly"
+  }, 
+  {
+    "date": "August 13, 2026",
+    "day": "Thursday",
+    "time": "9:30 AM",
+    "title": "Ninja Selling Calls",
+    "description": "",
+    "location": "Google Meet",
+    "type": "weekly"
+  },
+  {
+    "date": "August 13, 2026",
     "day": "Thursday",
     "time": "12:00 PM",
     "title": "Eric's Weekly Market Update",
+    "description": "",
+    "location": "KW Thrive Office",
+    "type": "weekly"
+  },
+  {
+    "date": "August 13, 2026",
+    "day": "Thursday",
+    "time": "1:00 PM",
+    "title": "Database/Leads Workshop",
     "description": "",
     "location": "KW Thrive Office",
     "type": "weekly"
@@ -27,11 +54,29 @@
     "type": "weekly"
   },
   {
-    "date": "August 7, 2026",
+    "date": "August 14, 2026",
+    "day": "Friday",
+    "time": "9:00 AM",
+    "title": "The 100 Club with Alan Wang",
+    "description": "",
+    "location": "Zoom",
+    "type": "weekly"
+  }
+  {
+    "date": "August 14, 2026",
+    "day": "Friday",
+    "time": "9:45 AM",
+    "title": "Script Practice",
+    "description": "",
+    "location": "KW Thrive Office",
+    "type": "weekly"
+  }
+  {
+    "date": "August 14, 2026",
     "day": "Friday",
     "time": "11:00 AM",
     "title": "Agent Mastermind",
-    "description": "Weekly Guest",
+    "description": "",
     "location": "KW Thrive Office | Google Meet",
     "type": "weekly"
   }
