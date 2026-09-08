@@ -219,6 +219,42 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
   100% { box-shadow: 0 0 0 0 rgba(200,16,46,0); }
 }
 .checklist-section.just-completed { animation: sectionGlow 1.2s ease-out forwards; }
+
+/* ── SCORECARD ── */
+.sc-hero { background: var(--dark); color: white; padding: 2rem 1.5rem 1.5rem; text-align: center; }
+.sc-hero-name { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 4px; }
+.sc-hero-sub { font-size: 13px; color: #aaa; margin-bottom: 1.25rem; }
+.sc-status-badge { display: inline-block; padding: 6px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
+.sc-status-badge.on-track { background: var(--green-light); color: var(--green); }
+.sc-status-badge.attention { background: var(--amber-light); color: var(--amber); }
+.sc-status-badge.off-track { background: var(--red-light); color: var(--red); }
+.sc-status-pct { font-size: 36px; font-weight: 700; margin: 10px 0 4px; }
+
+.sc-main { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
+.sc-daypicker { display: flex; gap: 8px; margin-bottom: 1.25rem; overflow-x: auto; padding-bottom: 4px; }
+.sc-day-btn { flex-shrink: 0; padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--gray-200); background: var(--white); font-family: inherit; font-size: 12px; font-weight: 500; color: var(--gray-700); cursor: pointer; transition: all 0.15s; }
+.sc-day-btn.today { border-color: var(--red); color: var(--red); }
+.sc-day-btn.active { background: var(--red); border-color: var(--red); color: white; }
+.sc-day-btn.has-entry:not(.active)::after { content: ' •'; color: var(--green); }
+
+.sc-entry-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem; margin-bottom: 1.5rem; }
+.sc-entry-title { font-weight: 600; font-size: 14px; margin-bottom: 14px; }
+.sc-field-grid { display: grid; grid-template-columns: 1fr 90px; gap: 10px 12px; align-items: center; }
+.sc-field-label { font-size: 13px; color: var(--gray-700); }
+.sc-field-input { border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 8px 10px; font-size: 14px; font-family: inherit; text-align: right; width: 100%; }
+.sc-field-input:focus { outline: none; border-color: var(--red); }
+
+.sc-week-title { font-weight: 600; font-size: 14px; margin: 1.5rem 0 10px; }
+.sc-metric-row { background: var(--white); border-radius: 10px; box-shadow: var(--shadow); padding: 12px 14px; margin-bottom: 8px; }
+.sc-metric-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.sc-metric-name { font-size: 13px; font-weight: 500; }
+.sc-metric-nums { font-size: 12px; color: var(--gray-500); }
+.sc-bar-bg { height: 6px; border-radius: 3px; background: var(--gray-200); overflow: hidden; }
+.sc-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+.sc-bar-fill.green { background: var(--green); }
+.sc-bar-fill.amber { background: var(--amber); }
+.sc-bar-fill.red { background: var(--red); }
+.sc-derived-note { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -229,14 +265,34 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 </div>
 
 <div class="tab-nav" id="tab-nav" style="display:none">
-  <button class="tab-btn active" onclick="switchTab('checklist',this)">📋 My Checklist</button>
+  <button class="tab-btn active" onclick="switchTab('scorecard',this)">📊 Scorecard</button>
+  <button class="tab-btn" onclick="switchTab('checklist',this)">📋 My Checklist</button>
   <button class="tab-btn" onclick="switchTab('resources',this)">📚 Resources</button>
 </div>
 
 <div id="content">
 
+  <!-- SCORECARD TAB (new default / front-facing) -->
+  <div id="tab-scorecard">
+    <div class="sc-hero">
+      <div class="sc-hero-name" id="sc-hero-name">Loading...</div>
+      <div class="sc-hero-sub" id="sc-hero-sub">Weekly Accountability Scorecard</div>
+      <div class="sc-status-pct" id="sc-status-pct">—</div>
+      <div class="sc-status-badge" id="sc-status-badge">Loading</div>
+    </div>
+    <div class="sc-main" id="sc-main" style="display:none">
+      <div class="sc-daypicker" id="sc-daypicker"></div>
+      <div class="sc-entry-card">
+        <div class="sc-entry-title" id="sc-entry-title">Today's Numbers</div>
+        <div class="sc-field-grid" id="sc-field-grid"></div>
+      </div>
+      <div class="sc-week-title">This Week So Far</div>
+      <div id="sc-metrics"></div>
+    </div>
+  </div>
+
   <!-- CHECKLIST TAB -->
-  <div id="tab-checklist">
+  <div id="tab-checklist" style="display:none">
     <div class="hero">
       <div class="hero-name" id="hero-name">Loading...</div>
       <div class="hero-sub" id="hero-sub">Chinese Mentorship Program · KW Thrive</div>
@@ -577,6 +633,7 @@ async function init() {
     renderChecklist();
     checkFormSubmission();
     renderResources(data.resources || []);
+    loadScorecard();
   } catch(e) {
     document.getElementById('content').innerHTML = `<div class="error-state"><h2>Page not found</h2><p>This link may be invalid. Please contact your mentor.</p></div>`;
   }
@@ -585,7 +642,8 @@ async function init() {
 function switchTab(tab, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('tab-checklist').style.display = tab === 'checklist' ? 'block' : 'none';
+  document.getElementById('tab-scorecard').style.display  = tab === 'scorecard'  ? 'block' : 'none';
+  document.getElementById('tab-checklist').style.display  = tab === 'checklist'  ? 'block' : 'none';
   document.getElementById('tab-resources').style.display  = tab === 'resources'  ? 'block' : 'none';
 }
 
@@ -1001,6 +1059,167 @@ function closePanel(groupId, total) {
     document.getElementById(`tstage-${groupId}-${i}`)?.classList.remove('active');
   }
   activeStagePanel = null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCORECARD (Weekly Accountability) — deliberately self-contained, no shared
+// state with the checklist renderer, so it can outlive the checklist tab.
+// KEEP IN SYNC with METRICS in api/daily-activity/[token].js.
+// ─────────────────────────────────────────────────────────────────────────────
+const SC_METRICS = [
+  { key: 'leadgen_hours',          label: 'Lead-Gen Hours',          weight: 0.20, unit: 'hrs' },
+  { key: 'new_conversations',      label: 'New RE Conversations',    weight: 0.15, unit: '' },
+  { key: 'followup_conversations', label: 'Follow-Up Conversations', weight: 0.15, unit: '' },
+  { key: 'roleplay_sessions',      label: 'Role-Play Sessions',      weight: 0.10, unit: '' },
+  { key: 'database_contacts',      label: 'Database Contacts',       weight: 0.10, unit: '' },
+  { key: 'open_houses',            label: 'Open Houses',             weight: 0.10, unit: '' },
+  { key: 'social_posts',           label: 'Social Posts / Videos',   weight: 0.05, unit: '' }
+];
+const SC_DERIVED = [
+  { key: 'business_building_days', label: 'Business-Building Days', weight: 0.10 },
+  { key: 'crm_updated_days',       label: 'CRM-Updated Days',       weight: 0.05 }
+];
+
+let scData = null, scSelectedDate = null, scSaveTimeout = null;
+
+async function loadScorecard() {
+  try {
+    const res = await fetch(`/api/daily-activity/${token}`);
+    if (!res.ok) throw new Error();
+    scData = await res.json();
+    scSelectedDate = scData.today;
+    document.getElementById('sc-hero-name').textContent = menteeData?.name || scData.mentee.name;
+    document.getElementById('sc-hero-sub').textContent = `Week ${scData.program_week} of 10 · Weekly Accountability`;
+    document.getElementById('sc-main').style.display = 'block';
+    renderDayPicker();
+    renderEntryForm();
+    renderWeekMetrics();
+  } catch (e) {
+    console.warn('Scorecard failed to load:', e.message);
+    document.getElementById('sc-hero-sub').textContent = 'Scorecard unavailable — contact your mentor.';
+  }
+}
+
+function scEntryFor(dateStr) {
+  return (scData.entries || []).find(e => e.entry_date === dateStr) || null;
+}
+
+function renderDayPicker() {
+  const el = document.getElementById('sc-daypicker');
+  const days = [];
+  const start = new Date(scData.week_start + 'T12:00:00Z');
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setUTCDate(start.getUTCDate() + i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  el.innerHTML = days.map(d => {
+    const label = new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+    const isToday = d === scData.today;
+    const isActive = d === scSelectedDate;
+    const hasEntry = !!scEntryFor(d);
+    const cls = ['sc-day-btn', isToday && 'today', isActive && 'active', hasEntry && 'has-entry'].filter(Boolean).join(' ');
+    return `<button class="${cls}" onclick="scSelectDay('${d}')">${label}</button>`;
+  }).join('');
+}
+
+function scSelectDay(dateStr) {
+  scSelectedDate = dateStr;
+  renderDayPicker();
+  renderEntryForm();
+}
+
+function renderEntryForm() {
+  const entry = scEntryFor(scSelectedDate) || {};
+  const label = new Date(scSelectedDate + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  document.getElementById('sc-entry-title').textContent =
+    scSelectedDate === scData.today ? "Today's Numbers" : `${label}'s Numbers`;
+  document.getElementById('sc-field-grid').innerHTML = SC_METRICS.map(m => `
+    <div class="sc-field-label">${m.label}${m.unit ? ' (' + m.unit + ')' : ''}</div>
+    <input class="sc-field-input" type="number" min="0" step="${m.key === 'leadgen_hours' ? '0.5' : '1'}"
+      value="${entry[m.key] ?? ''}" placeholder="0"
+      onchange="scSaveEntry()" data-key="${m.key}">
+  `).join('');
+}
+
+function scReadFormValues() {
+  const vals = { entry_date: scSelectedDate };
+  document.querySelectorAll('#sc-field-grid .sc-field-input').forEach(inp => {
+    vals[inp.dataset.key] = inp.value === '' ? 0 : Number(inp.value);
+  });
+  return vals;
+}
+
+async function scSaveEntry() {
+  clearTimeout(scSaveTimeout);
+  scSaveTimeout = setTimeout(async () => {
+    const body = scReadFormValues();
+    const dot = document.getElementById('saving-dot');
+    dot.classList.add('show');
+    try {
+      const res = await fetch(`/api/daily-activity/${token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok) { console.warn('Save rejected:', data.error); return; }
+      // Update local cache so week rollup reflects the save immediately
+      const idx = scData.entries.findIndex(e => e.entry_date === scSelectedDate);
+      if (idx >= 0) scData.entries[idx] = data.entry; else scData.entries.push(data.entry);
+      renderDayPicker();
+      renderWeekMetrics();
+    } catch (e) {
+      console.warn('Scorecard save failed:', e.message);
+    } finally {
+      setTimeout(() => dot.classList.remove('show'), 400);
+    }
+  }, 500); // debounce, matches checklist save pattern
+}
+
+function scStatusColor(pct) {
+  if (pct >= 85) return 'green';
+  if (pct >= 70) return 'amber';
+  return 'red';
+}
+
+function renderWeekMetrics() {
+  const entries = scData.entries || [];
+  const totals = {};
+  SC_METRICS.forEach(m => { totals[m.key] = entries.reduce((a, e) => a + (Number(e[m.key]) || 0), 0); });
+  const bbDays = entries.filter(e => (Number(e.leadgen_hours) || 0) >= 1 &&
+    ((Number(e.new_conversations) || 0) + (Number(e.followup_conversations) || 0)) >= 3).length;
+  const crmDays = entries.filter(e => (Number(e.database_contacts) || 0) > 0).length;
+  const derivedTotals = { business_building_days: bbDays, crm_updated_days: crmDays };
+
+  let weightedScore = 0, weightSum = 0;
+  const rows = [...SC_METRICS.map(m => ({ ...m, total: totals[m.key], target: scData.targets[m.key]?.target ?? 0 })),
+    ...SC_DERIVED.map(m => ({ ...m, total: derivedTotals[m.key], target: scData.derived_targets[m.key]?.target ?? 0, derived: true }))];
+
+  const html = rows.map(m => {
+    const pct = m.target > 0 ? Math.min(Math.round((m.total / m.target) * 100), 999) : 100;
+    weightedScore += Math.min(pct, 100) * m.weight;
+    weightSum += m.weight;
+    const color = scStatusColor(pct);
+    return `
+      <div class="sc-metric-row">
+        <div class="sc-metric-top">
+          <div class="sc-metric-name">${m.label}</div>
+          <div class="sc-metric-nums">${m.total} / ${m.target}</div>
+        </div>
+        <div class="sc-bar-bg"><div class="sc-bar-fill ${color}" style="width:${Math.min(pct,100)}%"></div></div>
+        ${m.derived ? '<div class="sc-derived-note">Auto-calculated from your daily entries</div>' : ''}
+      </div>`;
+  }).join('');
+  document.getElementById('sc-metrics').innerHTML = html;
+
+  const overallPct = weightSum > 0 ? Math.round(weightedScore / weightSum) : 0;
+  const badge = document.getElementById('sc-status-badge');
+  const pctEl = document.getElementById('sc-status-pct');
+  pctEl.textContent = overallPct + '%';
+  if (overallPct >= 85) { badge.textContent = 'ON TRACK'; badge.className = 'sc-status-badge on-track'; }
+  else if (overallPct >= 70) { badge.textContent = 'NEEDS ATTENTION'; badge.className = 'sc-status-badge attention'; }
+  else { badge.textContent = 'OFF TRACK'; badge.className = 'sc-status-badge off-track'; }
 }
 
 init();
