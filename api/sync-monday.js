@@ -12,6 +12,18 @@ const PAUSED_GROUP_ID = 'group_mm12kcan'; // Paused
 const CANCELLED_TITLE = 'cancelled';      // matched by title (case-insensitive), not ID —
                                            // so it keeps working even if the group gets renamed
 
+function isChecked(colValue) {
+  // Monday's checkbox column .text field isn't consistently populated across
+  // API versions — parse the raw .value JSON instead: {"checked":"true"} when checked.
+  if (!colValue) return false;
+  try {
+    const parsed = JSON.parse(colValue);
+    return parsed?.checked === 'true';
+  } catch {
+    return false;
+  }
+}
+
 async function fetchMondayMentees() {
   const query = `
     query {
@@ -23,9 +35,10 @@ async function fetchMondayMentees() {
             items {
               id
               name
-              column_values(ids: ["text_mkxv9drn","text_mkxvtxbk","email_mm1wde8k","date4"]) {
+              column_values(ids: ["text_mkxv9drn","text_mkxvtxbk","email_mm1wde8k","date4","boolean_mm70c4g3"]) {
                 id
                 text
+                value
               }
             }
           }
@@ -88,7 +101,8 @@ export default async function handler(req, res) {
 
       for (const item of group.items_page.items) {
         const colMap = {};
-        item.column_values.forEach(c => { colMap[c.id] = c.text; });
+        const colValueMap = {};
+        item.column_values.forEach(c => { colMap[c.id] = c.text; colValueMap[c.id] = c.value; });
 
         const menteeData = {
           monday_item_id: item.id,
@@ -97,7 +111,8 @@ export default async function handler(req, res) {
           work_email: colMap['text_mkxvtxbk'] || null,
           personal_email: colMap['email_mm1wde8k'] || null,
           onboard_date: colMap['date4'] || null,
-          is_active: isActive  // true for Signed Mentee, false for Paused
+          is_active: isActive,  // true for Signed Mentee, false for Paused
+          is_full_time: isChecked(colValueMap['boolean_mm70c4g3'])
         };
 
         const { data: existing } = await supabase
