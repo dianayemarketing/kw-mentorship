@@ -231,6 +231,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 .sc-status-pct { font-size: 36px; font-weight: 700; margin: 10px 0 4px; }
 
 .sc-main { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
+.sc-week-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+.sc-week-nav-btn { background: var(--white); border: 1.5px solid var(--gray-200); color: var(--gray-700); border-radius: 10px; padding: 6px 12px; font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.sc-week-nav-btn:disabled { opacity: 0.35; cursor: default; }
+.sc-week-nav-label { font-size: 12px; font-weight: 600; color: var(--gray-700); }
 .sc-daypicker { display: flex; gap: 8px; margin-bottom: 1.25rem; overflow-x: auto; padding-bottom: 4px; }
 .sc-day-btn { flex-shrink: 0; padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--gray-200); background: var(--white); font-family: inherit; font-size: 12px; font-weight: 500; color: var(--gray-700); cursor: pointer; transition: all 0.15s; }
 .sc-day-btn.today { border-color: var(--red); color: var(--red); }
@@ -344,6 +348,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
       <div class="sc-status-badge" id="sc-status-badge">Loading</div>
     </div>
     <div class="sc-main" id="sc-main" style="display:none">
+      <div class="sc-week-nav" id="sc-week-nav">
+        <button class="sc-week-nav-btn" id="sc-week-back" onclick="scGoToWeek(-1)">&lsaquo; Prev Week</button>
+        <div class="sc-week-nav-label" id="sc-week-nav-label"></div>
+        <button class="sc-week-nav-btn" id="sc-week-forward" onclick="scGoToWeek(1)">Next Week &rsaquo;</button>
+      </div>
       <div class="sc-daypicker" id="sc-daypicker"></div>
       <div class="sc-entry-card">
         <div class="sc-entry-title" id="sc-entry-title">Today's Numbers</div>
@@ -1241,15 +1250,17 @@ const SC_DERIVED = [
 
 let scData = null, scSelectedDate = null, scSaveTimeout = null;
 
-async function loadScorecard() {
+async function loadScorecard(weekStart = null) {
   try {
-    const res = await fetch(`/api/daily-activity/${token}`);
+    const url = weekStart ? `/api/daily-activity/${token}?week_start=${weekStart}` : `/api/daily-activity/${token}`;
+    const res = await fetch(url);
     if (!res.ok) throw new Error();
     scData = await res.json();
-    scSelectedDate = scData.today;
+    scSelectedDate = scData.editable ? scData.today : scData.week_start;
     document.getElementById('sc-hero-name').textContent = menteeData?.name || scData.mentee.name;
     document.getElementById('sc-hero-sub').textContent = `Week ${scData.program_week} of 10 · Weekly Accountability`;
     document.getElementById('sc-main').style.display = 'block';
+    renderWeekNav();
     renderDayPicker();
     renderEntryForm();
     renderWeekMetrics();
@@ -1257,6 +1268,21 @@ async function loadScorecard() {
     console.warn('Scorecard failed to load:', e.message);
     document.getElementById('sc-hero-sub').textContent = 'Scorecard unavailable — contact your mentor.';
   }
+}
+
+function renderWeekNav() {
+  const label = document.getElementById('sc-week-nav-label');
+  label.textContent = scData.editable ? 'This Week' :
+    new Date(scData.week_start + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+    ' – ' + new Date(scData.week_end + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  document.getElementById('sc-week-back').disabled = scData.week_start <= scData.earliest_week_start;
+  document.getElementById('sc-week-forward').disabled = scData.editable;
+}
+
+function scGoToWeek(direction) {
+  const base = new Date(scData.week_start + 'T12:00:00Z');
+  base.setUTCDate(base.getUTCDate() + direction * 7);
+  loadScorecard(base.toISOString().slice(0, 10));
 }
 
 function scEntryFor(dateStr) {
@@ -1292,7 +1318,7 @@ function renderEntryForm() {
   const entry = scEntryFor(scSelectedDate) || {};
   const label = new Date(scSelectedDate + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   document.getElementById('sc-entry-title').textContent =
-    scSelectedDate === scData.today ? "Today's Numbers" : `${label}'s Numbers`;
+    (scSelectedDate === scData.today ? "Today's Numbers" : `${label}'s Numbers`) + (scData.editable ? '' : ' — Read-Only');
   document.getElementById('sc-field-grid').innerHTML = SC_METRICS.map(m => {
     const goal = scData.targets[m.key]?.target;
     const goalText = goal !== undefined ? `Weekly goal: ${goal}${m.unit ? ' ' + m.unit : ''}` : '';
@@ -1303,7 +1329,7 @@ function renderEntryForm() {
     </div>
     <input class="sc-field-input" type="number" min="0" step="${m.key === 'leadgen_hours' ? '0.5' : '1'}"
       value="${entry[m.key] ?? ''}" placeholder="0"
-      onchange="scSaveEntry()" data-key="${m.key}">
+      ${scData.editable ? `onchange="scSaveEntry()"` : 'disabled'} data-key="${m.key}">
   `;
   }).join('');
 }
@@ -1317,6 +1343,7 @@ function scReadFormValues() {
 }
 
 async function scSaveEntry() {
+  if (!scData.editable) return; // defense in depth — inputs are disabled, but don't trust that alone
   clearTimeout(scSaveTimeout);
   scSaveTimeout = setTimeout(async () => {
     const body = scReadFormValues();
