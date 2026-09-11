@@ -1,545 +1,671 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KW Thrive · Mentor Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --red: #C8102E;
-  --red-light: #fdf0f2;
-  --red-mid: #f5c6ce;
-  --dark: #0f0f0f;
-  --gray-900: #1a1a1a;
-  --gray-700: #444;
-  --gray-500: #777;
-  --gray-200: #e8e8e8;
-  --gray-100: #f5f5f5;
-  --white: #ffffff;
-  --green: #00875a;
-  --green-light: #e3f5ef;
-  --amber: #b45309;
-  --amber-light: #fef3cd;
-  --radius: 12px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: var(--dark); min-height: 100vh; }
+  :root{
+    --bg:#161310;
+    --panel:#1E1A15;
+    --panel-raised:#26211A;
+    --line:#37312A;
+    --ink:#EFE9DC;
+    --ink-soft:#A79C8A;
+    --ink-faint:#726A5C;
+    --gold:#C7A34D;
+    --gold-dim:#8A7238;
+    --red:#C1382C;
+    --green:#6E9A63;
+    --amber:#C99A3B;
+    --sidebar-w:224px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Outfit',sans-serif;
+    font-size:14px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .shell{display:flex; min-height:100vh;}
 
-/* LOGIN */
-#login-screen {
-  min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  background: var(--dark);
-}
-.login-box {
-  background: var(--white); border-radius: 20px; padding: 3rem 2.5rem;
-  width: 360px; text-align: center;
-}
-.login-logo { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--red); margin-bottom: 4px; }
-.login-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 2rem; }
-.login-box input {
-  width: 100%; padding: 12px 16px; border: 1.5px solid var(--gray-200);
-  border-radius: 8px; font-size: 15px; font-family: inherit;
-  margin-bottom: 12px; outline: none; transition: border-color 0.2s;
-}
-.login-box input:focus { border-color: var(--red); }
-.login-btn {
-  width: 100%; padding: 13px; background: var(--red); color: white;
-  border: none; border-radius: 8px; font-size: 15px; font-family: inherit;
-  font-weight: 500; cursor: pointer; transition: opacity 0.2s;
-}
-.login-btn:hover { opacity: 0.88; }
-.login-error { font-size: 13px; color: var(--red); margin-top: 8px; display: none; }
+  /* ---------- Password gate ---------- */
+  #gate{
+    position:fixed; inset:0; background:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    z-index:100;
+  }
+  #gate.hidden{display:none;}
+  .gate-card{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:8px; padding:36px 34px; width:320px; text-align:center;
+  }
+  .gate-card .brand{font-size:1.6rem;}
+  .gate-card p{color:var(--ink-soft); font-size:12.5px; margin:6px 0 22px;}
+  .gate-card input{
+    width:100%; background:var(--panel-raised); border:1px solid var(--line);
+    color:var(--ink); border-radius:5px; padding:10px 12px; font-size:14px;
+    margin-bottom:12px; font-family:'Outfit',sans-serif;
+  }
+  .gate-card button{
+    width:100%; background:var(--gold); color:#1a1710; border:none;
+    border-radius:5px; padding:10px 12px; font-weight:600; font-size:13.5px;
+    cursor:pointer;
+  }
+  .gate-error{color:var(--red); font-size:12px; margin-top:10px; min-height:16px;}
 
-/* APP */
-#app { display: none; }
-.topbar {
-  background: var(--dark); color: white; padding: 0 2rem;
-  display: flex; align-items: center; justify-content: space-between;
-  height: 60px; position: sticky; top: 0; z-index: 100;
-}
-.topbar-brand { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--red); }
-.topbar-sub { font-size: 12px; color: #888; margin-left: 10px; }
-.topbar-right { display: flex; align-items: center; gap: 12px; }
-.sync-btn {
-  background: transparent; border: 1px solid #444; color: white;
-  padding: 6px 14px; border-radius: 6px; font-size: 12px;
-  font-family: inherit; cursor: pointer; transition: all 0.2s;
-  display: flex; align-items: center; gap: 6px;
-}
-.sync-btn:hover { border-color: var(--red); color: var(--red); }
-.sync-icon { display: inline-block; transition: transform 0.5s; }
-.sync-btn.syncing .sync-icon { animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:var(--sidebar-w); flex-shrink:0;
+    background:var(--panel); border-right:1px solid var(--line);
+    padding:28px 18px; display:flex; flex-direction:column;
+  }
+  .brand{
+    font-family:'Cormorant Garamond',serif; font-weight:600;
+    font-size:1.5rem; color:var(--gold); letter-spacing:0.01em; margin:0 0 2px;
+  }
+  .brand-sub{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-faint); margin:0 0 34px; letter-spacing:0.04em;}
+  .nav-item{
+    display:flex; align-items:center; gap:10px; padding:10px 12px;
+    border-radius:5px; color:var(--ink-soft); font-size:13.5px; font-weight:500;
+    cursor:pointer; margin-bottom:3px; transition:background .15s, color .15s;
+  }
+  .nav-item:hover{background:var(--panel-raised); color:var(--ink);}
+  .nav-item.active{background:var(--panel-raised); color:var(--gold);}
+  .nav-item .dot{width:6px; height:6px; border-radius:50%; background:var(--ink-faint); flex-shrink:0;}
+  .nav-item.active .dot{background:var(--gold);}
+  .nav-badge{
+    margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+    background:var(--red); color:#fff; padding:1px 6px; border-radius:20px;
+  }
+  .sidebar-foot{
+    margin-top:auto; padding-top:18px; border-top:1px solid var(--line);
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-faint); line-height:1.6;
+  }
+  .sidebar-foot .flag{color:var(--amber);}
+  .sidebar-foot .logout{color:var(--ink-faint); cursor:pointer; text-decoration:underline; margin-top:8px; display:inline-block;}
 
-.main { max-width: 1280px; margin: 0 auto; padding: 2rem; }
+  /* ---------- Main ---------- */
+  main{flex:1; padding:34px 44px 60px; max-width:1320px;}
+  .page-head{display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:14px;}
+  h1{font-family:'Cormorant Garamond',serif; font-weight:600; font-size:1.9rem; margin:0 0 6px;}
+  .page-sub{color:var(--ink-soft); font-size:13.5px; margin:0;}
+  .head-actions{display:flex; gap:10px; align-items:center;}
+  .review-btn{
+    display:inline-flex; align-items:center; font-family:'Outfit',sans-serif; font-weight:600;
+    font-size:12.5px; color:#1a1710; background:var(--gold); border-radius:5px;
+    padding:9px 16px; text-decoration:none; white-space:nowrap; transition:opacity .15s;
+    border:none; cursor:pointer;
+  }
+  .review-btn:hover{opacity:0.88;}
+  .sync-btn{
+    display:inline-flex; align-items:center; gap:7px; background:transparent;
+    border:1px solid var(--line); color:var(--ink-soft); padding:9px 15px;
+    border-radius:5px; font-size:12.5px; font-family:'Outfit',sans-serif; font-weight:500;
+    cursor:pointer; transition:all .2s; white-space:nowrap;
+  }
+  .sync-btn:hover{border-color:var(--gold); color:var(--gold);}
+  .sync-btn:disabled{opacity:0.5; cursor:default;}
+  .sync-icon{display:inline-block; transition:transform .5s;}
+  .sync-btn.syncing .sync-icon{animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
 
-/* METRICS */
-.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 2rem; }
-.metric-card {
-  background: var(--white); border-radius: var(--radius); padding: 1.25rem 1.5rem;
-  box-shadow: var(--shadow); border-top: 3px solid var(--gray-200);
-}
-.metric-card.red { border-top-color: var(--red); }
-.metric-card.green { border-top-color: var(--green); }
-.metric-card.amber { border-top-color: #f59e0b; }
-.metric-label { font-size: 12px; color: var(--gray-500); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
-.metric-value { font-size: 32px; font-weight: 600; color: var(--dark); line-height: 1; }
-.metric-sub { font-size: 12px; color: var(--gray-500); margin-top: 4px; }
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:22px 24px; margin-bottom:22px;}
+  .panel-title{font-size:12px; font-weight:600; color:var(--ink-soft); margin:0 0 16px; display:flex; align-items:center; gap:8px;}
+  .loading, .empty{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-faint); padding:20px 0;}
+  .load-error{color:var(--red);}
 
-/* TWO COLUMN LAYOUT */
-.content-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+  /* ---------- KPI strip ---------- */
+  .kpi-row{display:flex; gap:16px; margin-bottom:24px; flex-wrap:wrap;}
+  .kpi{flex:1; min-width:140px; background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:16px 18px;}
+  .kpi .num{font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:600; color:var(--ink); line-height:1;}
+  .kpi .num.warn{color:var(--amber);}
+  .kpi .num.danger{color:var(--red);}
+  .kpi .lbl{font-size:11.5px; color:var(--ink-soft); margin-top:6px;}
 
-/* SECTION HEADER */
-.section-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 1rem;
-}
-.section-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--dark); }
+  /* ---------- Roster two-column layout ---------- */
+  .roster-grid{display:grid; grid-template-columns:1fr 320px; gap:22px; align-items:start;}
+  @media (max-width:980px){ .roster-grid{grid-template-columns:1fr;} }
 
-/* MENTEE CARDS */
-.mentee-grid { display: flex; flex-direction: column; gap: 12px; }
-.mentee-card {
-  background: var(--white); border-radius: var(--radius);
-  box-shadow: var(--shadow); padding: 1.25rem 1.5rem;
-  cursor: pointer; transition: box-shadow 0.2s, transform 0.15s;
-  border: 1.5px solid transparent; text-decoration: none; color: inherit;
-  display: block;
-}
-.mentee-card:hover { box-shadow: 0 4px 20px rgba(200,16,46,0.12); border-color: var(--red-mid); transform: translateY(-1px); }
-.mentee-card-top { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
-.avatar {
-  width: 42px; height: 42px; border-radius: 50%;
-  background: var(--red); color: white;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 600; flex-shrink: 0;
-}
-.mentee-info { flex: 1; min-width: 0; }
-.mentee-name { font-weight: 600; font-size: 15px; color: var(--dark); }
-.mentee-meta { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
-.mentee-right { text-align: right; flex-shrink: 0; }
-.mentee-pct { font-size: 20px; font-weight: 700; color: var(--dark); }
-.mentee-pct-label { font-size: 11px; color: var(--gray-500); }
-.progress-bar-bg { height: 5px; background: var(--gray-200); border-radius: 3px; margin-bottom: 10px; }
-.progress-bar-fill { height: 5px; border-radius: 3px; background: var(--red); transition: width 0.6s ease; }
-.mentee-card-bottom { display: flex; align-items: center; justify-content: space-between; }
-.week-badge {
-  font-size: 11px; font-weight: 500; padding: 3px 10px;
-  border-radius: 20px; background: var(--gray-100); color: var(--gray-700);
-}
-.last-active { font-size: 11px; color: var(--gray-500); }
+  /* ---------- Table ---------- */
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th{
+    text-align:left; font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:10.5px;
+    color:var(--ink-faint); letter-spacing:0.02em; padding:0 12px 10px 0;
+    border-bottom:1px solid var(--line); white-space:nowrap;
+  }
+  td{padding:13px 12px 13px 0; border-bottom:1px solid var(--line); vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  .mentee-name{font-weight:600;}
+  .mentee-name .sub{display:block; font-size:11px; color:var(--ink-faint); font-weight:400;}
+  .status-pill{font-size:11px; padding:2px 9px; border-radius:20px; font-weight:500; white-space:nowrap;}
+  .status-pill.good{background:rgba(110,154,99,0.16); color:var(--green);}
+  .status-pill.mid{background:rgba(201,154,59,0.16); color:var(--amber);}
+  .status-pill.bad{background:rgba(193,56,44,0.16); color:var(--red);}
+  .status-pill.neutral{background:rgba(167,156,138,0.14); color:var(--ink-soft);}
+  .flag-count{font-weight:600;}
+  .flag-count.ok{color:var(--green);}
+  .flag-count.warn{color:var(--amber);}
+  .flag-count.bad{color:var(--red);}
+  .flag-age{font-size:11px; color:var(--ink-faint); margin-left:4px;}
+  .bar-track{width:70px; height:5px; background:var(--line); border-radius:3px; overflow:hidden;}
+  .bar-fill{height:100%; background:var(--gold);}
+  .pct-txt{font-size:11px; color:var(--ink-soft); margin-left:6px;}
+  .link-mini{background:none; border:none; color:var(--gold-dim); font-family:'IBM Plex Mono',monospace; font-size:11px; cursor:pointer; padding:0;}
+  .link-mini:hover{color:var(--gold);}
 
-/* COPY LINK */
-.copy-link-btn {
-  background: none; border: none; cursor: pointer;
-  color: var(--gray-500); font-size: 11px; padding: 0;
-  display: flex; align-items: center; gap: 4px;
-  transition: color 0.2s;
-}
-.copy-link-btn:hover { color: var(--red); }
+  /* ---------- Sidebar panels (Coaching Requests / Events) ---------- */
+  .side-panel{background:var(--panel); border:1px solid var(--line); border-radius:6px; overflow:hidden; margin-bottom:18px;}
+  .side-panel-head{
+    padding:14px 18px; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .side-panel-title{font-size:12.5px; font-weight:600; color:var(--ink);}
+  .side-panel-meta{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-faint);}
+  .form-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 18px; border-bottom:1px solid var(--panel-raised); font-size:12.5px;
+  }
+  .form-row:last-child{border-bottom:none;}
+  .form-status{font-size:10.5px; font-weight:600; color:var(--green);}
+  .side-empty{padding:16px 18px; font-size:12px; color:var(--ink-faint); font-style:italic;}
+  .event-item{padding:13px 18px; border-bottom:1px solid var(--panel-raised); display:flex; gap:12px;}
+  .event-item:last-child{border-bottom:none;}
+  .event-date-block{
+    flex-shrink:0; width:42px; text-align:center; background:rgba(199,163,77,0.12);
+    border-radius:6px; padding:5px 0;
+  }
+  .event-month{font-size:9.5px; font-weight:600; color:var(--gold); text-transform:uppercase;}
+  .event-day-num{font-size:17px; font-weight:700; color:var(--gold); line-height:1;}
+  .event-title{font-size:12.5px; font-weight:600; color:var(--ink); margin-bottom:2px;}
+  .event-time{font-size:11px; color:var(--ink-soft);}
+  .event-loc{font-size:10.5px; color:var(--ink-faint); margin-top:2px;}
 
-/* RIGHT SIDEBAR */
-.sidebar { display: flex; flex-direction: column; gap: 20px; }
+  /* ---------- Gate grid ---------- */
+  .gate-grid{overflow-x:auto;}
+  .gate-grid table{min-width:760px;}
+  .gate-cell{width:26px; height:26px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; margin:0 auto;}
+  .gate-cell.pass{background:rgba(110,154,99,0.22); color:var(--green);}
+  .gate-cell.follow{background:rgba(193,56,44,0.22); color:var(--red);}
+  .gate-cell.notdue{background:var(--panel-raised); color:var(--ink-faint);}
+  .filter-toggle{
+    display:inline-flex; align-items:center; gap:8px; font-size:12px; color:var(--ink-soft);
+    background:var(--panel-raised); border:1px solid var(--line); border-radius:20px;
+    padding:6px 14px; margin-bottom:18px; cursor:pointer;
+  }
+  .filter-toggle .sw{width:28px; height:16px; border-radius:20px; background:var(--line); position:relative;}
+  .filter-toggle .sw::after{content:''; position:absolute; top:2px; left:2px; width:12px; height:12px; border-radius:50%; background:var(--ink-faint);}
+  .filter-toggle.on .sw{background:rgba(199,163,77,0.35);}
+  .filter-toggle.on .sw::after{background:var(--gold); left:14px;}
 
-/* FORM SUMMARY */
-.panel {
-  background: var(--white); border-radius: var(--radius);
-  box-shadow: var(--shadow); overflow: hidden;
-}
-.panel-header {
-  padding: 1rem 1.25rem; border-bottom: 1px solid var(--gray-200);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.panel-title { font-weight: 600; font-size: 14px; color: var(--dark); }
-.panel-meta { font-size: 11px; color: var(--gray-500); }
-.form-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 1.25rem; border-bottom: 1px solid var(--gray-100);
-  font-size: 13px;
-}
-.form-row:last-child { border-bottom: none; }
-.form-row-name { color: var(--dark); font-weight: 500; }
-.form-status { font-size: 11px; font-weight: 600; }
-.form-status.yes { color: var(--green); }
-.form-status.no { color: var(--amber); }
+  /* ---------- Scorecard ---------- */
+  .metric-cell{display:flex; align-items:center; gap:6px;}
+  .traffic{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+  .traffic.green{background:var(--green);}
+  .traffic.amber{background:var(--amber);}
+  .traffic.red{background:var(--red);}
 
-/* EVENTS */
-.event-item {
-  padding: 14px 1.25rem; border-bottom: 1px solid var(--gray-100);
-  display: flex; gap: 14px;
-}
-.event-item:last-child { border-bottom: none; }
-.event-date-block {
-  flex-shrink: 0; width: 44px; text-align: center;
-  background: var(--red-light); border-radius: 8px; padding: 6px 0;
-}
-.event-month { font-size: 10px; font-weight: 600; color: var(--red); text-transform: uppercase; }
-.event-day-num { font-size: 20px; font-weight: 700; color: var(--red); line-height: 1; }
-.event-details { flex: 1; }
-.event-title { font-size: 13px; font-weight: 600; color: var(--dark); margin-bottom: 2px; }
-.event-time { font-size: 12px; color: var(--gray-500); }
-.event-loc { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+  /* ---------- Graduation ---------- */
+  .grad-card{
+    background:var(--panel-raised); border:1px solid var(--line); border-radius:6px;
+    padding:18px 20px; margin-bottom:14px; display:flex; gap:22px; align-items:center; flex-wrap:wrap;
+  }
+  .grad-card.mismatch{border-color:var(--amber);}
+  .grad-name{width:150px; flex-shrink:0;}
+  .grad-name .role{font-size:11px; color:var(--ink-faint); display:block; margin-top:2px;}
+  .grad-checklist{display:flex; gap:6px; flex:1; flex-wrap:wrap; min-width:260px;}
+  .grad-item{
+    display:flex; align-items:center; gap:5px; font-size:11px; color:var(--ink-soft);
+    background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:4px 10px 4px 6px;
+  }
+  .grad-check{width:14px; height:14px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:#fff; flex-shrink:0;}
+  .grad-check.yes{background:var(--green);}
+  .grad-check.no{background:var(--line); color:var(--ink-faint);}
+  .grad-status{flex-shrink:0; width:170px; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:11px;}
+  .grad-status .badge{display:inline-block; padding:3px 10px; border-radius:20px; font-family:'Outfit',sans-serif; font-weight:600; font-size:11px;}
+  .badge.eligible{background:rgba(110,154,99,0.2); color:var(--green);}
+  .badge.progress{background:rgba(201,154,59,0.2); color:var(--amber);}
+  .badge.certified{background:rgba(110,154,99,0.28); color:var(--green);}
+  .mismatch-note{font-size:10.5px; color:var(--amber); margin-top:4px; display:block;}
 
-/* LOADING */
-.loading { text-align: center; padding: 3rem; color: var(--gray-500); font-size: 14px; }
-.spinner {
-  width: 32px; height: 32px; border: 3px solid var(--gray-200);
-  border-top-color: var(--red); border-radius: 50%;
-  animation: spin 0.8s linear infinite; margin: 0 auto 12px;
-}
+  .tabpage{display:none;}
+  .tabpage.active{display:block;}
 
-/* TOAST */
-.toast {
-  position: fixed; bottom: 24px; right: 24px; background: var(--dark);
-  color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px;
-  opacity: 0; transform: translateY(8px); transition: all 0.25s;
-  pointer-events: none; z-index: 999;
-}
-.toast.show { opacity: 1; transform: translateY(0); }
-
-@media (max-width: 900px) {
-  .content-grid { grid-template-columns: 1fr; }
-  .metrics { grid-template-columns: repeat(2, 1fr); }
-}
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed; bottom:24px; right:24px; background:var(--panel-raised);
+    border:1px solid var(--line); color:var(--ink); padding:12px 20px; border-radius:8px;
+    font-size:13px; opacity:0; transform:translateY(8px); transition:all .25s;
+    pointer-events:none; z-index:999;
+  }
+  .toast.show{opacity:1; transform:translateY(0);}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">KW Thrive</div>
-    <div class="login-sub">Chinese Mentorship Program · Mentor Dashboard</div>
-    <input type="password" id="pwd-input" placeholder="Enter dashboard password" />
-    <button class="login-btn" onclick="doLogin()">Sign In</button>
-    <div class="login-error" id="login-error">Incorrect password. Please try again.</div>
+<div id="gate">
+  <div class="gate-card">
+    <p class="brand" style="font-family:'Cormorant Garamond',serif; color:var(--gold);">KW Thrive</p>
+    <p>Mentor Dashboard — enter password</p>
+    <input type="password" id="gate-input" placeholder="Password" autofocus>
+    <button onclick="attemptLogin()">Enter</button>
+    <div class="gate-error" id="gate-error"></div>
   </div>
 </div>
 
-<!-- APP -->
-<div id="app">
-  <div class="topbar">
-    <div style="display:flex;align-items:center;gap:8px">
-      <span class="topbar-brand">KW Thrive</span>
-      <span class="topbar-sub">Mentor Dashboard</span>
-    </div>
-    <div class="topbar-right">
-      <button class="sync-btn" onclick="syncMonday()" id="sync-btn">
-        <span class="sync-icon">⟳</span> Sync from Monday
-      </button>
-    </div>
-  </div>
+<div class="shell" id="shell" style="display:none;">
 
-  <div class="main">
-    <!-- Metrics -->
-    <div class="metrics">
-      <div class="metric-card red">
-        <div class="metric-label">Total Mentees</div>
-        <div class="metric-value" id="m-total">—</div>
-        <div class="metric-sub">Active in program</div>
-      </div>
-      <div class="metric-card green">
-        <div class="metric-label">Avg. Completion</div>
-        <div class="metric-value" id="m-avg">—</div>
-        <div class="metric-sub">Across all mentees</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">On Track</div>
-        <div class="metric-value" id="m-ontrack">—</div>
-        <div class="metric-sub">≥ 50% complete</div>
-      </div>
-      <div class="metric-card amber">
-        <div class="metric-label">Coaching Requests</div>
-        <div class="metric-value" id="m-forms">—</div>
-        <div class="metric-sub">This week's 1-on-1 requests</div>
-      </div>
-    </div>
+  <div class="sidebar">
+    <p class="brand">KW Thrive</p>
+    <p class="brand-sub">MENTOR DASHBOARD</p>
 
-    <div class="content-grid">
-      <!-- Mentee List -->
-      <div>
-        <div class="section-header">
-          <div class="section-title">Mentees</div>
-        </div>
-        <div class="mentee-grid" id="mentee-list">
-          <div class="loading"><div class="spinner"></div>Loading mentees...</div>
-        </div>
-      </div>
+    <div class="nav-item active" data-tab="roster"><span class="dot"></span> Roster</div>
+    <div class="nav-item" data-tab="gates"><span class="dot"></span> Readiness Gates <span class="nav-badge" id="gates-badge" style="display:none;"></span></div>
+    <div class="nav-item" data-tab="scorecard"><span class="dot"></span> Scorecard</div>
+    <div class="nav-item" data-tab="graduation"><span class="dot"></span> Graduation</div>
 
-      <!-- Sidebar -->
-      <div class="sidebar">
-
-        <!-- Coaching Prep Summary -->
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">Coaching Requests</div>
-            <div class="panel-meta" id="form-week-label">This week</div>
-          </div>
-          <div id="form-list">
-            <div class="loading" style="padding:1.5rem">Loading...</div>
-          </div>
-        </div>
-
-        <!-- Upcoming Events -->
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">Upcoming Events</div>
-          </div>
-          <div id="events-list">
-            <div class="loading" style="padding:1.5rem">Loading...</div>
-          </div>
-        </div>
-
-      </div>
+    <div class="sidebar-foot" id="sidebar-foot">
+      Loading…
+      <span class="logout" onclick="logout()">Log out</span>
     </div>
   </div>
+
+  <main>
+
+    <!-- ---------------- ROSTER ---------------- -->
+    <div class="tabpage active" id="tab-roster">
+      <div class="page-head">
+        <div><h1>Roster</h1><p class="page-sub">All active mentees, one row each</p></div>
+        <div class="head-actions">
+          <button class="sync-btn" id="sync-btn" onclick="syncMonday()"><span class="sync-icon">⟳</span> Sync from Monday</button>
+        </div>
+      </div>
+
+      <div class="kpi-row" id="roster-kpis"></div>
+
+      <div class="roster-grid">
+        <div class="panel">
+          <table>
+            <thead>
+              <tr>
+                <th>Mentee</th><th>Onboard</th>
+                <th>DocuSign</th><th>KPA</th>
+                <th>Gate flags</th><th>Checklist</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="roster-body"><tr><td colspan="7" class="loading">Loading roster…</td></tr></tbody>
+          </table>
+        </div>
+
+        <div>
+          <div class="side-panel">
+            <div class="side-panel-head">
+              <span class="side-panel-title">Coaching Requests</span>
+              <span class="side-panel-meta" id="form-week-label">This week</span>
+            </div>
+            <div id="form-list"><div class="side-empty">Loading…</div></div>
+          </div>
+
+          <div class="side-panel">
+            <div class="side-panel-head"><span class="side-panel-title">Upcoming Events</span></div>
+            <div id="events-list"><div class="side-empty">Loading…</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------------- READINESS GATES ---------------- -->
+    <div class="tabpage" id="tab-gates">
+      <div class="page-head">
+        <div><h1>Readiness Gates</h1><p class="page-sub">Mentee × gate — mirrors the Monday "All Gates" master view</p></div>
+        <a class="review-btn" href="https://forms.monday.com/forms/7f0a8bdb0bde3b30ce61ae0e4c67680f?r=use1" target="_blank" rel="noopener">+ Log a Gate Review</a>
+      </div>
+
+      <div class="filter-toggle on" id="flag-toggle"><span class="sw"></span> Flagged only</div>
+
+      <div class="panel gate-grid">
+        <table>
+          <thead>
+            <tr>
+              <th>Mentee</th>
+              <th>Foundation<br>Wk1</th><th>Lead Gen<br>Wk2</th><th>Buyer<br>Wk3</th>
+              <th>Offer<br>Wk4</th><th>Transaction<br>Wk5</th><th>Listing<br>Wk6</th>
+              <th>Negotiation<br>Wk8</th><th>Level 1<br>90-Day</th>
+            </tr>
+          </thead>
+          <tbody id="gates-body"><tr><td colspan="9" class="loading">Loading gates…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ---------------- SCORECARD ---------------- -->
+    <div class="tabpage" id="tab-scorecard">
+      <div class="page-head">
+        <div><h1 id="scorecard-title">Scorecard — This Week</h1><p class="page-sub" id="scorecard-sub">9-metric weekly activity score, per mentee</p></div>
+      </div>
+
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Mentee</th><th>Lead-Gen Hrs</th><th>New Convos</th><th>Follow-Up</th>
+              <th>Role-Play</th><th>DB Contacts</th><th>Open House</th><th>Overall</th>
+            </tr>
+          </thead>
+          <tbody id="scorecard-body"><tr><td colspan="8" class="loading">Loading scorecard…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ---------------- GRADUATION ---------------- -->
+    <div class="tabpage" id="tab-graduation">
+      <div class="page-head">
+        <div><h1>Graduation</h1><p class="page-sub">Certificate of Completion — 90 days, all gates, 3 transactions, coach sign-off</p></div>
+      </div>
+      <div id="graduation-list"><div class="loading">Loading graduation status…</div></div>
+    </div>
+
+  </main>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-let mentorPassword = '';
+const API_BASE = '';
+let MENTOR_PASSWORD = sessionStorage.getItem('mentorPassword') || '';
 let allMentees = [];
 let submitters = [];
 
-// ── LOGIN ──
-document.getElementById('pwd-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
-});
+async function apiGet(path){
+  const res = await fetch(API_BASE + path, { headers: { 'x-mentor-password': MENTOR_PASSWORD } });
+  if (res.status === 401) { showGate('Session expired — enter password again.'); throw new Error('unauthorized'); }
+  if (!res.ok) throw new Error('request failed: ' + path);
+  return res.json();
+}
 
-async function doLogin() {
-  const pwd = document.getElementById('pwd-input').value.trim();
-  if (!pwd) return;
-  mentorPassword = pwd;
+function showGate(msg){
+  document.getElementById('shell').style.display = 'none';
+  document.getElementById('gate').classList.remove('hidden');
+  document.getElementById('gate-error').textContent = msg || '';
+  sessionStorage.removeItem('mentorPassword');
+}
 
+async function attemptLogin(){
+  const val = document.getElementById('gate-input').value;
+  if (!val) return;
+  MENTOR_PASSWORD = val;
   try {
-    const res = await fetch('/api/mentees', {
-      headers: { 'x-mentor-password': pwd }
-    });
-    if (res.status === 401) {
-      document.getElementById('login-error').style.display = 'block';
-      return;
-    }
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    loadDashboard();
-  } catch(e) {
-    document.getElementById('login-error').style.display = 'block';
+    await apiGet('/api/mentees');
+    sessionStorage.setItem('mentorPassword', val);
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('shell').style.display = 'flex';
+    loadAll();
+  } catch (e) {
+    document.getElementById('gate-error').textContent = 'Incorrect password.';
   }
 }
-
-// ── DASHBOARD ──
-async function loadDashboard() {
-  await Promise.all([loadMentees(), loadFormResponses(), loadEvents()]);
-}
-
-async function loadMentees() {
-  const res = await fetch('/api/mentees', {
-    headers: { 'x-mentor-password': mentorPassword }
-  });
-  const data = await res.json();
-  allMentees = data.mentees || [];
-  renderMentees();
-  updateMetrics();
-}
-
-async function loadFormResponses() {
+function logout(){ showGate(''); }
+document.getElementById('gate-input').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+if (MENTOR_PASSWORD) { attemptLoginSilent(); }
+async function attemptLoginSilent(){
   try {
-    const res = await fetch('/api/form-responses', {
-      headers: { 'x-mentor-password': mentorPassword }
-    });
-    const data = await res.json();
-    submitters = data.submitters || [];
+    await apiGet('/api/mentees');
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('shell').style.display = 'flex';
+    loadAll();
+  } catch (e) { showGate(''); }
+}
 
+function loadAll(){
+  loadRoster();
+  loadFormResponses();
+  loadEvents();
+  loadGates();
+  loadScorecard();
+  loadGraduation();
+}
+
+// ---------------- Roster ----------------
+async function loadRoster(){
+  const body = document.getElementById('roster-body');
+  try {
+    const data = await apiGet('/api/mentees');
+    allMentees = data.mentees || [];
+
+    const totalFlags = allMentees.reduce((s,m)=>s+(m.flag_count||0),0);
+    const oldestFlag = allMentees.reduce((max,m)=> (m.flag_age_days!=null && m.flag_age_days>max) ? m.flag_age_days : max, 0);
+    const avgPct = allMentees.length ? Math.round(allMentees.reduce((a,m)=>a+m.pct,0) / allMentees.length) : 0;
+    const onTrack = allMentees.filter(m => m.pct >= 50).length;
+
+    document.getElementById('roster-kpis').innerHTML = `
+      <div class="kpi"><div class="num">${allMentees.length}</div><div class="lbl">Active mentees</div></div>
+      <div class="kpi"><div class="num">${avgPct}%</div><div class="lbl">Avg. completion</div></div>
+      <div class="kpi"><div class="num">${onTrack}</div><div class="lbl">On track (≥50%)</div></div>
+      <div class="kpi"><div class="num ${totalFlags>0?'warn':''}">${totalFlags}</div><div class="lbl">Open gate flags</div></div>
+      <div class="kpi"><div class="num ${oldestFlag>=7?'danger':''}">${oldestFlag}d</div><div class="lbl">Oldest flag, unresolved</div></div>
+    `;
+    document.getElementById('sidebar-foot').innerHTML = `
+      ${allMentees.length} mentees active<br>
+      <span class="flag">${totalFlags} flagged gates</span> · oldest ${oldestFlag}d<br>
+      <span class="logout" onclick="logout()">Log out</span>
+    `;
+    if (totalFlags > 0) {
+      document.getElementById('gates-badge').style.display = 'inline-block';
+      document.getElementById('gates-badge').textContent = totalFlags;
+    }
+
+    if (!allMentees.length) {
+      body.innerHTML = `<tr><td colspan="7" class="empty">No mentees yet. Click "Sync from Monday" to load.</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = allMentees.map(m => {
+      const flagCls = (m.flag_count||0)===0 ? 'ok' : ((m.flag_age_days||0)>=7 ? 'bad' : 'warn');
+      const menteeUrl = `/mentee/${m.token}`;
+      return `
+        <tr>
+          <td class="mentee-name">${m.name}<span class="sub">${m.current_week || ''}</span></td>
+          <td>${m.onboard_date || '—'}</td>
+          <td><span class="status-pill ${docPillClass(m.docusign_status)}">${m.docusign_status || 'Not started'}</span></td>
+          <td><span class="status-pill ${kpaPillClass(m.kpa_status)}">${m.kpa_status || 'Not started'}</span></td>
+          <td><span class="flag-count ${flagCls}">${m.flag_count||0}</span>${m.flag_age_days!=null?`<span class="flag-age">· ${m.flag_age_days}d</span>`:''}</td>
+          <td>
+            <div style="display:flex;align-items:center;">
+              <div class="bar-track"><div class="bar-fill" style="width:${m.pct}%"></div></div>
+              <span class="pct-txt">${m.pct}%</span>
+            </div>
+          </td>
+          <td><button class="link-mini" onclick="copyLink('${menteeUrl}','${m.name}')">⎘ Copy link</button></td>
+        </tr>`;
+    }).join('');
+  } catch (e) {
+    if (e.message !== 'unauthorized') body.innerHTML = `<tr><td colspan="7" class="loading load-error">Couldn't load roster — ${e.message}</td></tr>`;
+  }
+}
+function docPillClass(s){ return s==='Completed' ? 'good' : (s==='Sent' ? 'mid' : 'neutral'); }
+function kpaPillClass(s){ return s==='Done' ? 'good' : (s==='Unverified' ? 'bad' : 'neutral'); }
+
+function copyLink(url, name){
+  const full = window.location.origin + url;
+  navigator.clipboard.writeText(full);
+  showToast(`Copied link for ${name.split(' ')[0]}`);
+}
+
+// ---------------- Coaching Requests (form responses) ----------------
+async function loadFormResponses(){
+  const el = document.getElementById('form-list');
+  try {
+    const data = await apiGet('/api/form-responses');
+    submitters = data.submitters || [];
     const weekStart = data.week_start ? new Date(data.week_start) : new Date();
     document.getElementById('form-week-label').textContent =
       'Week of ' + weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
     renderFormList();
-    updateMetrics();
-  } catch(e) {
-    document.getElementById('form-list').innerHTML = '<div style="padding:1rem;font-size:13px;color:#777">Could not load responses</div>';
+  } catch (e) {
+    if (e.message !== 'unauthorized') el.innerHTML = `<div class="side-empty">Could not load responses</div>`;
   }
 }
-
-async function loadEvents() {
-  try {
-    const res = await fetch('/events.json');
-    const events = await res.json();
-    const el = document.getElementById('events-list');
-    if (!events.length) { el.innerHTML = '<div style="padding:1rem;font-size:13px;color:#777">No upcoming events</div>'; return; }
-    el.innerHTML = events.map(ev => {
-      const d = new Date(ev.date);
-      const month = d.toLocaleDateString('en-US', { month: 'short' });
-      const day = d.getDate();
-      return `
-        <div class="event-item">
-          <div class="event-date-block">
-            <div class="event-month">${month}</div>
-            <div class="event-day-num">${day}</div>
-          </div>
-          <div class="event-details">
-            <div class="event-title">${ev.title}</div>
-            <div class="event-time">${ev.day} · ${ev.time}</div>
-            <div class="event-loc">${ev.location}</div>
-          </div>
-        </div>`;
-    }).join('');
-  } catch(e) {
-    document.getElementById('events-list').innerHTML = '<div style="padding:1rem;font-size:13px;color:#777">Could not load events</div>';
-  }
-}
-
-function didSubmit(mentee) {
-  const emails = [
-    (mentee.work_email || '').toLowerCase(),
-    (mentee.personal_email || '').toLowerCase()
-  ];
-  return submitters.some(s =>
-    emails.includes(s.email) ||
-    s.name.toLowerCase().includes(mentee.name.split(' ')[0].toLowerCase())
-  );
-}
-
-function renderMentees() {
-  const el = document.getElementById('mentee-list');
-  if (!allMentees.length) {
-    el.innerHTML = '<div class="loading">No mentees yet. Click "Sync from Monday" to load.</div>';
-    return;
-  }
-  el.innerHTML = allMentees.map(m => {
-    const initials = m.name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
-    const lastActive = m.last_activity
-      ? 'Active ' + timeAgo(new Date(m.last_activity))
-      : 'No activity yet';
-    const onboardText = m.onboard_date
-      ? 'Onboarded ' + new Date(m.onboard_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      : 'Pending onboard';
-    const menteeUrl = `/mentee/${m.token}`;
-
-    return `
-      <div class="mentee-card" onclick="window.location='${menteeUrl}'">
-        <div class="mentee-card-top">
-          <div class="avatar">${initials}</div>
-          <div class="mentee-info">
-            <div class="mentee-name">${m.name}</div>
-            <div class="mentee-meta">${onboardText}</div>
-          </div>
-          <div class="mentee-right">
-            <div class="mentee-pct">${m.pct}%</div>
-            <div class="mentee-pct-label">complete</div>
-          </div>
-        </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" style="width:${m.pct}%"></div>
-        </div>
-        <div class="mentee-card-bottom">
-          <span class="week-badge">${m.current_week}</span>
-          <button class="copy-link-btn" onclick="event.stopPropagation();copyLink('${menteeUrl}','${m.name}')">
-            ⎘ Copy link
-          </button>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-function renderFormList() {
+function renderFormList(){
   const el = document.getElementById('form-list');
-
-  // Only show submitters whose email matches a signed mentee (work_email or personal_email)
   const menteeEmails = new Set(
     allMentees.flatMap(m => [
       (m.work_email || '').toLowerCase().trim(),
       (m.personal_email || '').toLowerCase().trim()
     ]).filter(Boolean)
   );
-
-  const filtered = submitters.filter(s =>
-    menteeEmails.has((s.email || '').toLowerCase().trim())
-  );
-
-  if (!filtered.length) {
-    el.innerHTML = '<div style="padding:1rem;font-size:13px;color:#777;font-style:italic">No requests this week</div>';
-    return;
-  }
-
-  // Use the mentee name from Monday if available, fall back to sheet name
+  const filtered = submitters.filter(s => menteeEmails.has((s.email || '').toLowerCase().trim()));
+  if (!filtered.length) { el.innerHTML = `<div class="side-empty">No requests this week</div>`; return; }
   el.innerHTML = filtered.map(s => {
     const mentee = allMentees.find(m =>
       (m.work_email || '').toLowerCase().trim() === (s.email || '').toLowerCase().trim() ||
       (m.personal_email || '').toLowerCase().trim() === (s.email || '').toLowerCase().trim()
     );
     const displayName = mentee ? mentee.name : (s.name || s.email);
-    return `
-    <div class="form-row">
-      <span class="form-row-name">${displayName}</span>
-      <span class="form-status yes">✓ Requested</span>
-    </div>`;
+    return `<div class="form-row"><span>${displayName}</span><span class="form-status">✓ Requested</span></div>`;
   }).join('');
 }
 
-function updateMetrics() {
-  const active = allMentees.filter(m => m.is_active);
-  const avg = active.length ? Math.round(active.reduce((a, m) => a + m.pct, 0) / active.length) : 0;
-  const onTrack = active.filter(m => m.pct >= 50).length;
-  // Count only requests from signed mentees
-  const menteeEmails = new Set(
-    allMentees.flatMap(m => [
-      (m.work_email || '').toLowerCase().trim(),
-      (m.personal_email || '').toLowerCase().trim()
-    ]).filter(Boolean)
-  );
-  const formsCount = submitters.filter(s =>
-    menteeEmails.has((s.email || '').toLowerCase().trim())
-  ).length;
-
-  document.getElementById('m-total').textContent = active.length;
-  document.getElementById('m-avg').textContent = avg + '%';
-  document.getElementById('m-ontrack').textContent = onTrack;
-  document.getElementById('m-forms').textContent = `${formsCount}/${allMentees.length}`;
+// ---------------- Upcoming Events ----------------
+async function loadEvents(){
+  const el = document.getElementById('events-list');
+  try {
+    const res = await fetch('/events.json');
+    const events = await res.json();
+    if (!events.length) { el.innerHTML = `<div class="side-empty">No upcoming events</div>`; return; }
+    el.innerHTML = events.map(ev => {
+      const d = new Date(ev.date);
+      const month = d.toLocaleDateString('en-US', { month: 'short' });
+      const day = d.getDate();
+      return `
+        <div class="event-item">
+          <div class="event-date-block"><div class="event-month">${month}</div><div class="event-day-num">${day}</div></div>
+          <div>
+            <div class="event-title">${ev.title}</div>
+            <div class="event-time">${ev.day} · ${ev.time}</div>
+            <div class="event-loc">${ev.location}</div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch (e) {
+    el.innerHTML = `<div class="side-empty">Could not load events</div>`;
+  }
 }
 
-function timeAgo(date) {
-  const diff = Math.floor((Date.now() - date) / 1000);
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
-  return Math.floor(diff / 86400) + 'd ago';
-}
-
-async function syncMonday() {
+// ---------------- Sync from Monday ----------------
+async function syncMonday(){
   const btn = document.getElementById('sync-btn');
   btn.classList.add('syncing');
   btn.disabled = true;
   try {
-    const res = await fetch('/api/sync-monday', {
-      method: 'POST',
-      headers: { 'x-mentor-password': mentorPassword }
-    });
+    const res = await fetch('/api/sync-monday', { method: 'POST', headers: { 'x-mentor-password': MENTOR_PASSWORD } });
     const data = await res.json();
     const removedMsg = data.removed ? `, ${data.removed} removed` : '';
     showToast(`Synced! ${data.added} added, ${data.updated} updated${removedMsg}.`);
-    await loadMentees();
-  } catch(e) {
+    await loadRoster();
+  } catch (e) {
     showToast('Sync failed. Check your Monday API token.');
   }
   btn.classList.remove('syncing');
   btn.disabled = false;
 }
-
-function copyLink(url, name) {
-  const full = window.location.origin + url;
-  navigator.clipboard.writeText(full);
-  showToast(`Copied link for ${name.split(' ')[0]}`);
-}
-
-function showToast(msg) {
+function showToast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
+
+// ---------------- Readiness Gates ----------------
+let flagOnly = true;
+let gatesData = [];
+async function loadGates(){
+  const body = document.getElementById('gates-body');
+  try {
+    const data = await apiGet('/api/mentor/gates');
+    gatesData = data.mentees || [];
+    renderGates();
+  } catch (e) {
+    if (e.message !== 'unauthorized') body.innerHTML = `<tr><td colspan="9" class="loading load-error">Couldn't load gates — ${e.message}</td></tr>`;
+  }
+}
+const cellLabel = { 'Pass':'✓', 'Needs Follow-Up':'!', 'Not Yet Reviewed':'–' };
+const cellClass = { 'Pass':'pass', 'Needs Follow-Up':'follow', 'Not Yet Reviewed':'notdue' };
+function renderGates(){
+  const body = document.getElementById('gates-body');
+  const rows = gatesData.filter(m => !flagOnly || m.gates.some(g => g.status === 'Needs Follow-Up'));
+  if (!rows.length) { body.innerHTML = `<tr><td colspan="9" class="empty">No flagged gates right now.</td></tr>`; return; }
+  body.innerHTML = rows.map(m => {
+    const cells = m.gates.map(g => `<td><div class="gate-cell ${cellClass[g.status]}" title="${g.status}">${cellLabel[g.status]}</div></td>`).join('');
+    return `<tr><td class="mentee-name">${m.name}</td>${cells}</tr>`;
+  }).join('');
+}
+document.getElementById('flag-toggle').addEventListener('click', function(){
+  flagOnly = !flagOnly;
+  this.classList.toggle('on', flagOnly);
+  renderGates();
+});
+
+// ---------------- Scorecard ----------------
+async function loadScorecard(){
+  const body = document.getElementById('scorecard-body');
+  try {
+    const data = await apiGet('/api/mentor/scorecard');
+    const mentees = data.mentees || [];
+    document.getElementById('scorecard-sub').textContent =
+      `9-metric weekly activity score · week of ${data.week_start} – ${data.week_end}`;
+    if (!mentees.length) { body.innerHTML = `<tr><td colspan="8" class="empty">No active mentees.</td></tr>`; return; }
+    body.innerHTML = mentees.map(m => `
+      <tr>
+        <td class="mentee-name">${m.name}<span class="sub">Wk ${m.program_week}</span></td>
+        ${['leadgen_hours','new_conversations','followup_conversations','roleplay_sessions','database_contacts','open_houses']
+          .map(k => `<td><div class="metric-cell"><span class="traffic ${m.metrics[k]}"></span></div></td>`).join('')}
+        <td style="font-weight:600;">${m.overall_pct}% <span style="color:var(--ink-faint); font-weight:400; font-size:11px;">${m.overall_status}</span></td>
+      </tr>`).join('');
+  } catch (e) {
+    if (e.message !== 'unauthorized') body.innerHTML = `<tr><td colspan="8" class="loading load-error">Couldn't load scorecard — ${e.message}</td></tr>`;
+  }
+}
+
+// ---------------- Graduation ----------------
+async function loadGraduation(){
+  const list = document.getElementById('graduation-list');
+  try {
+    const data = await apiGet('/api/mentor/graduation');
+    const mentees = data.mentees || [];
+    if (!mentees.length) { list.innerHTML = `<div class="empty">No active mentees.</div>`; return; }
+    list.innerHTML = mentees.map(g => {
+      const items = g.items.map(i => `<div class="grad-item"><span class="grad-check ${i.done?'yes':'no'}">${i.done?'✓':''}</span> ${i.label}</div>`).join('');
+      const badgeClass = g.certificate_status === 'Certified' ? 'certified'
+        : (g.certificate_status === 'Rules met — awaiting sign-off' ? 'eligible' : 'progress');
+      return `
+        <div class="grad-card ${g.mismatch?'mismatch':''}">
+          <div class="grad-name">${g.name}<span class="role">Day ${g.days_in_program ?? '—'} in program</span></div>
+          <div class="grad-checklist">${items}</div>
+          <div class="grad-status">
+            <span class="badge ${badgeClass}">${g.certificate_status}</span><br>
+            <span style="color:var(--ink-faint);">${g.done_count} / ${g.total_items} complete</span>
+            ${g.mismatch ? `<span class="mismatch-note">Coach marked Yes before rules caught up</span>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  } catch (e) {
+    if (e.message !== 'unauthorized') list.innerHTML = `<div class="loading load-error">Couldn't load graduation status — ${e.message}</div>`;
+  }
+}
+
+// ---------------- Tab switching ----------------
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.querySelectorAll('.tabpage').forEach(p=>p.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('tab-'+item.dataset.tab).classList.add('active');
+  });
+});
 </script>
 </body>
 </html>
