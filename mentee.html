@@ -300,9 +300,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
       <div class="hero-sub">Chinese Mentorship Program · KW Thrive</div>
     </div>
     <div class="main">
-      <div class="events-card" id="events-card" style="display:none">
-        <div class="events-header">Upcoming Events This Week</div>
-        <div id="events-body"></div>
+      <div id="form-banner" class="form-banner pending">
+        <div>
+          <div class="banner-text">📋 Request a 1-on-1 Coaching</div>
+          <div class="banner-sub" id="banner-sub">Fill out the form and we will contact you to schedule</div>
+        </div>
+        <a href="https://forms.gle/X1c5rBzLaQhd1o6b6" target="_blank" class="form-btn" id="form-action-btn">Fill Out Form</a>
       </div>
       <div class="dash-shortcuts" id="dash-shortcuts">
         <div class="dash-shortcut" onclick="goToTab('scorecard')">
@@ -320,6 +323,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
         <div class="dash-shortcut" onclick="goToTab('resources')">
           <span class="dash-shortcut-icon">📚</span>
           <span class="dash-shortcut-label">Resources</span>
+        </div>
+      </div>
+      <div class="events-card" id="events-card" style="display:none">
+        <div class="events-header">Upcoming Events This Week</div>
+        <div id="events-body"></div>
+        <div class="event-item" style="border-top:1px solid var(--gray-100)">
+          <a href="https://calendar.google.com/calendar/u/0/r?cid=Y18zM2E0NTUxZWY4YjUwMTc4MjZmOThhNmNlZGY3NzY5ZTk5MTEyNTE3MjY4MDJlNWMxODU2NjE2Y2YwNGQ3NzRiQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20" target="_blank" style="font-size:13px;font-weight:600;color:var(--red);text-decoration:none">📅 View Full Mentorship Calendar →</a>
         </div>
       </div>
     </div>
@@ -367,13 +377,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
       <div class="hero-progress-bg"><div class="hero-progress-fill" id="hero-bar" style="width:0%"></div></div>
     </div>
     <div class="main" id="main-content" style="display:none">
-      <div id="form-banner" class="form-banner pending">
-        <div>
-          <div class="banner-text">📋 Request a 1-on-1 Coaching</div>
-          <div class="banner-sub" id="banner-sub">Fill out the form and we will contact you to schedule</div>
-        </div>
-        <a href="https://forms.gle/X1c5rBzLaQhd1o6b6" target="_blank" class="form-btn" id="form-action-btn">Fill Out Form</a>
-      </div>
       <div id="checklist-container"></div>
     </div>
   </div>
@@ -692,7 +695,7 @@ async function init() {
     await loadEvents();
     renderChecklist();
     checkFormSubmission();
-    renderResources(data.resources || []);
+    loadResources();
     loadScorecard();
     loadReadiness();
   } catch(e) {
@@ -1109,6 +1112,21 @@ function buildResourceRow(s) {
   const url  = linkCol?.value ? (() => { try { return JSON.parse(linkCol.value).url; } catch { return '#'; } })() : '#';
   const type = typeCol?.text || '';
   return `<a href="${url}" target="_blank" class="res-row"><div class="r-icon ${cls(type)}">${icon(type)}</div><div class="r-name">${s.name}</div><div class="r-type">${type}</div><div class="r-arrow">→</div></a>`;
+}
+
+// Public content, no token needed — shared across all mentees. Access-level
+// locking (L2/L3) is still applied client-side via accessFlags from /api/progress.
+async function loadResources() {
+  try {
+    const res = await fetch('/api/resources');
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    renderResources(data.groups || []);
+  } catch (e) {
+    console.warn('Resources load failed:', e.message);
+    const loading = document.getElementById('res-loading');
+    if (loading) loading.textContent = 'Unable to load resources right now — try refreshing.';
+  }
 }
 
 function renderResources(groups) {
