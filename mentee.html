@@ -256,6 +256,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 .sc-bar-fill.amber { background: var(--amber); }
 .sc-bar-fill.red { background: var(--red); }
 .sc-derived-note { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+
+/* ── READINESS GATE ── */
+.rg-pill { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+.rg-pill.pass { background: var(--green-light); color: var(--green); }
+.rg-pill.followup { background: var(--red-light); color: var(--red); }
+.rg-pill.pending { background: var(--gray-100); color: var(--gray-500); }
+.rg-comp-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 1.25rem; border-top: 1px solid var(--gray-100); font-size: 13px; }
+.rg-comp-score { font-weight: 600; font-size: 11px; padding: 2px 9px; border-radius: 10px; flex-shrink: 0; margin-left: 12px; }
+.rg-comp-score.s-high { background: var(--green-light); color: var(--green); }
+.rg-comp-score.s-low { background: var(--red-light); color: var(--red); }
+.rg-empty-note { padding: 14px 1.25rem 16px; font-size: 13px; color: var(--gray-500); }
+
+/* ── DASHBOARD ── */
+.dash-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.dash-shortcut { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem 1rem; text-align: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+.dash-shortcut:hover { transform: translateY(-2px); box-shadow: 0 2px 6px rgba(0,0,0,0.1), 0 8px 20px rgba(0,0,0,0.06); }
+.dash-shortcut-icon { display: block; font-size: 28px; margin-bottom: 8px; }
+.dash-shortcut-label { font-size: 13px; font-weight: 600; color: var(--dark); }
 </style>
 </head>
 <body>
@@ -266,15 +284,49 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 </div>
 
 <div class="tab-nav" id="tab-nav" style="display:none">
-  <button class="tab-btn active" onclick="switchTab('scorecard',this)">📊 Scorecard</button>
+  <button class="tab-btn active" onclick="switchTab('dashboard',this)">🏠 Dashboard</button>
+  <button class="tab-btn" onclick="switchTab('scorecard',this)">📊 Scorecard</button>
+  <button class="tab-btn" onclick="switchTab('readiness',this)">🎯 Readiness Gate</button>
   <button class="tab-btn" onclick="switchTab('checklist',this)">📋 My Checklist</button>
   <button class="tab-btn" onclick="switchTab('resources',this)">📚 Resources</button>
 </div>
 
 <div id="content">
 
-  <!-- SCORECARD TAB (new default / front-facing) -->
-  <div id="tab-scorecard">
+  <!-- DASHBOARD TAB (new landing tab) -->
+  <div id="tab-dashboard">
+    <div class="hero">
+      <div class="hero-name" id="dash-hero-name">Loading...</div>
+      <div class="hero-sub">Chinese Mentorship Program · KW Thrive</div>
+    </div>
+    <div class="main">
+      <div class="events-card" id="events-card" style="display:none">
+        <div class="events-header">Upcoming Events This Week</div>
+        <div id="events-body"></div>
+      </div>
+      <div class="dash-shortcuts" id="dash-shortcuts">
+        <div class="dash-shortcut" onclick="goToTab('scorecard')">
+          <span class="dash-shortcut-icon">📊</span>
+          <span class="dash-shortcut-label">Scorecard</span>
+        </div>
+        <div class="dash-shortcut" onclick="goToTab('readiness')">
+          <span class="dash-shortcut-icon">🎯</span>
+          <span class="dash-shortcut-label">Readiness Gate</span>
+        </div>
+        <div class="dash-shortcut" onclick="goToTab('checklist')">
+          <span class="dash-shortcut-icon">📋</span>
+          <span class="dash-shortcut-label">My Checklist</span>
+        </div>
+        <div class="dash-shortcut" onclick="goToTab('resources')">
+          <span class="dash-shortcut-icon">📚</span>
+          <span class="dash-shortcut-label">Resources</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCORECARD TAB -->
+  <div id="tab-scorecard" style="display:none">
     <div class="sc-hero">
       <div class="sc-hero-name" id="sc-hero-name">Loading...</div>
       <div class="sc-hero-sub" id="sc-hero-sub">Weekly Accountability Scorecard</div>
@@ -289,6 +341,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
       </div>
       <div class="sc-week-title">This Week So Far</div>
       <div id="sc-metrics"></div>
+    </div>
+  </div>
+
+  <!-- READINESS GATE TAB -->
+  <div id="tab-readiness" style="display:none">
+    <div class="hero">
+      <div class="hero-name">Readiness Gate</div>
+      <div class="hero-sub">8 competency checkpoints across the program</div>
+    </div>
+    <div class="main" id="rg-main" style="display:none">
+      <div id="readiness-container"></div>
     </div>
   </div>
 
@@ -310,10 +373,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
           <div class="banner-sub" id="banner-sub">Fill out the form and we will contact you to schedule</div>
         </div>
         <a href="https://forms.gle/X1c5rBzLaQhd1o6b6" target="_blank" class="form-btn" id="form-action-btn">Fill Out Form</a>
-      </div>
-      <div class="events-card" id="events-card" style="display:none">
-        <div class="events-header">Upcoming Events This Week</div>
-        <div id="events-body"></div>
       </div>
       <div id="checklist-container"></div>
     </div>
@@ -635,6 +694,7 @@ async function init() {
     checkFormSubmission();
     renderResources(data.resources || []);
     loadScorecard();
+    loadReadiness();
   } catch(e) {
     document.getElementById('content').innerHTML = `<div class="error-state"><h2>Page not found</h2><p>This link may be invalid. Please contact your mentor.</p></div>`;
   }
@@ -643,14 +703,94 @@ async function init() {
 function switchTab(tab, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  document.getElementById('tab-dashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
   document.getElementById('tab-scorecard').style.display  = tab === 'scorecard'  ? 'block' : 'none';
+  document.getElementById('tab-readiness').style.display  = tab === 'readiness' ? 'block' : 'none';
   document.getElementById('tab-checklist').style.display  = tab === 'checklist'  ? 'block' : 'none';
   document.getElementById('tab-resources').style.display  = tab === 'resources'  ? 'block' : 'none';
+}
+
+// Shortcut cards on the Dashboard tab route through here so they activate the
+// matching nav button too, not just the content pane.
+function goToTab(tab) {
+  const btn = Array.from(document.querySelectorAll('.tab-btn'))
+    .find(b => b.getAttribute('onclick')?.includes(`'${tab}'`));
+  if (btn) switchTab(tab, btn);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// READINESS GATE
+// Mirrors the 8 gates on the Readiness Gate Reviews Monday board (18430429768).
+// Data comes from /api/readiness/[token], which reads a Supabase table kept in
+// sync by a Monday webhook — see api-gate-webhook.js. Gates with no review yet
+// simply don't appear in the API response and render as "Not Yet Reviewed".
+// ─────────────────────────────────────────────────────────────────────────────
+const GATE_DEFS = [
+  { key: 'wk1_foundation',   label: 'Wk1 · Professional Foundation' },
+  { key: 'wk2_leadgen',      label: 'Wk2 · Lead Generation Ready' },
+  { key: 'wk3_buyerconsult', label: 'Wk3 · Buyer Consultation Ready' },
+  { key: 'wk4_offer',        label: 'Wk4 · Offer Ready' },
+  { key: 'wk5_transaction',  label: 'Wk5 · Transaction Ready' },
+  { key: 'wk6_listing',      label: 'Wk6 · Listing Ready' },
+  { key: 'wk8_negotiation',  label: 'Wk8 · Negotiation Ready' },
+  { key: 'day90_level1',     label: '90-Day · Level 1 Competent' }
+];
+let rgData = [];
+
+async function loadReadiness() {
+  try {
+    const res = await fetch(`/api/readiness/${token}`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    rgData = data.gates || [];
+  } catch (e) {
+    rgData = [];
+    console.warn('Readiness gate load failed:', e.message);
+  } finally {
+    document.getElementById('rg-main').style.display = 'block';
+    renderReadiness();
+  }
+}
+
+function renderReadiness() {
+  document.getElementById('readiness-container').innerHTML = GATE_DEFS.map((g, gi) => {
+    const result = rgData.find(r => r.gate_key === g.key);
+    const status = result ? result.pass_fail : null;
+    const pillClass = status === 'Pass' ? 'pass' : status === 'Needs Follow-Up' ? 'followup' : 'pending';
+    const pillText  = status === 'Pass' ? '✓ Pass' : status === 'Needs Follow-Up' ? 'Needs Follow-Up' : 'Not Yet Reviewed';
+    const comps = (result && result.competencies) || [];
+    const compsHtml = comps.length
+      ? comps.map(c => {
+          const scoreCls = c.score >= 3 ? 's-high' : 's-low';
+          return `<div class="rg-comp-row"><span>${c.label}</span><span class="rg-comp-score ${scoreCls}">${c.score}/4</span></div>`;
+        }).join('')
+      : `<div class="rg-empty-note">${result ? 'No competency scores recorded yet.' : "This gate hasn't been reviewed yet — it'll appear here after your next check-in with Diana or Mark."}</div>`;
+    return `
+      <div class="checklist-section" id="rg-section-${gi}">
+        <div class="section-header" onclick="toggleRgSection(${gi})">
+          <div class="section-left">
+            <div class="section-num">${gi + 1}</div>
+            <div class="section-name">${g.label}</div>
+          </div>
+          <div class="section-right">
+            <span class="rg-pill ${pillClass}">${pillText}</span>
+            <span class="chevron" id="rg-chev-${gi}">▼</span>
+          </div>
+        </div>
+        <div class="task-list" id="rg-tasks-${gi}">${compsHtml}</div>
+      </div>`;
+  }).join('');
+}
+
+function toggleRgSection(gi) {
+  document.getElementById(`rg-tasks-${gi}`).classList.toggle('open');
+  document.getElementById(`rg-chev-${gi}`).classList.toggle('open');
 }
 
 function renderHero() {
   document.title = `${menteeData.name} · KW Thrive`;
   document.getElementById('hero-name').textContent = menteeData.name;
+  document.getElementById('dash-hero-name').textContent = `Welcome, ${menteeData.name.split(' ')[0]}`;
   const onboard = menteeData.onboard_date
     ? 'Onboarded ' + new Date(menteeData.onboard_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : 'Chinese Mentorship Program · KW Thrive';
