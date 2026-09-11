@@ -5,6 +5,15 @@
 // TIMEZONE: hardcoded to America/Los_Angeles. Program is strictly South
 // Bay agents, so the server is the sole source of truth for "today" and
 // the editable-window check — no client-supplied date is trusted.
+//
+// HISTORY (added): GET now accepts an optional ?week_start=YYYY-MM-DD to
+// view a past week read-only. Targets/rollups are computed live from
+// daily_activity each time (live-compute, not snapshotted) — safe because
+// past weeks are already frozen by the editable-window rule below, so the
+// underlying rows never change once a week has closed. POST is completely
+// unaffected: it always validates against the CURRENT week regardless of
+// what week_start a GET request asked to view, so viewing history can
+// never accidentally open a write path into a past week.
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -14,6 +23,13 @@ const supabase = createClient(
 );
 
 const TZ = 'America/Los_Angeles';
+
+// History can't go back further than this date, regardless of onboard_date.
+// Weeks before this have no real daily_activity rows (the table didn't
+// exist yet), so scrolling there would render a false 0%/OFF TRACK
+// scorecard for mentees who onboarded earlier — not real underperformance.
+// Update to the actual deploy date before shipping.
+const FEATURE_LAUNCH_DATE = '2026-09-11';
 
 function pacificDateString(d = new Date()) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
@@ -47,11 +63,25 @@ function mondayOf(dateStr) {
   return [fmt(monday), fmt(sunday)];
 }
 
+// Original: program week relative to "today". Still used nowhere directly
+// now that GET always goes through programWeekForRange below, but kept
+// for compatibility in case anything else imports it.
 function programWeek(onboardDate) {
   if (!onboardDate) return 1;
   const start = new Date(onboardDate + 'T00:00:00Z');
   const today = new Date(pacificDateString() + 'T00:00:00Z');
   const days = Math.floor((today - start) / 86400000);
+  const wk = Math.floor(days / 7) + 1;
+  return Math.min(Math.max(wk, 1), 10);
+}
+
+// Program week relative to an arbitrary week's Monday — used so a past
+// week's targets reflect the ramp that applied THAT week, not today's.
+function programWeekForRange(onboardDate, weekStartStr) {
+  if (!onboardDate) return 1;
+  const start = new Date(onboardDate + 'T00:00:00Z');
+  const ws = new Date(weekStartStr + 'T00:00:00Z');
+  const days = Math.floor((ws - start) / 86400000);
   const wk = Math.floor(days / 7) + 1;
   return Math.min(Math.max(wk, 1), 10);
 }
@@ -75,8 +105,30 @@ export default async function handler(req, res) {
   if (error || !mentee) return res.status(404).json({ error: 'Mentee not found' });
 
   const todayStr = pacificDateString();
-  const [weekStart, weekEnd] = mondayOf(todayStr);
-  const week = programWeek(mentee.onboard_date);
+  const [currentWeekStart, currentWeekEnd] = mondayOf(todayStr);
+
+  // Default view is the current week. A GET may ask for a past week via
+  // ?week_start=YYYY-MM-DD — normalized to that date's Monday regardless
+  // of which day of the week was passed in. Future weeks are rejected.
+  let weekStart = currentWeekStart, weekEnd = currentWeekEnd;
+  if (req.query.week_start) {
+    const [reqStart, reqEnd] = mondayOf(req.query.week_start);
+    if (reqStart > currentWeekStart) {
+      return res.status(400).json({ error: 'Cannot view a future week.' });
+    }
+    weekStart = reqStart;
+    weekEnd = reqEnd;
+  }
+
+  const week = programWeekForRange(mentee.onboard_date, weekStart);
+  const editable = weekStart === currentWeekStart;
+
+  // History floor = whichever is LATER: the mentee's onboard week, or the
+  // week this feature actually launched. Prevents scrolling into weeks
+  // that predate real data.
+  const onboardFloor = mondayOf(mentee.onboard_date || todayStr)[0];
+  const launchFloor = mondayOf(FEATURE_LAUNCH_DATE)[0];
+  const earliestWeekStart = onboardFloor > launchFloor ? onboardFloor : launchFloor;
 
   if (req.method === 'GET') {
     const { data: entries } = await supabase
@@ -93,6 +145,9 @@ export default async function handler(req, res) {
       week_start: weekStart,
       week_end: weekEnd,
       program_week: week,
+      editable,
+      current_week_start: currentWeekStart,
+      earliest_week_start: earliestWeekStart,
       targets: METRICS.filter(m => !m.derived).reduce((acc, m) => {
         acc[m.key] = { label: m.label, weight: m.weight, target: targetFor(m, week) };
         return acc;
@@ -108,8 +163,10 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { entry_date, ...values } = req.body;
 
-    // Editable window: current calendar week only
-    if (entry_date < weekStart || entry_date > weekEnd) {
+    // Editable window: CURRENT calendar week only. Uses currentWeekStart/
+    // currentWeekEnd, not the (possibly historical) weekStart/weekEnd above —
+    // so a GET made against a past week can never leak into what POST allows.
+    if (entry_date < currentWeekStart || entry_date > currentWeekEnd) {
       return res.status(403).json({ error: 'That date is outside the current editable week.' });
     }
 
