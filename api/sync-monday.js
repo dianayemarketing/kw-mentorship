@@ -1,3 +1,12 @@
+// Intended repo path: api/sync-monday.js
+//
+// CHANGE FROM LIVE VERSION: pulls 5 more columns off board 18383986088 for the
+// mentor dashboard — Agreement (DocuSign), KPA, # of Transactions, State
+// Compliance, and Graduation. Same zero-maintenance pattern as is_full_time:
+// content flows from Monday, nothing here needs touching when a value changes.
+// Column IDs confirmed live via get_board_info on 2026-09-11 — do not hand-type
+// these, they don't follow a guessable pattern.
+
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -35,7 +44,10 @@ async function fetchMondayMentees() {
             items {
               id
               name
-              column_values(ids: ["text_mkxv9drn","text_mkxvtxbk","email_mm1wde8k","date4","boolean_mm70c4g3"]) {
+              column_values(ids: [
+                "text_mkxv9drn","text_mkxvtxbk","email_mm1wde8k","date4","boolean_mm70c4g3",
+                "color_mm0ypp1b","status","numeric_mm73y6p9","boolean_mm73hznk","dropdown_mm73vm79"
+              ]) {
                 id
                 text
                 value
@@ -112,7 +124,16 @@ export default async function handler(req, res) {
           personal_email: colMap['email_mm1wde8k'] || null,
           onboard_date: colMap['date4'] || null,
           is_active: isActive,  // true for Signed Mentee, false for Paused
-          is_full_time: isChecked(colValueMap['boolean_mm70c4g3'])
+          is_full_time: isChecked(colValueMap['boolean_mm70c4g3']),
+
+          // --- new for the mentor dashboard ---
+          docusign_status: colMap['color_mm0ypp1b'] || null,           // "Working on it" / "Sent" / "Completed"
+          kpa_status: colMap['status'] || null,                        // "Ordered" / "Done" / "Unverified"
+          transactions_count: colMap['numeric_mm73y6p9']
+            ? parseInt(colMap['numeric_mm73y6p9'], 10) || 0
+            : 0,
+          state_compliance: isChecked(colValueMap['boolean_mm73hznk']),
+          graduation_flag: colMap['dropdown_mm73vm79'] || null          // "Yes" / "No" — coach's own call, never derived
         };
 
         const { data: existing } = await supabase
