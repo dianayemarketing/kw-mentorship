@@ -663,7 +663,9 @@ document.querySelectorAll('.nav-item').forEach(item=>{
   });
 });
 </script>
-  <style>
+
+<!-- ── PAGE HELP (floating info button) ─────────────────────────────────── -->
+<style>
 .help-fab {
   position: fixed; bottom: 24px; right: 24px; width: 48px; height: 48px;
   border-radius: 50%; background: var(--red, #C8102E); color: #fff;
@@ -692,34 +694,45 @@ document.querySelectorAll('.nav-item').forEach(item=>{
 </div>
 
 <script>
-let helpData = {};
-fetch('/api/page-help').then(r => r.json()).then(d => { helpData = d.help || {}; });
+// Reads directly from Supabase's public REST API — no Vercel function needed,
+// keeps this off the 12-function Hobby-plan cap. RLS on page_help allows
+// public SELECT only; every other table stays locked down.
+const SUPABASE_URL = 'https://gbpshybsynmdztzwczyc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdicHNoeWJzeW5tZHp0endjenljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMzEzMjUsImV4cCI6MjA5MTgwNzMyNX0.eLjkxSNsZpxcAVIi5nkEVNo_arefqM8zHQ3tVhgVw78';
 
+let helpData = {};
+fetch(`${SUPABASE_URL}/rest/v1/page_help?select=slug,title,content`, {
+  headers: {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+  }
+})
+  .then(r => r.json())
+  .then(rows => {
+    helpData = {};
+    (rows || []).forEach(row => { helpData[row.slug] = row; });
+  })
+  .catch(e => console.warn('Page help load failed:', e.message));
+
+// This page's tab switching toggles .active on the clicked .nav-item directly
+// (see "Tab switching" above), so the active tab is always readable straight
+// from the DOM — no separate tracked variable needed like mentee.html.
 const HELP_SLUG_MAP = {
-  // index.html (mentor dashboard) — data-tab values
   'roster': 'mentor-roster',
   'gates': 'mentor-readiness',
   'scorecard': 'mentor-scorecard',
-  'graduation': 'mentor-graduation',
-  // mentee.html — tab element ids
-  'tab-dashboard': 'mentee-dashboard',
-  'tab-scorecard': 'mentee-scorecard',
-  'tab-readiness': 'mentee-readiness',
-  'tab-checklist': 'mentee-checklist',
-  'tab-resources': 'mentee-resources'
+  'graduation': 'mentor-graduation'
 };
 
 function currentHelpSlug() {
-  const activeNav = document.querySelector('.nav-item.active'); // index.html
-  if (activeNav) return HELP_SLUG_MAP[activeNav.dataset.tab];
-  const activeTabPage = document.querySelector('[id^="tab-"]:not([style*="display: none"])'); // mentee.html
-  return activeTabPage ? HELP_SLUG_MAP[activeTabPage.id] : null;
+  const activeNav = document.querySelector('.nav-item.active');
+  return activeNav ? HELP_SLUG_MAP[activeNav.dataset.tab] : null;
 }
 
 document.getElementById('help-fab').onclick = () => {
   const slug = currentHelpSlug();
   const entry = helpData[slug];
-  if (!entry) return;
+  if (!entry) return; // no help content loaded yet, or none written for this tab
   document.getElementById('help-title').textContent = entry.title;
   document.getElementById('help-body').textContent = entry.content;
   document.getElementById('help-backdrop').style.display = 'block';
