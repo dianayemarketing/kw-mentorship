@@ -292,6 +292,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 .rg-step.locked .rg-step-label { color: var(--gray-300); }
 .rg-locked-panel { text-align: center; padding: 32px 20px; color: var(--gray-500); }
 .rg-locked-panel .rg-lock-icon { font-size: 24px; margin-bottom: 8px; display: block; }
+.rg-whattodo { background: var(--gray-100); border-radius: 10px; padding: 12px 14px; margin: 14px 1.25rem 0; font-size: 13px; color: #2E2A26; line-height: 1.5; }
+.rg-whattodo-label { font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gray-500); margin-bottom: 5px; }
+.rg-whattodo-labnote { display: block; margin-top: 6px; font-size: 11.5px; color: var(--amber); }
 
 /* ── DASHBOARD ── */
 .dash-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -769,6 +772,46 @@ const GATE_DEFS = [
   { key: 'wk8_negotiation',  label: 'Negotiation Ready',       short: 'Wk8', week: 8 },
   { key: 'day90_level1',     label: 'Level 1 Competent',       short: '90-Day', week: null } // reached at 90 days, not by week number
 ];
+
+// Plain-language "what's expected" per gate. labNote is non-null only for
+// gates designed to be practiced through the Transaction Lab — which is
+// Phase 2 and not built yet, so this says so rather than pointing mentees
+// at something that doesn't exist. Source: Readiness_Gates + TL_Overview
+// (Level_1_Launch_Full_System_with_Transaction_Lab.xlsx).
+const WHAT_TO_DO = {
+  wk1_foundation: {
+    summary: 'Show up with a working calendar with lead-gen time blocked, a clear 30-second value proposition, and the ability to explain current local market conditions to a client. Demonstrated live with your coach — no case study for this one.',
+    labNote: null
+  },
+  wk2_leadgen: {
+    summary: 'Get your CRM organized, define at least 3 primary + 1 backup lead source, and practice sphere/referral conversations, an open house run-through, and objection handling with your coach.',
+    labNote: null
+  },
+  wk3_buyerconsult: {
+    summary: 'Run a full buyer consultation, explain agency/representation and financing basics, and prepare a buyer-side CMA.',
+    labNote: 'Designed to be practiced through the Transaction Lab\u2019s Buyer Case — not live yet. Prepare directly with your coach for now.'
+  },
+  wk4_offer: {
+    summary: 'Build an offer strategy from client goals and comps, complete a purchase agreement accurately, and explain the terms and risks to a client in plain language.',
+    labNote: 'Continues the Transaction Lab buyer case — not live yet. Prepare directly with your coach for now.'
+  },
+  wk5_transaction: {
+    summary: 'Build a dated transaction timeline, handle an inspection response and negotiation, and keep the client proactively updated through closing.',
+    labNote: 'Continues the Transaction Lab buyer case — not live yet. Prepare directly with your coach for now.'
+  },
+  wk6_listing: {
+    summary: 'Run a full listing consultation, build a seller-side CMA and pricing recommendation, and complete a listing agreement.',
+    labNote: 'Designed to be practiced through the Transaction Lab\u2019s Seller Case — not live yet. Prepare directly with your coach for now.'
+  },
+  wk8_negotiation: {
+    summary: 'Present offers and counters neutrally, navigate a multiple-offer scenario, and handle a difficult client conversation professionally.',
+    labNote: 'Draws on both Transaction Lab cases — not live yet. Prepare directly with your coach for now.'
+  },
+  day90_level1: {
+    summary: 'Have a current 1-year business plan, complete your state/local compliance module, and close 3 real supervised transactions (do-it-with-me, do-it-with-support, show-me-you-can).',
+    labNote: 'This is real production work, not a simulation — the Transaction Lab (once built) will help you prepare, but it can\u2019t stand in for the 3 actual transactions.'
+  }
+};
 let rgData = [];
 let rgSelectedKey = null;
 
@@ -888,6 +931,10 @@ function renderReadiness() {
   const submitLinkHtml = canSubmit
     ? `<a class="rg-submit-link" target="_blank" href="https://forms.monday.com/forms/f4c47b89e5313c5d7d861e4cc91b9baa?token=${encodeURIComponent(token)}&name=${encodeURIComponent(menteeData.name || '')}">📎 ${status === 'Needs Follow-Up' ? 'Resubmit' : 'Submit'} Evidence</a>`
     : '';
+  const wtd = WHAT_TO_DO[g.key];
+  const whatToDoHtml = wtd
+    ? `<div class="rg-whattodo"><div class="rg-whattodo-label">What's expected</div>${wtd.summary}${wtd.labNote ? `<span class="rg-whattodo-labnote">🔧 ${wtd.labNote}</span>` : ''}</div>`
+    : '';
 
   document.getElementById('rg-detail-container').innerHTML = `
     <div class="checklist-section">
@@ -897,6 +944,7 @@ function renderReadiness() {
         </div>
         <div class="section-right"><span class="rg-pill ${pillClass}">${pillText}</span></div>
       </div>
+      ${whatToDoHtml}
       <div class="task-list open">${compsHtml}${submitLinkHtml}</div>
     </div>`;
 }
