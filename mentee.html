@@ -266,6 +266,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 .rg-pill.pass { background: var(--green-light); color: var(--green); }
 .rg-pill.followup { background: var(--red-light); color: var(--red); }
 .rg-pill.pending { background: var(--gray-100); color: var(--gray-500); }
+.rg-pill.submitted { background: var(--amber-light); color: var(--amber); }
+.rg-submit-link { display: inline-block; margin: 12px 1.25rem 16px; font-size: 12px; font-family: inherit; font-weight: 600; color: #fff; background: var(--red); border-radius: 8px; padding: 7px 14px; text-decoration: none; }
 .rg-comp-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 1.25rem; border-top: 1px solid var(--gray-100); font-size: 13px; }
 .rg-comp-score { font-weight: 600; font-size: 11px; padding: 2px 9px; border-radius: 10px; flex-shrink: 0; margin-left: 12px; }
 .rg-comp-score.s-high { background: var(--green-light); color: var(--green); }
@@ -690,10 +692,6 @@ const token = window.location.pathname.split('/').pop();
 let menteeData = null, progressMap = {}, saveTimeout = null, accessFlags = { l2: false, l3: false };
 let activeStagePanel = null;
 
-// Tracks which tab is currently showing, updated by switchTab(). The help-fab
-// script at the bottom reads this directly instead of sniffing inline styles.
-let currentTab = 'dashboard';
-
 async function init() {
   try {
     const res = await fetch(`/api/progress/${token}`);
@@ -717,7 +715,6 @@ async function init() {
 }
 
 function switchTab(tab, btn) {
-  currentTab = tab;
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('tab-dashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
@@ -773,15 +770,27 @@ function renderReadiness() {
   document.getElementById('readiness-container').innerHTML = GATE_DEFS.map((g, gi) => {
     const result = rgData.find(r => r.gate_key === g.key);
     const status = result ? result.pass_fail : null;
-    const pillClass = status === 'Pass' ? 'pass' : status === 'Needs Follow-Up' ? 'followup' : 'pending';
-    const pillText  = status === 'Pass' ? '✓ Pass' : status === 'Needs Follow-Up' ? 'Needs Follow-Up' : 'Not Yet Reviewed';
+    const pillClass = status === 'Pass' ? 'pass'
+      : status === 'Needs Follow-Up' ? 'followup'
+      : status === 'Pending Review' ? 'submitted'
+      : 'pending';
+    const pillText = status === 'Pass' ? '✓ Pass'
+      : status === 'Needs Follow-Up' ? 'Needs Follow-Up'
+      : status === 'Pending Review' ? 'Pending Review'
+      : 'Not Yet Reviewed';
     const comps = (result && result.competencies) || [];
     const compsHtml = comps.length
       ? comps.map(c => {
           const scoreCls = c.score >= 3 ? 's-high' : 's-low';
           return `<div class="rg-comp-row"><span>${c.label}</span><span class="rg-comp-score ${scoreCls}">${c.score}/4</span></div>`;
         }).join('')
-      : `<div class="rg-empty-note">${result ? 'No competency scores recorded yet.' : "This gate hasn't been reviewed yet — it'll appear here after your next check-in with Diana or Mark."}</div>`;
+      : status === 'Pending Review'
+        ? `<div class="rg-empty-note">Evidence submitted — waiting on your coach to review it.</div>`
+        : `<div class="rg-empty-note">${result ? 'No competency scores recorded yet.' : "This gate hasn't been reviewed yet — it'll appear here after your next check-in with Diana or Mark."}</div>`;
+    const canSubmit = status !== 'Pass' && status !== 'Pending Review';
+    const submitLinkHtml = canSubmit
+      ? `<a class="rg-submit-link" target="_blank" href="https://forms.monday.com/forms/f4c47b89e5313c5d7d861e4cc91b9baa?token=${encodeURIComponent(token)}&name=${encodeURIComponent(menteeData.name || '')}">📎 ${status === 'Needs Follow-Up' ? 'Resubmit' : 'Submit'} Evidence</a>`
+      : '';
     return `
       <div class="checklist-section" id="rg-section-${gi}">
         <div class="section-header" onclick="toggleRgSection(${gi})">
@@ -794,7 +803,7 @@ function renderReadiness() {
             <span class="chevron" id="rg-chev-${gi}">▼</span>
           </div>
         </div>
-        <div class="task-list" id="rg-tasks-${gi}">${compsHtml}</div>
+        <div class="task-list" id="rg-tasks-${gi}">${compsHtml}${submitLinkHtml}</div>
       </div>`;
   }).join('');
 }
@@ -1421,83 +1430,6 @@ function renderWeekMetrics() {
 }
 
 init();
-</script>
-
-<!-- ── PAGE HELP (floating info button) ─────────────────────────────────── -->
-<style>
-.help-fab {
-  position: fixed; bottom: 24px; right: 24px; width: 48px; height: 48px;
-  border-radius: 50%; background: var(--red, #C8102E); color: #fff;
-  border: none; font-family: 'DM Serif Display', serif; font-size: 20px;
-  cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.25); z-index: 999;
-}
-.help-modal-backdrop {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000;
-}
-.help-modal {
-  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
-  background: #fff; border-radius: 12px; padding: 28px; max-width: 480px; width: 90%;
-  max-height: 70vh; overflow-y: auto; font-family: 'DM Sans', sans-serif; z-index: 1001;
-}
-.help-modal h3 { font-family: 'DM Serif Display', serif; color: var(--red, #C8102E); margin-top: 0; }
-.help-modal button.close { position: absolute; top: 12px; right: 16px; border: none; background: none; font-size: 20px; cursor: pointer; }
-</style>
-
-<button class="help-fab" id="help-fab" title="Page info">?</button>
-<div class="help-modal-backdrop" id="help-backdrop">
-  <div class="help-modal">
-    <button class="close" id="help-close">×</button>
-    <h3 id="help-title"></h3>
-    <div id="help-body" style="white-space:pre-line;"></div>
-  </div>
-</div>
-
-<script>
-// Reads directly from Supabase's public REST API — no Vercel function needed,
-// keeps this off the 12-function Hobby-plan cap. RLS on page_help allows
-// public SELECT only; every other table stays locked down.
-const SUPABASE_URL = 'https://gbpshybsynmdztzwczyc.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdicHNoeWJzeW5tZHp0endjenljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMzEzMjUsImV4cCI6MjA5MTgwNzMyNX0.eLjkxSNsZpxcAVIi5nkEVNo_arefqM8zHQ3tVhgVw78';
-
-let helpData = {};
-fetch(`${SUPABASE_URL}/rest/v1/page_help?select=slug,title,content`, {
-  headers: {
-    'apikey': SUPABASE_ANON_KEY,
-    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-  }
-})
-  .then(r => r.json())
-  .then(rows => {
-    helpData = {};
-    (rows || []).forEach(row => { helpData[row.slug] = row; });
-  })
-  .catch(e => console.warn('Page help load failed:', e.message));
-
-// Maps this page's tab names (set by switchTab, tracked in currentTab) to
-// their page_help slugs. This file's tab names never collide with the
-// mentor dashboard's, so this map only needs to cover mentee.html's 5 tabs.
-const HELP_SLUG_MAP = {
-  'dashboard': 'mentee-dashboard',
-  'scorecard': 'mentee-scorecard',
-  'readiness': 'mentee-readiness',
-  'checklist': 'mentee-checklist',
-  'resources': 'mentee-resources'
-};
-
-function currentHelpSlug() {
-  return HELP_SLUG_MAP[currentTab] || null;
-}
-
-document.getElementById('help-fab').onclick = () => {
-  const slug = currentHelpSlug();
-  const entry = helpData[slug];
-  if (!entry) return; // no help content loaded yet, or none written for this tab
-  document.getElementById('help-title').textContent = entry.title;
-  document.getElementById('help-body').textContent = entry.content;
-  document.getElementById('help-backdrop').style.display = 'block';
-};
-document.getElementById('help-close').onclick = () =>
-  document.getElementById('help-backdrop').style.display = 'none';
 </script>
 </body>
 </html>
