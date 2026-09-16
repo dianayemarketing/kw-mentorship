@@ -581,7 +581,7 @@ let gatesData = [];
 async function loadGates(){
   const body = document.getElementById('gates-body');
   try {
-    const data = await apiGet('/api/mentor/gates');
+    const data = await apiGet('/api/mentor?view=gates');
     gatesData = data.mentees || [];
     renderGates();
   } catch (e) {
@@ -609,7 +609,7 @@ document.getElementById('flag-toggle').addEventListener('click', function(){
 async function loadScorecard(){
   const body = document.getElementById('scorecard-body');
   try {
-    const data = await apiGet('/api/mentor/scorecard');
+    const data = await apiGet('/api/mentor?view=scorecard');
     const mentees = data.mentees || [];
     document.getElementById('scorecard-sub').textContent =
       `9-metric weekly activity score · week of ${data.week_start} – ${data.week_end}`;
@@ -630,7 +630,7 @@ async function loadScorecard(){
 async function loadGraduation(){
   const list = document.getElementById('graduation-list');
   try {
-    const data = await apiGet('/api/mentor/graduation');
+    const data = await apiGet('/api/mentor?view=graduation');
     const mentees = data.mentees || [];
     if (!mentees.length) { list.innerHTML = `<div class="empty">No active mentees.</div>`; return; }
     list.innerHTML = mentees.map(g => {
@@ -662,83 +662,6 @@ document.querySelectorAll('.nav-item').forEach(item=>{
     document.getElementById('tab-'+item.dataset.tab).classList.add('active');
   });
 });
-</script>
-
-<!-- ── PAGE HELP (floating info button) ─────────────────────────────────── -->
-<style>
-.help-fab {
-  position: fixed; bottom: 24px; right: 24px; width: 48px; height: 48px;
-  border-radius: 50%; background: var(--red, #C8102E); color: #fff;
-  border: none; font-family: 'DM Serif Display', serif; font-size: 20px;
-  cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.25); z-index: 999;
-}
-.help-modal-backdrop {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000;
-}
-.help-modal {
-  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
-  background: #fff; border-radius: 12px; padding: 28px; max-width: 480px; width: 90%;
-  max-height: 70vh; overflow-y: auto; font-family: 'DM Sans', sans-serif; z-index: 1001;
-}
-.help-modal h3 { font-family: 'DM Serif Display', serif; color: var(--red, #C8102E); margin-top: 0; }
-.help-modal button.close { position: absolute; top: 12px; right: 16px; border: none; background: none; font-size: 20px; cursor: pointer; }
-</style>
-
-<button class="help-fab" id="help-fab" title="Page info">?</button>
-<div class="help-modal-backdrop" id="help-backdrop">
-  <div class="help-modal">
-    <button class="close" id="help-close">×</button>
-    <h3 id="help-title"></h3>
-    <div id="help-body" style="white-space:pre-line;"></div>
-  </div>
-</div>
-
-<script>
-// Reads directly from Supabase's public REST API — no Vercel function needed,
-// keeps this off the 12-function Hobby-plan cap. RLS on page_help allows
-// public SELECT only; every other table stays locked down.
-const SUPABASE_URL = 'https://gbpshybsynmdztzwczyc.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdicHNoeWJzeW5tZHp0endjenljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMzEzMjUsImV4cCI6MjA5MTgwNzMyNX0.eLjkxSNsZpxcAVIi5nkEVNo_arefqM8zHQ3tVhgVw78';
-
-let helpData = {};
-fetch(`${SUPABASE_URL}/rest/v1/page_help?select=slug,title,content`, {
-  headers: {
-    'apikey': SUPABASE_ANON_KEY,
-    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-  }
-})
-  .then(r => r.json())
-  .then(rows => {
-    helpData = {};
-    (rows || []).forEach(row => { helpData[row.slug] = row; });
-  })
-  .catch(e => console.warn('Page help load failed:', e.message));
-
-// This page's tab switching toggles .active on the clicked .nav-item directly
-// (see "Tab switching" above), so the active tab is always readable straight
-// from the DOM — no separate tracked variable needed like mentee.html.
-const HELP_SLUG_MAP = {
-  'roster': 'mentor-roster',
-  'gates': 'mentor-readiness',
-  'scorecard': 'mentor-scorecard',
-  'graduation': 'mentor-graduation'
-};
-
-function currentHelpSlug() {
-  const activeNav = document.querySelector('.nav-item.active');
-  return activeNav ? HELP_SLUG_MAP[activeNav.dataset.tab] : null;
-}
-
-document.getElementById('help-fab').onclick = () => {
-  const slug = currentHelpSlug();
-  const entry = helpData[slug];
-  if (!entry) return; // no help content loaded yet, or none written for this tab
-  document.getElementById('help-title').textContent = entry.title;
-  document.getElementById('help-body').textContent = entry.content;
-  document.getElementById('help-backdrop').style.display = 'block';
-};
-document.getElementById('help-close').onclick = () =>
-  document.getElementById('help-backdrop').style.display = 'none';
 </script>
 </body>
 </html>
