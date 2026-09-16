@@ -274,6 +274,25 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 .rg-comp-score.s-low { background: var(--red-light); color: var(--red); }
 .rg-empty-note { padding: 14px 1.25rem 16px; font-size: 13px; color: var(--gray-500); }
 
+/* ── READINESS GATE STEPPER ── */
+.rg-stepper-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px 18px 16px; margin-bottom: 16px; }
+.rg-stepper-row { display: flex; align-items: flex-start; overflow-x: auto; padding-bottom: 4px; }
+.rg-step { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 78px; cursor: pointer; }
+.rg-step.locked { cursor: default; }
+.rg-step-line { flex: 1; height: 2px; background: var(--gray-200); margin-top: 18px; min-width: 12px; }
+.rg-step-line.done { background: var(--green); }
+.rg-step-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; border: 2px solid var(--gray-200); background: var(--white); color: var(--gray-500); }
+.rg-step-circle.pass { background: var(--green); border-color: var(--green); color: #fff; }
+.rg-step-circle.followup { background: var(--red); border-color: var(--red); color: #fff; }
+.rg-step-circle.submitted { background: var(--amber); border-color: var(--amber); color: #fff; }
+.rg-step-circle.current { background: var(--white); border-color: var(--red); color: var(--red); box-shadow: 0 0 0 4px var(--red-light); }
+.rg-step-circle.locked { background: var(--gray-100); border-color: var(--gray-200); color: var(--gray-300); }
+.rg-step.selected .rg-step-circle { transform: scale(1.08); }
+.rg-step-label { font-size: 10px; font-weight: 500; color: var(--gray-700); text-align: center; margin-top: 6px; line-height: 1.25; }
+.rg-step.locked .rg-step-label { color: var(--gray-300); }
+.rg-locked-panel { text-align: center; padding: 32px 20px; color: var(--gray-500); }
+.rg-locked-panel .rg-lock-icon { font-size: 24px; margin-bottom: 8px; display: block; }
+
 /* ── DASHBOARD ── */
 .dash-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .dash-shortcut { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem 1rem; text-align: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
@@ -369,10 +388,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
   <div id="tab-readiness" style="display:none">
     <div class="hero">
       <div class="hero-name">Readiness Gate</div>
-      <div class="hero-sub">8 competency checkpoints across the program</div>
+      <div class="hero-sub" id="rg-hero-sub">8 competency checkpoints across the program</div>
     </div>
     <div class="main" id="rg-main" style="display:none">
-      <div id="readiness-container"></div>
+      <div id="rg-stepper-container"></div>
+      <div id="rg-detail-container"></div>
     </div>
   </div>
 
@@ -740,16 +760,32 @@ function goToTab(tab) {
 // simply don't appear in the API response and render as "Not Yet Reviewed".
 // ─────────────────────────────────────────────────────────────────────────────
 const GATE_DEFS = [
-  { key: 'wk1_foundation',   label: 'Wk1 · Professional Foundation' },
-  { key: 'wk2_leadgen',      label: 'Wk2 · Lead Generation Ready' },
-  { key: 'wk3_buyerconsult', label: 'Wk3 · Buyer Consultation Ready' },
-  { key: 'wk4_offer',        label: 'Wk4 · Offer Ready' },
-  { key: 'wk5_transaction',  label: 'Wk5 · Transaction Ready' },
-  { key: 'wk6_listing',      label: 'Wk6 · Listing Ready' },
-  { key: 'wk8_negotiation',  label: 'Wk8 · Negotiation Ready' },
-  { key: 'day90_level1',     label: '90-Day · Level 1 Competent' }
+  { key: 'wk1_foundation',   label: 'Professional Foundation', short: 'Wk1', week: 1 },
+  { key: 'wk2_leadgen',      label: 'Lead Generation Ready',   short: 'Wk2', week: 2 },
+  { key: 'wk3_buyerconsult', label: 'Buyer Consultation Ready',short: 'Wk3', week: 3 },
+  { key: 'wk4_offer',        label: 'Offer Ready',             short: 'Wk4', week: 4 },
+  { key: 'wk5_transaction',  label: 'Transaction Ready',       short: 'Wk5', week: 5 },
+  { key: 'wk6_listing',      label: 'Listing Ready',           short: 'Wk6', week: 6 },
+  { key: 'wk8_negotiation',  label: 'Negotiation Ready',       short: 'Wk8', week: 8 },
+  { key: 'day90_level1',     label: 'Level 1 Competent',       short: '90-Day', week: null } // reached at 90 days, not by week number
 ];
 let rgData = [];
+let rgSelectedKey = null;
+
+function rgDaysSinceOnboard() {
+  if (!menteeData || !menteeData.onboard_date) return 0;
+  return Math.floor((Date.now() - new Date(menteeData.onboard_date + 'T00:00:00Z')) / 86400000);
+}
+
+// Uncapped, unlike the Scorecard's week (which caps at 10) — gates run
+// through the 90-day mark, so this needs to keep counting past week 10.
+function rgCurrentWeek() {
+  return Math.floor(rgDaysSinceOnboard() / 7) + 1;
+}
+
+function rgIsReached(gate) {
+  return gate.week === null ? rgDaysSinceOnboard() >= 90 : rgCurrentWeek() >= gate.week;
+}
 
 async function loadReadiness() {
   try {
@@ -762,55 +798,107 @@ async function loadReadiness() {
     console.warn('Readiness gate load failed:', e.message);
   } finally {
     document.getElementById('rg-main').style.display = 'block';
+    // Default to the first reached-but-unresolved gate; fall back to the last reached gate.
+    const reached = GATE_DEFS.filter(rgIsReached);
+    const openOne = reached.find(g => {
+      const r = rgData.find(x => x.gate_key === g.key);
+      return !r || (r.pass_fail !== 'Pass' && r.pass_fail !== 'Pending Review');
+    });
+    rgSelectedKey = (openOne || reached[reached.length - 1] || GATE_DEFS[0]).key;
     renderReadiness();
   }
 }
 
-function renderReadiness() {
-  document.getElementById('readiness-container').innerHTML = GATE_DEFS.map((g, gi) => {
-    const result = rgData.find(r => r.gate_key === g.key);
-    const status = result ? result.pass_fail : null;
-    const pillClass = status === 'Pass' ? 'pass'
-      : status === 'Needs Follow-Up' ? 'followup'
-      : status === 'Pending Review' ? 'submitted'
-      : 'pending';
-    const pillText = status === 'Pass' ? '✓ Pass'
-      : status === 'Needs Follow-Up' ? 'Needs Follow-Up'
-      : status === 'Pending Review' ? 'Pending Review'
-      : 'Not Yet Reviewed';
-    const comps = (result && result.competencies) || [];
-    const compsHtml = comps.length
-      ? comps.map(c => {
-          const scoreCls = c.score >= 3 ? 's-high' : 's-low';
-          return `<div class="rg-comp-row"><span>${c.label}</span><span class="rg-comp-score ${scoreCls}">${c.score}/4</span></div>`;
-        }).join('')
-      : status === 'Pending Review'
-        ? `<div class="rg-empty-note">Evidence submitted — waiting on your coach to review it.</div>`
-        : `<div class="rg-empty-note">${result ? 'No competency scores recorded yet.' : "This gate hasn't been reviewed yet — it'll appear here after your next check-in with Diana or Mark."}</div>`;
-    const canSubmit = status !== 'Pass' && status !== 'Pending Review';
-    const submitLinkHtml = canSubmit
-      ? `<a class="rg-submit-link" target="_blank" href="https://forms.monday.com/forms/f4c47b89e5313c5d7d861e4cc91b9baa?token=${encodeURIComponent(token)}&name=${encodeURIComponent(menteeData.name || '')}">📎 ${status === 'Needs Follow-Up' ? 'Resubmit' : 'Submit'} Evidence</a>`
-      : '';
-    return `
-      <div class="checklist-section" id="rg-section-${gi}">
-        <div class="section-header" onclick="toggleRgSection(${gi})">
-          <div class="section-left">
-            <div class="section-num">${gi + 1}</div>
-            <div class="section-name">${g.label}</div>
-          </div>
-          <div class="section-right">
-            <span class="rg-pill ${pillClass}">${pillText}</span>
-            <span class="chevron" id="rg-chev-${gi}">▼</span>
-          </div>
-        </div>
-        <div class="task-list" id="rg-tasks-${gi}">${compsHtml}${submitLinkHtml}</div>
-      </div>`;
-  }).join('');
+function rgStatusFor(gate) {
+  const result = rgData.find(r => r.gate_key === gate.key);
+  return result ? result.pass_fail : null;
 }
 
-function toggleRgSection(gi) {
-  document.getElementById(`rg-tasks-${gi}`).classList.toggle('open');
-  document.getElementById(`rg-chev-${gi}`).classList.toggle('open');
+function rgStepClass(gate) {
+  const status = rgStatusFor(gate);
+  if (status === 'Pass') return 'pass';
+  if (status === 'Needs Follow-Up') return 'followup';
+  if (status === 'Pending Review') return 'submitted';
+  if (!rgIsReached(gate)) return 'locked';
+  return 'current';
+}
+
+function rgStepIcon(gate, stepClass) {
+  if (stepClass === 'pass') return '✓';
+  if (stepClass === 'followup') return '!';
+  if (stepClass === 'submitted') return '⏳';
+  if (stepClass === 'locked') return '🔒';
+  return gate.short.replace('Wk', '');
+}
+
+function selectRgGate(key) {
+  const gate = GATE_DEFS.find(g => g.key === key);
+  if (!gate || rgStepClass(gate) === 'locked') return; // locked gates aren't previewable yet
+  rgSelectedKey = key;
+  renderReadiness();
+}
+
+function renderReadiness() {
+  document.getElementById('rg-hero-sub').textContent = `Week ${rgCurrentWeek()} · 8 competency checkpoints across the program`;
+
+  const stepsHtml = GATE_DEFS.map((g, gi) => {
+    const stepClass = rgStepClass(g);
+    const prevPass = gi > 0 && rgStatusFor(GATE_DEFS[gi - 1]) === 'Pass';
+    return `
+      ${gi > 0 ? `<div class="rg-step-line ${prevPass ? 'done' : ''}"></div>` : ''}
+      <div class="rg-step ${stepClass === 'locked' ? 'locked' : ''} ${g.key === rgSelectedKey ? 'selected' : ''}" onclick="selectRgGate('${g.key}')">
+        <div class="rg-step-circle ${stepClass}">${rgStepIcon(g, stepClass)}</div>
+        <div class="rg-step-label">${g.short}<br>${g.label.replace(' Ready', '')}</div>
+      </div>`;
+  }).join('');
+  document.getElementById('rg-stepper-container').innerHTML = `<div class="rg-stepper-card"><div class="rg-stepper-row">${stepsHtml}</div></div>`;
+
+  const g = GATE_DEFS.find(x => x.key === rgSelectedKey) || GATE_DEFS[0];
+  const stepClass = rgStepClass(g);
+
+  if (stepClass === 'locked') {
+    document.getElementById('rg-detail-container').innerHTML = `
+      <div class="checklist-section"><div class="rg-locked-panel">
+        <span class="rg-lock-icon">🔒</span>
+        <div>${g.label} unlocks when you reach ${g.short} in the program.</div>
+      </div></div>`;
+    return;
+  }
+
+  const result = rgData.find(r => r.gate_key === g.key);
+  const status = result ? result.pass_fail : null;
+  const pillClass = status === 'Pass' ? 'pass'
+    : status === 'Needs Follow-Up' ? 'followup'
+    : status === 'Pending Review' ? 'submitted'
+    : 'pending';
+  const pillText = status === 'Pass' ? '✓ Pass'
+    : status === 'Needs Follow-Up' ? 'Needs Follow-Up'
+    : status === 'Pending Review' ? 'Pending Review'
+    : 'Not Yet Reviewed';
+  const comps = (result && result.competencies) || [];
+  const compsHtml = comps.length
+    ? comps.map(c => {
+        const scoreCls = c.score >= 3 ? 's-high' : 's-low';
+        return `<div class="rg-comp-row"><span>${c.label}</span><span class="rg-comp-score ${scoreCls}">${c.score}/4</span></div>`;
+      }).join('')
+    : status === 'Pending Review'
+      ? `<div class="rg-empty-note">Evidence submitted — waiting on your coach to review it.</div>`
+      : `<div class="rg-empty-note">${result ? 'No competency scores recorded yet.' : "This gate hasn't been reviewed yet — it'll appear here after your next check-in with Diana or Mark."}</div>`;
+  const canSubmit = status !== 'Pass' && status !== 'Pending Review';
+  const submitLinkHtml = canSubmit
+    ? `<a class="rg-submit-link" target="_blank" href="https://forms.monday.com/forms/f4c47b89e5313c5d7d861e4cc91b9baa?token=${encodeURIComponent(token)}&name=${encodeURIComponent(menteeData.name || '')}">📎 ${status === 'Needs Follow-Up' ? 'Resubmit' : 'Submit'} Evidence</a>`
+    : '';
+
+  document.getElementById('rg-detail-container').innerHTML = `
+    <div class="checklist-section">
+      <div class="section-header">
+        <div class="section-left">
+          <div class="section-name">${g.short} · ${g.label}</div>
+        </div>
+        <div class="section-right"><span class="rg-pill ${pillClass}">${pillText}</span></div>
+      </div>
+      <div class="task-list open">${compsHtml}${submitLinkHtml}</div>
+    </div>`;
 }
 
 function renderHero() {
