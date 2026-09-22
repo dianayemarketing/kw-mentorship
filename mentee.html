@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>KW Thrive · My Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
 :root {
   --red: #C8102E; --red-light: #fdf0f2; --red-mid: #f5c6ce;
@@ -14,30 +14,40 @@
   --amber: #b45309; --amber-light: #fef3cd;
   --gold: #B8922A; --gold-pale: #FBF5E8; --gold-border: rgba(184,146,42,0.2);
   --radius: 12px; --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+  --sidebar-w: 210px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: var(--dark); }
 
-.topbar {
-  background: var(--dark); color: white; padding: 0 1.5rem;
-  display: flex; align-items: center; justify-content: space-between;
-  height: 56px; position: sticky; top: 0; z-index: 100;
+/* ── Left sidebar nav (desktop) / top bar (mobile) ── */
+.shell { display: flex; min-height: 100vh; }
+.sidebar {
+  width: var(--sidebar-w); flex-shrink: 0; background: var(--dark); color: white;
+  display: flex; flex-direction: column; padding: 1.25rem 0;
+  position: sticky; top: 0; height: 100vh; z-index: 100;
 }
-.topbar-brand { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--red); }
+.sidebar-brand { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--red); padding: 0 1.25rem 1.25rem; }
+.nav-item {
+  padding: 12px 1.25rem; font-size: 13.5px; font-weight: 500; color: #bbb;
+  cursor: pointer; border-left: 3px solid transparent; transition: all 0.2s;
+  background: none; border-top: none; border-right: none; border-bottom: none;
+  font-family: inherit; text-align: left; width: 100%; white-space: nowrap;
+}
+.nav-item:hover { color: white; background: rgba(255,255,255,0.06); }
+.nav-item.active { color: white; border-left-color: var(--red); background: rgba(200,16,46,0.15); }
+.page-main { flex: 1; min-width: 0; }
 
-.tab-nav {
-  background: var(--white); border-bottom: 1px solid var(--gray-200);
-  display: flex; padding: 0 1.5rem;
-  position: sticky; top: 56px; z-index: 99;
+@media (max-width: 720px) {
+  .shell { flex-direction: column; min-height: 0; }
+  .sidebar {
+    width: 100%; height: auto; position: sticky; top: 0;
+    flex-direction: row; align-items: center; overflow-x: auto;
+    padding: 0 0.5rem;
+  }
+  .sidebar-brand { padding: 0 0.75rem; flex-shrink: 0; }
+  .nav-item { border-left: none; border-bottom: 3px solid transparent; padding: 14px 14px; }
+  .nav-item.active { border-left-color: transparent; border-bottom-color: var(--red); }
 }
-.tab-btn {
-  padding: 14px 20px; font-size: 13px; font-weight: 500; color: var(--gray-500);
-  cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;
-  background: none; border-top: none; border-left: none; border-right: none;
-  font-family: inherit; white-space: nowrap;
-}
-.tab-btn:hover { color: var(--dark); }
-.tab-btn.active { color: var(--red); border-bottom-color: var(--red); }
 
 .hero {
   background: var(--dark); color: white;
@@ -119,63 +129,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 .saving-dot.show { opacity: 1; }
 .error-state { text-align: center; padding: 4rem 2rem; color: var(--gray-500); }
 .error-state h2 { font-size: 18px; margin-bottom: 8px; color: var(--dark); }
-
-/* ── RESOURCES ── */
-.resources-main { background: var(--off-white); margin: 0; padding: 0; }
-.resources-layout { display: flex; min-height: calc(100vh - 112px); }
-.res-sidebar { width: 240px; flex-shrink: 0; background: var(--white); border-right: 1px solid #EEECE8; padding: 28px 0; position: sticky; top: 112px; height: calc(100vh - 112px); overflow-y: auto; }
-.res-sidebar-label { font-size: 9px; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase; color: #A8A099; padding: 0 20px 12px; }
-.res-nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 20px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; font-size: 13px; color: #2E2A26; font-family: 'Outfit', sans-serif; font-weight: 300; }
-.res-nav-item:hover { background: #F7F6F4; }
-.res-nav-item.active { background: var(--gold-pale); border-left-color: var(--gold); }
-.res-nav-item.active .res-nav-label { font-weight: 500; color: #1A1714; }
-.res-nav-item.locked { opacity: 0.4; cursor: not-allowed; }
-.res-nav-item.locked:hover { background: none; }
-.res-nav-icon { width: 28px; height: 28px; border-radius: 6px; background: #EEECE8; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
-.res-nav-label { flex: 1; line-height: 1.3; }
-.res-nav-count { font-size: 10px; font-weight: 500; color: #A8A099; background: #EEECE8; border-radius: 10px; padding: 2px 7px; }
-.res-nav-item.active .res-nav-count { background: rgba(184,146,42,0.15); color: var(--gold); }
-.res-content { flex: 1; padding: 40px 44px; max-width: 860px; }
-.res-section { display: none; }
-.res-section.active { display: block; }
-.res-section-header { margin-bottom: 36px; }
-.res-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; font-family: 'Outfit', sans-serif; }
-.res-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400; color: #1A1714; line-height: 1.2; }
-.timeline-track { display: flex; align-items: flex-start; position: relative; margin-bottom: 36px; padding-bottom: 4px; overflow-x: auto; gap: 0; }
-.timeline-track::before { content: ''; position: absolute; top: 20px; left: 20px; right: 20px; height: 2px; background: #EEECE8; z-index: 0; }
-.t-stage { flex: 1; min-width: 110px; display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; z-index: 1; }
-.t-node { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #DDD9D2; background: var(--white); display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 12px; transition: all 0.25s; box-shadow: 0 1px 3px rgba(0,0,0,0.06); position: relative; z-index: 2; }
-.t-stage:hover .t-node { border-color: #D4AA4A; box-shadow: 0 0 0 5px var(--gold-pale); }
-.t-stage.active .t-node { border-color: var(--gold); background: var(--gold-pale); box-shadow: 0 0 0 5px rgba(184,146,42,0.12); }
-.t-label { font-size: 12px; font-weight: 400; color: #6B6560; text-align: center; line-height: 1.4; padding: 0 6px; transition: color 0.2s; font-family: 'Outfit', sans-serif; }
-.t-stage:hover .t-label { color: #1A1714; }
-.t-stage.active .t-label { color: #1A1714; font-weight: 500; }
-.detail-panel { background: var(--white); border: 1px solid #EEECE8; border-radius: 14px; padding: 28px; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04); animation: fadeUp 0.25s ease; margin-bottom: 20px; }
-.detail-panel.open { display: block; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);} }
-.panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid #EEECE8; }
-.panel-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: #1A1714; }
-.panel-stage { font-size: 11px; color: #A8A099; margin-top: 2px; }
-.btn-close { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #DDD9D2; background: transparent; cursor: pointer; color: #6B6560; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
-.btn-close:hover { background: #F7F6F4; border-color: #A8A099; }
-.res-group-label { font-size: 9px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: #A8A099; padding: 14px 0 7px; border-bottom: 1px solid #EEECE8; margin-bottom: 7px; font-family: 'Outfit', sans-serif; }
-.res-group-label:first-child { padding-top: 0; }
-.res-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; }
-.res-row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 9px; border: 1px solid transparent; text-decoration: none; color: #2E2A26; transition: all 0.15s; background: #F7F6F4; font-family: 'Outfit', sans-serif; }
-.res-row:hover { background: var(--white); border-color: #DDD9D2; box-shadow: 0 1px 3px rgba(0,0,0,0.06); transform: translateX(2px); }
-.r-icon { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-.r-video{background:#FEE2E2;} .r-pdf{background:#FEF3C7;} .r-doc{background:#DBEAFE;}
-.r-ppt{background:#FCE7F3;} .r-sheet{background:#D1FAE5;} .r-folder{background:#EDE9FE;}
-.r-name { flex: 1; font-size: 13px; font-weight: 400; color: #2E2A26; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.r-type { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #A8A099; flex-shrink: 0; }
-.r-arrow { color: #DDD9D2; font-size: 12px; flex-shrink: 0; transition: all 0.15s; }
-.res-row:hover .r-arrow { color: var(--gold); transform: translateX(2px); }
-.locked-overlay { background: var(--white); border: 1px solid #EEECE8; border-radius: 14px; padding: 56px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-.lock-big { font-size: 40px; margin-bottom: 14px; }
-.locked-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; color: #1A1714; margin-bottom: 10px; }
-.locked-desc { font-size: 13px; color: #6B6560; line-height: 1.7; }
-.res-loading { text-align: center; padding: 3rem; color: #A8A099; font-size: 14px; font-family: 'Outfit', sans-serif; }
-.res-empty { text-align: center; padding: 1.5rem; color: #A8A099; font-size: 13px; font-style: italic; }
 
 /* ── CONFETTI CANVAS ── */
 #confetti-canvas {
@@ -302,7 +255,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 
 /* ── DASHBOARD ── */
 .dash-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.dash-shortcut { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem 1rem; text-align: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+.dash-shortcut { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem 1rem; text-align: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; display: block; text-decoration: none; color: inherit; }
 .dash-shortcut:hover { transform: translateY(-2px); box-shadow: 0 2px 6px rgba(0,0,0,0.1), 0 8px 20px rgba(0,0,0,0.06); }
 .dash-shortcut-icon { display: block; font-size: 28px; margin-bottom: 8px; }
 .dash-shortcut-label { font-size: 13px; font-weight: 600; color: var(--dark); }
@@ -310,19 +263,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 </head>
 <body>
 
-<div class="topbar">
-  <span class="topbar-brand">KW Thrive</span>
-  <span style="font-size:12px;color:#888">My Mentorship Portal</span>
-</div>
+<div class="shell">
 
-<div class="tab-nav" id="tab-nav" style="display:none">
-  <button class="tab-btn active" onclick="switchTab('dashboard',this)">🏠 Dashboard</button>
-  <button class="tab-btn" onclick="switchTab('scorecard',this)">📊 Scorecard</button>
-  <button class="tab-btn" onclick="switchTab('readiness',this)">🎯 Readiness Gate</button>
-  <button class="tab-btn" onclick="switchTab('checklist',this)">📋 My Checklist</button>
-  <button class="tab-btn" onclick="switchTab('resources',this)">📚 Resources</button>
-</div>
+<nav class="sidebar" id="tab-nav" style="display:none">
+  <div class="sidebar-brand">KW Thrive</div>
+  <button class="nav-item active" onclick="switchTab('dashboard',this)">🏠 Dashboard</button>
+  <button class="nav-item" onclick="switchTab('scorecard',this)">📊 Scorecard</button>
+  <button class="nav-item" onclick="switchTab('readiness',this)">🎯 Readiness Gate</button>
+  <button class="nav-item" onclick="switchTab('checklist',this)">📋 My Checklist</button>
+</nav>
 
+<main class="page-main">
 <div id="content">
 
   <!-- DASHBOARD TAB (new landing tab) -->
@@ -340,22 +291,22 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
         <a href="https://forms.gle/X1c5rBzLaQhd1o6b6" target="_blank" class="form-btn" id="form-action-btn">Fill Out Form</a>
       </div>
       <div class="dash-shortcuts" id="dash-shortcuts">
-        <div class="dash-shortcut" onclick="goToTab('scorecard')">
-          <span class="dash-shortcut-icon">📊</span>
-          <span class="dash-shortcut-label">Scorecard</span>
-        </div>
-        <div class="dash-shortcut" onclick="goToTab('readiness')">
-          <span class="dash-shortcut-icon">🎯</span>
-          <span class="dash-shortcut-label">Readiness Gate</span>
-        </div>
-        <div class="dash-shortcut" onclick="goToTab('checklist')">
-          <span class="dash-shortcut-icon">📋</span>
-          <span class="dash-shortcut-label">My Checklist</span>
-        </div>
-        <div class="dash-shortcut" onclick="goToTab('resources')">
+        <a class="dash-shortcut" href="https://forms.gle/X1c5rBzLaQhd1o6b6" target="_blank" rel="noopener">
+          <span class="dash-shortcut-icon">🗓️</span>
+          <span class="dash-shortcut-label">Coaching Request</span>
+        </a>
+        <a class="dash-shortcut" href="#">
+          <span class="dash-shortcut-icon">📘</span>
+          <span class="dash-shortcut-label">Guide</span>
+        </a>
+        <a class="dash-shortcut" href="/resources.html" target="_blank" rel="noopener">
           <span class="dash-shortcut-icon">📚</span>
-          <span class="dash-shortcut-label">Resources</span>
-        </div>
+          <span class="dash-shortcut-label">Resource</span>
+        </a>
+        <a class="dash-shortcut" href="#">
+          <span class="dash-shortcut-icon">📈</span>
+          <span class="dash-shortcut-label">KCM</span>
+        </a>
       </div>
       <div class="events-card" id="events-card" style="display:none">
         <div class="events-header">Upcoming Events This Week</div>
@@ -419,20 +370,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
     </div>
   </div>
 
-  <!-- RESOURCES TAB -->
-  <div id="tab-resources" style="display:none">
-    <div class="resources-main">
-      <div id="res-body" class="resources-layout">
-        <nav class="res-sidebar">
-          <div class="res-sidebar-label">Training Modules</div>
-          <div id="res-nav"><div class="res-loading">Loading...</div></div>
-        </nav>
-        <div class="res-content" id="res-sections">
-          <div id="res-loading" class="res-loading">Loading resources...</div>
-        </div>
-      </div>
-    </div>
-  </div>
+
+</div>
+</main>
 
 </div>
 
@@ -705,19 +645,8 @@ function renderTaskText(task) {
   return html;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// RESOURCES CONFIG
-// ─────────────────────────────────────────────────────────────────────────────
-const TIMELINE_GROUPS = ['buyer process','seller process'];
-const LEVEL_MAP = { 'level 1 - building foundations': null, 'level 2 - expand market': 'l2', 'level 3 - consistency & delegation': 'l3' };
-const FILE_ICONS = { video:'🎬', pdf:'📄', doc:'📝', pptx:'📊', sheet:'📊', folder:'📁' };
-const FILE_CLS   = { video:'r-video', pdf:'r-pdf', doc:'r-doc', pptx:'r-ppt', sheet:'r-sheet', folder:'r-folder' };
-const STAGE_EMOJIS = ['🏡','🤝','✍️','📄','🔑','📋','🏠','✅'];
-const MODULE_ICONS_MAP = { 'ignite videos':'🎬','buyer process':'🏠','seller process':'📋','level 1':'⭐','level 2':'⭐⭐','level 3':'⭐⭐⭐' };
-
 const token = window.location.pathname.split('/').pop();
-let menteeData = null, progressMap = {}, saveTimeout = null, accessFlags = { l2: false, l3: false };
-let activeStagePanel = null;
+let menteeData = null, progressMap = {}, saveTimeout = null;
 
 async function init() {
   try {
@@ -725,7 +654,6 @@ async function init() {
     if (!res.ok) throw new Error();
     const data = await res.json();
     menteeData = data.mentee;
-    accessFlags = data.access || { l2: false, l3: false };
     (data.progress || []).forEach(p => { progressMap[`${p.section_index}-${p.task_index}`] = p.completed; });
     renderHero();
     document.getElementById('tab-nav').style.display = 'flex';
@@ -733,7 +661,6 @@ async function init() {
     await loadEvents();
     renderChecklist();
     checkFormSubmission();
-    loadResources();
     loadScorecard();
     loadReadiness();
   } catch(e) {
@@ -742,21 +669,12 @@ async function init() {
 }
 
 function switchTab(tab, btn) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('tab-dashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
   document.getElementById('tab-scorecard').style.display  = tab === 'scorecard'  ? 'block' : 'none';
   document.getElementById('tab-readiness').style.display  = tab === 'readiness' ? 'block' : 'none';
   document.getElementById('tab-checklist').style.display  = tab === 'checklist'  ? 'block' : 'none';
-  document.getElementById('tab-resources').style.display  = tab === 'resources'  ? 'block' : 'none';
-}
-
-// Shortcut cards on the Dashboard tab route through here so they activate the
-// matching nav button too, not just the content pane.
-function goToTab(tab) {
-  const btn = Array.from(document.querySelectorAll('.tab-btn'))
-    .find(b => b.getAttribute('onclick')?.includes(`'${tab}'`));
-  if (btn) switchTab(tab, btn);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -974,7 +892,7 @@ function renderReadiness() {
 function renderHero() {
   document.title = `${menteeData.name} · KW Thrive`;
   document.getElementById('hero-name').textContent = menteeData.name;
-  document.getElementById('dash-hero-name').textContent = `Welcome, ${menteeData.name.split(' ')[0]}`;
+  document.getElementById('dash-hero-name').textContent = `Hi, ${menteeData.name.split(' ')[0]}!`;
   const onboard = menteeData.onboard_date
     ? 'Onboarded ' + new Date(menteeData.onboard_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : 'Chinese Mentorship Program · KW Thrive';
@@ -1274,132 +1192,6 @@ async function notifyMentor(sectionName, sectionIndex, pct) {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// RESOURCES
-// ─────────────────────────────────────────────────────────────────────────────
-function getModIcon(title) {
-  const t = title.toLowerCase();
-  const m = Object.entries(MODULE_ICONS_MAP).find(([k]) => t.includes(k));
-  return m ? m[1] : '📁';
-}
-function icon(type) { return FILE_ICONS[(type || '').toLowerCase()] || '📎'; }
-function cls(type)  { return FILE_CLS[(type  || '').toLowerCase()] || 'r-folder'; }
-function isLocked(title)   { const k = LEVEL_MAP[title.toLowerCase()]; return k !== undefined ? (k === null ? false : !accessFlags[k]) : false; }
-function isTimeline(title) { return TIMELINE_GROUPS.some(t => title.toLowerCase().includes(t)); }
-
-function buildResourceRow(s) {
-  const linkCol = s.column_values?.find(c => c.id === 'link_mm2pev2e');
-  const typeCol = s.column_values?.find(c => c.id === 'dropdown_mm2pkbpn');
-  const url  = linkCol?.value ? (() => { try { return JSON.parse(linkCol.value).url; } catch { return '#'; } })() : '#';
-  const type = typeCol?.text || '';
-  return `<a href="${url}" target="_blank" class="res-row"><div class="r-icon ${cls(type)}">${icon(type)}</div><div class="r-name">${s.name}</div><div class="r-type">${type}</div><div class="r-arrow">→</div></a>`;
-}
-
-// Public content, no token needed — shared across all mentees. Access-level
-// locking (L2/L3) is still applied client-side via accessFlags from /api/progress.
-async function loadResources() {
-  try {
-    const res = await fetch('/api/resources');
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    renderResources(data.groups || []);
-  } catch (e) {
-    console.warn('Resources load failed:', e.message);
-    const loading = document.getElementById('res-loading');
-    if (loading) loading.textContent = 'Unable to load resources right now — try refreshing.';
-  }
-}
-
-function renderResources(groups) {
-  const nav      = document.getElementById('res-nav');
-  const sections = document.getElementById('res-sections');
-  nav.innerHTML = ''; sections.innerHTML = '';
-  document.getElementById('res-loading')?.remove();
-  let firstId = null;
-  groups.forEach((group, gi) => {
-    const id      = `rsec-${gi}`;
-    if (!firstId) firstId = id;
-    const locked  = isLocked(group.title);
-    const modIcon = getModIcon(group.title);
-    const items   = (group.items_page?.items || []).filter(item => {
-      const s = item.column_values?.find(c => c.id === 'color_mm2pg0xb');
-      return !s || s.text !== 'Draft';
-    });
-    nav.innerHTML += `
-      <div class="res-nav-item ${locked ? 'locked' : ''}" id="nav-${id}"
-           onclick="${locked ? '' : `switchResSection('${id}')`}">
-        <div class="res-nav-icon">${modIcon}</div>
-        <div class="res-nav-label">${group.title}</div>
-        ${locked ? '<span style="font-size:11px;color:#A8A099">🔒</span>' : `<span class="res-nav-count">${items.length}</span>`}
-      </div>`;
-    let html = '';
-    if (locked) {
-      const lvlKey = LEVEL_MAP[group.title.toLowerCase()];
-      const lvl = lvlKey === 'l3' ? 3 : 2;
-      html = `
-        <div class="res-section-header"><div class="res-eyebrow">Training Module</div><div class="res-title">${group.title}</div></div>
-        <div class="locked-overlay"><div class="lock-big">🔒</div><div class="locked-title">Level ${lvl} is Locked</div><div class="locked-desc">Your mentor will unlock this when you're ready.<br>Keep working through your checklist!</div></div>`;
-    } else if (isTimeline(group.title)) {
-      const nodes  = items.map((item, idx) => `
-        <div class="t-stage" id="tstage-${id}-${idx}" onclick="openPanel('${id}',${idx},${items.length},this)">
-          <div class="t-node">${STAGE_EMOJIS[idx] || '📌'}</div>
-          <div class="t-label">${item.name}</div>
-        </div>`).join('');
-      const panels = items.map((item, idx) => {
-        const rows = (item.subitems || []).map(buildResourceRow).join('') || '<div class="res-empty">Resources coming soon</div>';
-        return `
-          <div class="detail-panel" id="panel-${id}-${idx}">
-            <div class="panel-head">
-              <div><div class="panel-title">${item.name}</div><div class="panel-stage">Stage ${idx + 1} of ${items.length}</div></div>
-              <button class="btn-close" onclick="closePanel('${id}',${items.length})">✕</button>
-            </div>
-            <div class="res-list">${rows}</div>
-          </div>`;
-      }).join('');
-      html = `
-        <div class="res-section-header"><div class="res-eyebrow">Process Flow</div><div class="res-title">${group.title}</div></div>
-        <div class="timeline-track">${nodes}</div>${panels}`;
-    } else {
-      const content = items.map(item => {
-        if (!(item.subitems || []).length) return '';
-        return `<div class="res-group-label">${item.name}</div><div class="res-list">${item.subitems.map(buildResourceRow).join('')}</div>`;
-      }).join('') || '<div class="res-empty">Resources coming soon</div>';
-      html = `
-        <div class="res-section-header"><div class="res-eyebrow">Training Module</div><div class="res-title">${group.title}</div></div>
-        ${content}`;
-    }
-    sections.innerHTML += `<div class="res-section" id="${id}">${html}</div>`;
-  });
-  if (firstId) switchResSection(firstId);
-}
-
-function switchResSection(id) {
-  document.querySelectorAll('.res-section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.res-nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById(id)?.classList.add('active');
-  document.getElementById('nav-' + id)?.classList.add('active');
-}
-
-function openPanel(groupId, idx, total, el) {
-  for (let i = 0; i < total; i++) {
-    document.getElementById(`panel-${groupId}-${i}`)?.classList.remove('open');
-    document.getElementById(`tstage-${groupId}-${i}`)?.classList.remove('active');
-  }
-  const panelId = `panel-${groupId}-${idx}`;
-  if (activeStagePanel === panelId) { activeStagePanel = null; return; }
-  document.getElementById(panelId)?.classList.add('open');
-  el.classList.add('active');
-  activeStagePanel = panelId;
-  setTimeout(() => document.getElementById(panelId)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
-}
-
-function closePanel(groupId, total) {
-  for (let i = 0; i < total; i++) {
-    document.getElementById(`panel-${groupId}-${i}`)?.classList.remove('open');
-    document.getElementById(`tstage-${groupId}-${i}`)?.classList.remove('active');
-  }
-  activeStagePanel = null;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SCORECARD (Weekly Accountability) — deliberately self-contained, no shared
