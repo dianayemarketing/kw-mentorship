@@ -37,17 +37,26 @@ function pacificDateString(d = new Date()) {
 
 // 9 scorecard metrics -> weight + ramped targets (Wk1-4) + flat target (Wk5-10)
 // Business-Building Day and CRM-Updated Day are DERIVED, not stored directly.
-// KEEP IN SYNC with the copy of this table in mentee.html.
+// KEEP IN SYNC with the copy of this table in mentee.html and scorecard.js.
+//
+// cadence: 'daily'  — has an explicit per-day rate in the Level 1 Operating
+//          Standard (e.g. "2 hrs/day x 6 days"); batching it at week's end
+//          defeats the habit it's meant to build, so the mentee UI prompts
+//          for it on the day it happened.
+//          'weekly' — only a weekly total exists in the standard, no daily
+//          breakdown; fine to log anytime before Sunday. Storage is still
+//          per entry_date either way — cadence only changes how the mentee
+//          UI frames/groups the field, not how POST validates or stores it.
 export const METRICS = [
-  { key: 'leadgen_hours',           label: 'Lead-Generation Hours',   weight: 0.20, ramp: [6, 8, 10, 12], flat: 12 },
-  { key: 'new_conversations',       label: 'New RE Conversations',    weight: 0.15, ramp: [20, 30, 35, 35], flat: 35 },
-  { key: 'followup_conversations',  label: 'Follow-Up Conversations', weight: 0.15, ramp: [6, 8, 10, 12], flat: 12 },
-  { key: 'business_building_days',  label: 'Business-Building Days',  weight: 0.10, ramp: [3, 4, 5, 6], flat: 6, derived: true },
-  { key: 'roleplay_sessions',       label: 'Role-Play Sessions',      weight: 0.10, ramp: [1, 2, 3, 3], flat: 3 },
-  { key: 'database_contacts',       label: 'Database Contacts',       weight: 0.10, ramp: [0, 5, 5, 5], flat: 5 },
-  { key: 'open_houses',             label: 'Open Houses',             weight: 0.10, ramp: [0, 0, 0, 1], flat: 1 },
-  { key: 'social_posts',            label: 'Social Posts / Videos',   weight: 0.05, ramp: [1, 2, 3, 3], flat: 3 },
-  { key: 'crm_updated_days',        label: 'CRM-Updated Days',        weight: 0.05, ramp: [0, 3, 5, 6], flat: 6, derived: true }
+  { key: 'leadgen_hours',           label: 'Lead-Generation Hours',   weight: 0.20, ramp: [6, 8, 10, 12], flat: 12, cadence: 'daily' },
+  { key: 'new_conversations',       label: 'New RE Conversations',    weight: 0.15, ramp: [20, 30, 35, 35], flat: 35, cadence: 'daily' },
+  { key: 'followup_conversations',  label: 'Follow-Up Conversations', weight: 0.15, ramp: [6, 8, 10, 12], flat: 12, cadence: 'daily' },
+  { key: 'business_building_days',  label: 'Business-Building Days',  weight: 0.10, ramp: [3, 4, 5, 6], flat: 6, derived: true, cadence: 'daily' },
+  { key: 'roleplay_sessions',       label: 'Role-Play Sessions',      weight: 0.10, ramp: [1, 2, 3, 3], flat: 3, cadence: 'weekly' },
+  { key: 'database_contacts',       label: 'Database Contacts',       weight: 0.10, ramp: [0, 5, 5, 5], flat: 5, cadence: 'weekly' },
+  { key: 'open_houses',             label: 'Open Houses',             weight: 0.10, ramp: [0, 0, 0, 1], flat: 1, cadence: 'weekly' },
+  { key: 'social_posts',            label: 'Social Posts / Videos',   weight: 0.05, ramp: [1, 2, 3, 3], flat: 3, cadence: 'weekly' },
+  { key: 'crm_updated_days',        label: 'CRM-Updated Days',        weight: 0.05, ramp: [0, 3, 5, 6], flat: 6, derived: true, cadence: 'daily' }
 ];
 
 function mondayOf(dateStr) {
