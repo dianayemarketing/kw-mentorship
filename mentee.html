@@ -67,22 +67,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 
 .main { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
 
-.form-banner {
-  border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.5rem;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: var(--shadow);
-}
-.form-banner.pending { background: var(--amber-light); border: 1.5px solid #fcd34d; }
-.form-banner.submitted { background: var(--green-light); border: 1.5px solid #6ee7b7; }
-.banner-text { font-size: 14px; font-weight: 500; }
-.banner-sub { font-size: 12px; color: var(--gray-700); margin-top: 2px; }
-.form-btn {
-  background: var(--red); color: white; border: none; border-radius: 8px;
-  padding: 8px 16px; font-size: 13px; font-family: inherit; font-weight: 500;
-  cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; transition: opacity 0.2s;
-}
-.form-btn:hover { opacity: 0.85; }
-.form-btn.done { background: var(--green); }
-
 .events-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1.5rem; overflow: hidden; }
 .events-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--gray-200); font-weight: 600; font-size: 14px; }
 .event-item { display: flex; gap: 14px; padding: 12px 1.25rem; border-bottom: 1px solid var(--gray-100); }
@@ -254,7 +238,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 .rg-scenario-label { font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin-bottom: 5px; }
 
 /* ── DASHBOARD ── */
-.dash-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.dash-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
 .dash-shortcut { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem 1rem; text-align: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; display: block; text-decoration: none; color: inherit; }
 .dash-shortcut:hover { transform: translateY(-2px); box-shadow: 0 2px 6px rgba(0,0,0,0.1), 0 8px 20px rgba(0,0,0,0.06); }
 .dash-shortcut-icon { display: block; font-size: 28px; margin-bottom: 8px; }
@@ -283,13 +267,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
       <div class="hero-sub">Chinese Mentorship Program · KW Thrive</div>
     </div>
     <div class="main">
-      <div id="form-banner" class="form-banner pending">
-        <div>
-          <div class="banner-text">📋 Request a 1-on-1 Coaching</div>
-          <div class="banner-sub" id="banner-sub">Fill out the form and we will contact you to schedule</div>
-        </div>
-        <a href="https://forms.gle/X1c5rBzLaQhd1o6b6" target="_blank" class="form-btn" id="form-action-btn">Fill Out Form</a>
-      </div>
       <div class="dash-shortcuts" id="dash-shortcuts">
         <a class="dash-shortcut" href="https://forms.gle/X1c5rBzLaQhd1o6b6" target="_blank" rel="noopener">
           <span class="dash-shortcut-icon">🗓️</span>
@@ -660,7 +637,6 @@ async function init() {
     document.getElementById('main-content').style.display = 'block';
     await loadEvents();
     renderChecklist();
-    checkFormSubmission();
     loadScorecard();
     loadReadiness();
   } catch(e) {
@@ -931,33 +907,6 @@ async function loadEvents() {
       </div>`;
     }).join('');
   } catch(e) {}
-}
-
-function checkFormSubmission() {
-  const banner = document.getElementById('form-banner');
-  const btn    = document.getElementById('form-action-btn');
-  const sub    = document.getElementById('banner-sub');
-  const clicked = localStorage.getItem('form-clicked-' + getWeekKey());
-  if (clicked) {
-    banner.className = 'form-banner submitted';
-    btn.textContent = '✓ Submitted';
-    btn.className = 'form-btn done';
-    btn.removeAttribute('href');
-    sub.textContent = 'Thank you! Your mentor will review this before your 1-on-1.';
-  } else {
-    btn.addEventListener('click', () => setTimeout(() => {
-      localStorage.setItem('form-clicked-' + getWeekKey(), '1');
-      banner.className = 'form-banner submitted';
-      btn.textContent = '✓ Submitted';
-      btn.className = 'form-btn done';
-      btn.removeAttribute('href');
-      sub.textContent = 'Thank you! Your mentor will review this before your 1-on-1.';
-    }, 500));
-  }
-}
-function getWeekKey() {
-  const n = new Date(), d = n.getDay(), diff = n.getDate() - d + (d === 0 ? -6 : 1);
-  return new Date(n.setDate(diff)).toISOString().split('T')[0];
 }
 
 function renderChecklist() {
