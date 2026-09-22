@@ -236,7 +236,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 .rg-step-circle.submitted { background: var(--amber); border-color: var(--amber); color: #fff; }
 .rg-step-circle.current { background: var(--white); border-color: var(--red); color: var(--red); box-shadow: 0 0 0 4px var(--red-light); }
 .rg-step-circle.locked { background: var(--gray-100); border-color: var(--gray-200); color: var(--gray-300); }
-.rg-step.selected .rg-step-circle { transform: scale(1.12); outline: 3px solid var(--dark); outline-offset: 3px; }
+.rg-step.selected .rg-step-circle { background: var(--red-light); border-color: var(--red); color: var(--red); }
+.rg-step.selected .rg-step-circle.pass,
+.rg-step.selected .rg-step-circle.followup,
+.rg-step.selected .rg-step-circle.submitted { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-light); }
 .rg-step-label { font-size: 10px; font-weight: 500; color: var(--gray-700); text-align: center; margin-top: 6px; line-height: 1.25; }
 .rg-step.selected .rg-step-label { color: var(--dark); font-weight: 700; }
 .rg-step.locked .rg-step-label { color: var(--gray-300); }
