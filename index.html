@@ -601,7 +601,7 @@ async function loadGates(){
     if (e.message !== 'unauthorized') body.innerHTML = `<tr><td colspan="9" class="loading load-error">Couldn't load gates — ${e.message}</td></tr>`;
   }
 }
-const cellLabel = { 'Pass':'✓', 'Needs Follow-Up':'!', 'Pending Review':'⏳', 'Not Yet Reviewed':'–' };
+const cellLabel = { 'Pass':'✓', 'Needs Follow-Up':'✗', 'Pending Review':'⏳', 'Not Yet Reviewed':'–' };
 const cellClass = { 'Pass':'pass', 'Needs Follow-Up':'follow', 'Pending Review':'pending', 'Not Yet Reviewed':'notdue' };
 function renderGates(){
   const body = document.getElementById('gates-body');
