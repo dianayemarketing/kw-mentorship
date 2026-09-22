@@ -23,6 +23,78 @@ const GATE_KEYS = [
   'wk5_transaction', 'wk6_listing', 'wk8_negotiation', 'day90_level1'
 ];
 
+// Gate Evidence Submissions board — same source api/readiness/[token].js reads
+// to show mentees their own "Pending Review" gates. Here we read it once for
+// ALL mentees so the mentor Gates grid can show the same status instead of a
+// blank "Not Yet Reviewed" for a gate someone already submitted evidence for.
+const MONDAY_API_URL = 'https://api.monday.com/v2';
+const SUBMISSIONS_BOARD_ID = 18431260768;
+const SUBMISSIONS_TOKEN_COL = 'short_textxixz9afx';
+const SUBMISSIONS_GATE_COL = 'single_selectpi8ixg2';
+
+// KEEP IN SYNC with LABEL_TO_GATE_KEY in api/readiness/[token].js and
+// GATE_MAP in api/gate-webhook.js.
+const LABEL_TO_GATE_KEY = {
+  'Wk1 - Foundation': 'wk1_foundation',
+  'Wk2 - Lead Gen': 'wk2_leadgen',
+  'Wk3 - Buyer Consult': 'wk3_buyerconsult',
+  'Wk4 - Offer': 'wk4_offer',
+  'Wk5 - Transaction': 'wk5_transaction',
+  'Wk6 - Listing': 'wk6_listing',
+  'Wk8 - Negotiation': 'wk8_negotiation',
+  '90-Day - Level 1': 'day90_level1'
+};
+
+// Returns Map<mentee_token, Set<gate_key>> for every submission on the board.
+// Fails soft: a broken/slow Monday call must never break the Gates tab.
+async function pendingGatesByToken() {
+  const query = `
+    query ($boardId: [ID!]) {
+      boards(ids: $boardId) {
+        items_page(limit: 100) {
+          items {
+            column_values(ids: ["${SUBMISSIONS_TOKEN_COL}", "${SUBMISSIONS_GATE_COL}"]) { id text }
+          }
+        }
+      }
+    }
+  `;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 4000);
+
+  try {
+    const resp = await fetch(MONDAY_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': process.env.MONDAY_API_TOKEN
+      },
+      body: JSON.stringify({ query, variables: { boardId: String(SUBMISSIONS_BOARD_ID) } }),
+      signal: controller.signal
+    });
+    const json = await resp.json();
+    const items = json?.data?.boards?.[0]?.items_page?.items || [];
+
+    const byToken = new Map();
+    items.forEach(item => {
+      const cols = item.column_values || [];
+      const token = cols.find(c => c.id === SUBMISSIONS_TOKEN_COL)?.text;
+      const label = cols.find(c => c.id === SUBMISSIONS_GATE_COL)?.text;
+      const key = LABEL_TO_GATE_KEY[label];
+      if (!token || !key) return;
+      if (!byToken.has(token)) byToken.set(token, new Set());
+      byToken.get(token).add(key);
+    });
+    return byToken;
+  } catch (e) {
+    console.error('Pending-review lookup failed (non-fatal):', e.message);
+    return new Map();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 const TZ = 'America/Los_Angeles';
 
 function pacificDateString(d = new Date()) {
@@ -86,7 +158,7 @@ function trafficFor(pct) {
 async function handleGates() {
   const { data: mentees, error: mErr } = await supabase
     .from('mentees')
-    .select('id, name')
+    .select('id, name, token')
     .eq('is_active', true)
     .order('name');
   if (mErr) throw mErr;
@@ -102,16 +174,30 @@ async function handleGates() {
     byMentee[g.mentee_id][g.gate_key] = g;
   });
 
+  // Only worth the Monday round-trip if some mentee has an un-scored gate.
+  const scoredCounts = mentees.map(m => Object.keys(byMentee[m.id] || {}).length);
+  const hasUnscoredGate = scoredCounts.some(c => c < GATE_KEYS.length);
+  const pendingByToken = hasUnscoredGate ? await pendingGatesByToken() : new Map();
+
   const results = mentees.map(m => ({
     mentee_id: m.id,
     name: m.name,
     gates: GATE_KEYS.map(key => {
       const row = byMentee[m.id]?.[key];
+      if (row) {
+        return {
+          gate_key: key,
+          status: row.pass_fail, // "Pass" | "Needs Follow-Up"
+          eval_date: row.eval_date || null,
+          reviewer: row.reviewer || null
+        };
+      }
+      const isPending = pendingByToken.get(m.token)?.has(key) || false;
       return {
         gate_key: key,
-        status: row ? row.pass_fail : 'Not Yet Reviewed', // "Pass" | "Needs Follow-Up" | "Not Yet Reviewed"
-        eval_date: row?.eval_date || null,
-        reviewer: row?.reviewer || null
+        status: isPending ? 'Pending Review' : 'Not Yet Reviewed',
+        eval_date: null,
+        reviewer: null
       };
     })
   }));
