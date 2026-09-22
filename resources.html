@@ -30,6 +30,22 @@
 
   .sidebar { width:260px; flex-shrink:0; background:var(--white); border-right:1px solid var(--gray-100); padding:32px 0; position:sticky; top:81px; height:calc(100vh - 81px); overflow-y:auto; }
   .sidebar-section-label { font-size:9px; font-weight:600; letter-spacing:0.25em; text-transform:uppercase; color:var(--gray-400); padding:0 24px 12px; }
+
+  .search-wrap { position:relative; padding:0 20px 20px; }
+  .search-input { width:100%; padding:9px 14px; border:1px solid var(--gray-200); border-radius:8px; font-family:'Outfit',sans-serif; font-size:13px; font-weight:400; color:var(--gray-900); background:var(--gray-50); outline:none; transition:border-color 0.15s; }
+  .search-input:focus { border-color:var(--gold-light); background:var(--white); }
+  .search-results { position:absolute; left:20px; right:20px; top:calc(100% - 12px); background:var(--white); border:1px solid var(--gray-200); border-radius:10px; box-shadow:var(--shadow-md); max-height:320px; overflow-y:auto; z-index:200; display:none; }
+  .search-results.open { display:block; }
+  .search-result-item { display:flex; align-items:center; gap:10px; padding:10px 14px; cursor:pointer; border-bottom:1px solid var(--gray-100); }
+  .search-result-item:last-child { border-bottom:none; }
+  .search-result-item:hover { background:var(--gray-50); }
+  .search-result-icon { width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+  .search-result-text { flex:1; overflow:hidden; }
+  .search-result-name { font-size:12.5px; color:var(--gray-900); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .search-result-path { font-size:10.5px; color:var(--gray-400); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .search-empty { padding:14px; font-size:12.5px; color:var(--gray-400); font-style:italic; text-align:center; }
+  .row-highlight { animation:rowFlash 1.6s ease; }
+  @keyframes rowFlash { 0%{background:var(--gold-pale);border-color:var(--gold-light);} 100%{background:var(--gray-50);border-color:transparent;} }
   .nav-item { display:flex; align-items:center; gap:12px; padding:12px 24px; cursor:pointer; transition:all 0.15s; border-left:3px solid transparent; }
   .nav-item:hover { background:var(--gray-50); }
   .nav-item.active { background:var(--gold-pale); border-left-color:var(--gold); }
@@ -118,6 +134,10 @@
 
 <div class="layout">
   <nav class="sidebar">
+    <div class="search-wrap">
+      <input type="text" id="res-search" class="search-input" placeholder="Search resources…" autocomplete="off" oninput="handleSearch(this.value)" onfocus="handleSearch(this.value)">
+      <div id="search-results" class="search-results"></div>
+    </div>
     <div class="sidebar-section-label">Training Modules</div>
     <div id="res-nav"><div class="loading-state" style="padding:24px"><div class="spinner"></div></div></div>
   </nav>
@@ -179,18 +199,80 @@ function getModuleIcon(title) {
   return match ? match[1] : '📁';
 }
 
-function buildRow(s) {
+let searchIndex = [];
+let rowSeq = 0;
+
+function buildRow(s, ctx) {
   const linkCol = s.column_values?.find(c => c.id === 'link_mm2pev2e');
   const typeCol = s.column_values?.find(c => c.id === 'dropdown_mm2pkbpn');
   const url  = (() => { try { return JSON.parse(linkCol?.value||'{}').url||'#'; } catch{ return '#'; } })();
   const type = typeCol?.text || '';
-  return `<a href="${url}" target="_blank" class="resource-row">
+  const rowId = `res-row-${rowSeq++}`;
+  if (ctx) {
+    searchIndex.push({
+      name: s.name, type, url, rowId,
+      sectionId: ctx.sectionId, sectionTitle: ctx.sectionTitle,
+      panelId: ctx.panelId || null, parentName: ctx.parentName || null,
+    });
+  }
+  return `<a href="${url}" target="_blank" class="resource-row" id="${rowId}">
     <div class="r-icon ${fileCls(type)}">${fileIcon(type)}</div>
     <div class="r-name">${s.name}</div>
     <div class="r-type">${type}</div>
     <div class="r-arrow">→</div>
   </a>`;
 }
+
+function handleSearch(qRaw) {
+  const box = document.getElementById('search-results');
+  const q = qRaw.trim().toLowerCase();
+  if (!q) { box.classList.remove('open'); box.innerHTML=''; return; }
+  const matches = searchIndex.filter(r => r.name.toLowerCase().includes(q)).slice(0, 20);
+  if (!matches.length) {
+    box.innerHTML = '<div class="search-empty">No resources found</div>';
+    box.classList.add('open');
+    return;
+  }
+  box.innerHTML = matches.map((r,i) => `
+    <div class="search-result-item" onclick="goToResult(${i})">
+      <div class="search-result-icon ${fileCls(r.type)}">${fileIcon(r.type)}</div>
+      <div class="search-result-text">
+        <div class="search-result-name">${r.name}</div>
+        <div class="search-result-path">${r.sectionTitle}${r.parentName?' · '+r.parentName:''}</div>
+      </div>
+    </div>`).join('');
+  box.classList.add('open');
+  box._matches = matches;
+}
+
+function goToResult(i) {
+  const box = document.getElementById('search-results');
+  const r = box._matches[i];
+  if (!r) return;
+  box.classList.remove('open');
+  document.getElementById('res-search').value = '';
+  switchSection(r.sectionId);
+  if (r.panelId) {
+    document.querySelectorAll('.detail-panel').forEach(p=>p.classList.remove('open'));
+    document.querySelectorAll('.t-stage').forEach(s=>s.classList.remove('active'));
+    document.getElementById(r.panelId)?.classList.add('open');
+    document.getElementById(r.panelId.replace('panel-', 'tstage-'))?.classList.add('active');
+    activePanel = r.panelId;
+  }
+  setTimeout(() => {
+    const rowEl = document.getElementById(r.rowId);
+    rowEl?.scrollIntoView({behavior:'smooth', block:'center'});
+    rowEl?.classList.add('row-highlight');
+    setTimeout(()=>rowEl?.classList.remove('row-highlight'), 1600);
+  }, 60);
+}
+
+document.addEventListener('click', (e) => {
+  const wrap = document.querySelector('.search-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('search-results')?.classList.remove('open');
+  }
+});
 
 // ── Panel state ──
 let activePanel = null;
@@ -302,10 +384,12 @@ async function init() {
         </div>`).join('');
 
       const panels = items.map((item,idx)=>{
-        const rows = (item.subitems||[]).map(buildRow).join('') ||
+        const panelId = `panel-${id}-${idx}`;
+        const ctx = { sectionId: id, sectionTitle: group.title, panelId, parentName: item.name };
+        const rows = (item.subitems||[]).map(sub=>buildRow(sub, ctx)).join('') ||
           '<div class="empty-msg">Resources coming soon</div>';
         return `
-          <div class="detail-panel" id="panel-${id}-${idx}">
+          <div class="detail-panel" id="${panelId}">
             <div class="panel-head">
               <div>
                 <div class="panel-title">${item.name}</div>
@@ -329,8 +413,9 @@ async function init() {
       const content = items.map(item => {
         const subs = item.subitems||[];
         if (!subs.length) return '';
+        const ctx = { sectionId: id, sectionTitle: group.title, parentName: item.name };
         return `<div class="resource-group-label">${item.name}</div>
-                <div class="resource-list">${subs.map(buildRow).join('')}</div>`;
+                <div class="resource-list">${subs.map(sub=>buildRow(sub, ctx)).join('')}</div>`;
       }).join('') || '<div class="empty-msg">Resources coming soon</div>';
 
       html = `
