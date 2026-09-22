@@ -116,7 +116,12 @@ async function fetchItem(itemId) {
       items(ids: $ids) {
         id
         board { id }
-        column_values { id text value }
+        column_values {
+          id
+          text
+          value
+          ... on BoardRelationValue { linked_item_ids }
+        }
       }
     }
   `;
@@ -147,12 +152,19 @@ async function syncItem(itemId) {
   const gateDef = GATE_MAP[gateLabel];
   if (!gateDef) return; // no gate picked yet — nothing to sync
 
-  const menteeRaw = cols.find(c => c.id === MENTEE_COL)?.value;
-  let mondayMenteeId = null;
-  try {
-    const parsed = menteeRaw ? JSON.parse(menteeRaw) : null;
-    mondayMenteeId = parsed?.linkedPulseIds?.[0]?.linkedPulseId || null;
-  } catch (e) { /* leave null */ }
+  // linked_item_ids is the reliable field for board_relation columns — Monday's
+  // older .value JSON has been observed to come back null here even when the
+  // link genuinely exists (confirmed 2026-09-22: UI showed a linked mentee,
+  // .value was null, linked_item_ids had it). Keep the .value parse as a
+  // fallback only, don't rely on it as the primary source.
+  const menteeCol = cols.find(c => c.id === MENTEE_COL);
+  let mondayMenteeId = menteeCol?.linked_item_ids?.[0] || null;
+  if (!mondayMenteeId) {
+    try {
+      const parsed = menteeCol?.value ? JSON.parse(menteeCol.value) : null;
+      mondayMenteeId = parsed?.linkedPulseIds?.[0]?.linkedPulseId || null;
+    } catch (e) { /* leave null */ }
+  }
   if (!mondayMenteeId) return; // no mentee linked yet — nothing to sync
 
   const { data: mentee } = await supabase
