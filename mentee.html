@@ -22,19 +22,20 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 /* ── Left sidebar nav (desktop) / top bar (mobile) ── */
 .shell { display: flex; min-height: 100vh; }
 .sidebar {
-  width: var(--sidebar-w); flex-shrink: 0; background: var(--dark); color: white;
+  width: var(--sidebar-w); flex-shrink: 0; background: var(--white); color: var(--dark);
+  border-right: 1px solid var(--gray-200);
   display: flex; flex-direction: column; padding: 1.25rem 0;
   position: sticky; top: 0; height: 100vh; z-index: 100;
 }
 .sidebar-brand { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--red); padding: 0 1.25rem 1.25rem; }
 .nav-item {
-  padding: 12px 1.25rem; font-size: 13.5px; font-weight: 500; color: #bbb;
+  padding: 12px 1.25rem; font-size: 13.5px; font-weight: 500; color: var(--gray-700);
   cursor: pointer; border-left: 3px solid transparent; transition: all 0.2s;
   background: none; border-top: none; border-right: none; border-bottom: none;
   font-family: inherit; text-align: left; width: 100%; white-space: nowrap;
 }
-.nav-item:hover { color: white; background: rgba(255,255,255,0.06); }
-.nav-item.active { color: white; border-left-color: var(--red); background: rgba(200,16,46,0.15); }
+.nav-item:hover { color: var(--red); background: var(--gray-100); }
+.nav-item.active { color: var(--red); border-left-color: var(--red); background: var(--red-light); }
 .page-main { flex: 1; min-width: 0; }
 
 @media (max-width: 720px) {
@@ -50,19 +51,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 }
 
 .hero {
-  background: var(--dark); color: white;
+  background: var(--white); color: var(--dark); border-bottom: 1px solid var(--gray-200);
   padding: 2rem 1.5rem 2.5rem; text-align: center;
 }
-.hero-name { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 4px; }
-.hero-sub { font-size: 13px; color: #aaa; margin-bottom: 1.5rem; }
+.hero-name { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 4px; color: var(--red); }
+.hero-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 1.5rem; }
 .overall-ring {
   display: inline-flex; flex-direction: column; align-items: center;
-  background: rgba(255,255,255,0.06); border-radius: 16px;
+  background: var(--red-light); border-radius: 16px;
   padding: 1.25rem 2.5rem; margin-bottom: 1.5rem;
 }
 .overall-pct { font-size: 48px; font-weight: 700; color: var(--red); line-height: 1; }
-.overall-label { font-size: 12px; color: #aaa; margin-top: 2px; }
-.hero-progress-bg { width: 100%; max-width: 400px; height: 6px; background: rgba(255,255,255,0.12); border-radius: 3px; margin: 0 auto; }
+.overall-label { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+.hero-progress-bg { width: 100%; max-width: 400px; height: 6px; background: var(--gray-200); border-radius: 3px; margin: 0 auto; }
 .hero-progress-fill { height: 6px; border-radius: 3px; background: var(--red); transition: width 0.8s ease; }
 
 .main { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
@@ -158,9 +159,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 .checklist-section.just-completed { animation: sectionGlow 1.2s ease-out forwards; }
 
 /* ── SCORECARD ── */
-.sc-hero { background: var(--dark); color: white; padding: 2rem 1.5rem 1.5rem; text-align: center; }
-.sc-hero-name { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 4px; }
-.sc-hero-sub { font-size: 13px; color: #aaa; margin-bottom: 1.25rem; }
+.sc-hero { background: var(--white); color: var(--dark); border-bottom: 1px solid var(--gray-200); padding: 2rem 1.5rem 1.5rem; text-align: center; }
+.sc-hero-name { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 4px; color: var(--red); }
+.sc-hero-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 1.25rem; }
 .sc-status-badge { display: inline-block; padding: 6px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
 .sc-status-badge.on-track { background: var(--green-light); color: var(--green); }
 .sc-status-badge.attention { background: var(--amber-light); color: var(--amber); }
@@ -215,7 +216,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 
 /* ── READINESS GATE STEPPER ── */
 .rg-stepper-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px 18px 16px; margin-bottom: 16px; }
-.rg-stepper-row { display: flex; align-items: flex-start; overflow-x: auto; padding-bottom: 4px; }
+.rg-stepper-wrap { display: flex; align-items: center; gap: 6px; }
+.rg-stepper-arrow {
+  flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--gray-200);
+  background: var(--white); color: var(--gray-700); font-size: 14px; font-family: inherit;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.rg-stepper-arrow:hover:not(:disabled) { border-color: var(--red); color: var(--red); }
+.rg-stepper-arrow:disabled { opacity: 0.3; cursor: default; }
+.rg-stepper-row { display: flex; align-items: flex-start; overflow-x: auto; padding-bottom: 4px; scroll-behavior: smooth; flex: 1; scrollbar-width: none; }
+.rg-stepper-row::-webkit-scrollbar { display: none; }
 .rg-step { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 78px; cursor: pointer; }
 .rg-step.locked { cursor: default; }
 .rg-step-line { flex: 1; height: 2px; background: var(--gray-200); margin-top: 18px; min-width: 12px; }
@@ -788,7 +798,13 @@ function rgStepIcon(gate, stepClass) {
   if (stepClass === 'followup') return '!';
   if (stepClass === 'submitted') return '⏳';
   if (stepClass === 'locked') return '🔒';
+  if (gate.key === 'day90_level1') return '🏁';
   return gate.short.replace('Wk', '');
+}
+
+function rgScrollStepper(dir) {
+  const row = document.getElementById('rg-stepper-row');
+  if (row) row.scrollBy({ left: dir * 110, behavior: 'smooth' });
 }
 
 function selectRgGate(key) {
@@ -811,7 +827,14 @@ function renderReadiness() {
         <div class="rg-step-label">${g.short}<br>${g.label.replace(' Ready', '')}</div>
       </div>`;
   }).join('');
-  document.getElementById('rg-stepper-container').innerHTML = `<div class="rg-stepper-card"><div class="rg-stepper-row">${stepsHtml}</div></div>`;
+  document.getElementById('rg-stepper-container').innerHTML = `
+    <div class="rg-stepper-card">
+      <div class="rg-stepper-wrap">
+        <button class="rg-stepper-arrow" onclick="rgScrollStepper(-1)" aria-label="Scroll gates left">&lsaquo;</button>
+        <div class="rg-stepper-row" id="rg-stepper-row">${stepsHtml}</div>
+        <button class="rg-stepper-arrow" onclick="rgScrollStepper(1)" aria-label="Scroll gates right">&rsaquo;</button>
+      </div>
+    </div>`;
 
   const g = GATE_DEFS.find(x => x.key === rgSelectedKey) || GATE_DEFS[0];
   const stepClass = rgStepClass(g);
