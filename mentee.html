@@ -246,6 +246,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 .sc-field-grid { display: grid; grid-template-columns: 1fr 90px; gap: 10px 12px; align-items: center; }
 .sc-field-label { font-size: 13px; color: var(--gray-700); }
 .sc-field-goal { font-size: 11px; color: var(--gray-500); margin-top: 1px; }
+.sc-field-section-header { grid-column: 1 / -1; font-size: 12px; font-weight: 600; color: var(--gray-700); margin: 10px 0 2px; padding-top: 10px; border-top: 1px solid var(--gray-200, #e5e5e5); }
+.sc-field-section-note { font-weight: 400; color: var(--gray-500); }
 .sc-field-input { border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 8px 10px; font-size: 14px; font-family: inherit; text-align: right; width: 100%; }
 .sc-field-input:focus { outline: none; border-color: var(--red); }
 
@@ -1404,14 +1406,18 @@ function closePanel(groupId, total) {
 // state with the checklist renderer, so it can outlive the checklist tab.
 // KEEP IN SYNC with METRICS in api/daily-activity/[token].js.
 // ─────────────────────────────────────────────────────────────────────────────
+// cadence: 'daily' has a per-day rate in the Level 1 standard (e.g. 2 hrs/day
+// x 6 days) — shown under the day picker, tied to whichever day is selected.
+// cadence: 'weekly' only has a weekly total in the standard — shown as a
+// single running-progress block, log it on whichever day it actually happens.
 const SC_METRICS = [
-  { key: 'leadgen_hours',          label: 'Lead-Gen Hours',          weight: 0.20, unit: 'hrs' },
-  { key: 'new_conversations',      label: 'New RE Conversations',    weight: 0.15, unit: '' },
-  { key: 'followup_conversations', label: 'Follow-Up Conversations', weight: 0.15, unit: '' },
-  { key: 'roleplay_sessions',      label: 'Role-Play Sessions',      weight: 0.10, unit: '' },
-  { key: 'database_contacts',      label: 'Database Contacts',       weight: 0.10, unit: '' },
-  { key: 'open_houses',            label: 'Open Houses',             weight: 0.10, unit: '' },
-  { key: 'social_posts',           label: 'Social Posts / Videos',   weight: 0.05, unit: '' }
+  { key: 'leadgen_hours',          label: 'Lead-Gen Hours',          weight: 0.20, unit: 'hrs', cadence: 'daily' },
+  { key: 'new_conversations',      label: 'New RE Conversations',    weight: 0.15, unit: '', cadence: 'daily' },
+  { key: 'followup_conversations', label: 'Follow-Up Conversations', weight: 0.15, unit: '', cadence: 'daily' },
+  { key: 'roleplay_sessions',      label: 'Role-Play Sessions',      weight: 0.10, unit: '', cadence: 'weekly' },
+  { key: 'database_contacts',      label: 'Database Contacts',       weight: 0.10, unit: '', cadence: 'weekly' },
+  { key: 'open_houses',            label: 'Open Houses',             weight: 0.10, unit: '', cadence: 'weekly' },
+  { key: 'social_posts',           label: 'Social Posts / Videos',   weight: 0.05, unit: '', cadence: 'weekly' }
 ];
 const SC_DERIVED = [
   { key: 'business_building_days', label: 'Business-Building Days', weight: 0.10 },
@@ -1489,19 +1495,36 @@ function renderEntryForm() {
   const label = new Date(scSelectedDate + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   document.getElementById('sc-entry-title').textContent =
     (scSelectedDate === scData.today ? "Today's Numbers" : `${label}'s Numbers`) + (scData.editable ? '' : ' — Read-Only');
-  document.getElementById('sc-field-grid').innerHTML = SC_METRICS.map(m => {
-    const goal = scData.targets[m.key]?.target;
-    const goalText = goal !== undefined ? `Weekly goal: ${goal}${m.unit ? ' ' + m.unit : ''}` : '';
-    return `
+  const weeklyTotal = (key) => (scData.entries || []).reduce((a, e) => a + (Number(e[key]) || 0), 0);
+
+  const fieldRow = (m, subtext) => `
     <div>
       <div class="sc-field-label">${m.label}${m.unit ? ' (' + m.unit + ')' : ''}</div>
-      <div class="sc-field-goal">${goalText}</div>
+      <div class="sc-field-goal">${subtext}</div>
     </div>
     <input class="sc-field-input" type="number" min="0" step="${m.key === 'leadgen_hours' ? '0.5' : '1'}"
       value="${entry[m.key] ?? ''}" placeholder="0"
       ${scData.editable ? `onchange="scSaveEntry()"` : 'disabled'} data-key="${m.key}">
   `;
+
+  const dailyFields = SC_METRICS.filter(m => m.cadence === 'daily').map(m => {
+    const goal = scData.targets[m.key]?.target;
+    const goalText = goal !== undefined ? `Weekly goal: ${goal}${m.unit ? ' ' + m.unit : ''}` : '';
+    return fieldRow(m, goalText);
   }).join('');
+
+  const weeklyFields = SC_METRICS.filter(m => m.cadence === 'weekly').map(m => {
+    const goal = scData.targets[m.key]?.target;
+    const total = weeklyTotal(m.key);
+    const subtext = goal !== undefined ? `${total} of ${goal} logged this week` : '';
+    return fieldRow(m, subtext);
+  }).join('');
+
+  document.getElementById('sc-field-grid').innerHTML = `
+    ${dailyFields}
+    <div class="sc-field-section-header">This Week's Tasks <span class="sc-field-section-note">— log on whichever day it happens</span></div>
+    ${weeklyFields}
+  `;
 }
 
 function scReadFormValues() {
