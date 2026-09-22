@@ -226,9 +226,9 @@ async function handleGraduation() {
 
   const results = mentees.map(m => {
     const daysIn = daysSince(m.onboard_date);
-    const trainingComplete = daysIn !== null && daysIn >= 90;
 
     const menteeGates = gatesByMentee[m.id] || {};
+    const trainingComplete = menteeGates['day90_level1'] === 'Pass';
     const allGatesPass = GATE_KEYS.every(k => menteeGates[k] === 'Pass');
 
     const txnCount = m.transactions_count || 0;
