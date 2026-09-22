@@ -742,5 +742,82 @@ document.querySelectorAll('.nav-item').forEach(item=>{
   });
 });
 </script>
+
+<!-- ── PAGE HELP (floating info button) ─────────────────────────────────── -->
+<style>
+.info-fab {
+  position: fixed; bottom: 24px; right: 24px; width: 48px; height: 48px;
+  border-radius: 50%; background: var(--red, #C8102E); color: #fff;
+  border: none; font-family: 'DM Serif Display', serif; font-size: 20px;
+  cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.25); z-index: 999;
+}
+.info-modal-backdrop {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000;
+}
+.info-modal {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  background: #fff; border-radius: 12px; padding: 28px; max-width: 480px; width: 90%;
+  max-height: 70vh; overflow-y: auto; font-family: 'DM Sans', sans-serif; z-index: 1001;
+}
+.info-modal h3 { font-family: 'DM Serif Display', serif; color: var(--red, #C8102E); margin-top: 0; }
+.info-modal button.close { position: absolute; top: 12px; right: 16px; border: none; background: none; font-size: 20px; cursor: pointer; }
+</style>
+
+<button class="info-fab" id="info-fab" title="Page info">?</button>
+<div class="info-modal-backdrop" id="info-backdrop">
+  <div class="info-modal">
+    <button class="close" id="info-close">×</button>
+    <h3 id="info-title"></h3>
+    <div id="info-body" style="white-space:pre-line;"></div>
+  </div>
+</div>
+
+<script>
+// Reads directly from Supabase's public REST API — no Vercel function needed,
+// keeps this off the 12-function Hobby-plan cap. RLS on page_help allows
+// public SELECT only; every other table stays locked down.
+const SUPABASE_URL = 'https://gbpshybsynmdztzwczyc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdicHNoeWJzeW5tZHp0endjenljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMzEzMjUsImV4cCI6MjA5MTgwNzMyNX0.eLjkxSNsZpxcAVIi5nkEVNo_arefqM8zHQ3tVhgVw78';
+
+let helpData = {};
+fetch(`${SUPABASE_URL}/rest/v1/page_help?select=slug,title,content`, {
+  headers: {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+  }
+})
+  .then(r => r.json())
+  .then(rows => {
+    helpData = {};
+    (rows || []).forEach(row => { helpData[row.slug] = row; });
+  })
+  .catch(e => console.warn('Page help load failed:', e.message));
+
+// This page's tab switching toggles .active on the clicked .nav-item directly
+// (see "Tab switching" above), so the active tab is always readable straight
+// from the DOM — no separate tracked variable needed like mentee.html.
+const HELP_SLUG_MAP = {
+  'roster': 'mentor-roster',
+  'gates': 'mentor-readiness',
+  'scorecard': 'mentor-scorecard',
+  'graduation': 'mentor-graduation'
+};
+
+function currentHelpSlug() {
+  const activeNav = document.querySelector('.nav-item.active');
+  return activeNav ? HELP_SLUG_MAP[activeNav.dataset.tab] : null;
+}
+
+document.getElementById('info-fab').onclick = () => {
+  const slug = currentHelpSlug();
+  const entry = helpData[slug];
+  if (!entry) return; // no help content loaded yet, or none written for this tab
+  document.getElementById('info-title').textContent = entry.title;
+  document.getElementById('info-body').textContent = entry.content;
+  document.getElementById('info-backdrop').style.display = 'block';
+};
+document.getElementById('info-close').onclick = () =>
+  document.getElementById('info-backdrop').style.display = 'none';
+</script>
 </body>
 </html>
