@@ -236,6 +236,50 @@ async function handleScorecard() {
   return { week_start: weekStart, week_end: weekEnd, mentees: results };
 }
 
+async function handleScorecardDaily(menteeId, weekStartParam) {
+  const { data: mentee, error: mErr } = await supabase
+    .from('mentees')
+    .select('id, name')
+    .eq('id', menteeId)
+    .single();
+  if (mErr) throw mErr;
+
+  const todayStr = pacificDateString();
+  const [ws, we] = mondayOf(weekStartParam || todayStr);
+
+  const { data: entries } = await supabase
+    .from('daily_activity')
+    .select('*')
+    .eq('mentee_id', menteeId)
+    .gte('entry_date', ws)
+    .lte('entry_date', we);
+
+  const byDate = {};
+  (entries || []).forEach(e => { byDate[e.entry_date] = e; });
+
+  const dailyMetrics = METRICS.filter(mt => !mt.derived);
+
+  const days = [];
+  const cursor = new Date(ws + 'T12:00:00Z');
+  for (let i = 0; i < 7; i++) {
+    const dateStr = cursor.toISOString().slice(0, 10);
+    const e = byDate[dateStr];
+    const values = {};
+    dailyMetrics.forEach(mt => { values[mt.key] = e ? (Number(e[mt.key]) || 0) : null; });
+    days.push({ date: dateStr, logged: !!e, values });
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  return {
+    mentee_id: mentee.id,
+    name: mentee.name,
+    week_start: ws,
+    week_end: we,
+    metrics: dailyMetrics.map(mt => ({ key: mt.key, label: mt.label })),
+    days
+  };
+}
+
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
@@ -251,7 +295,12 @@ export default async function handler(req, res) {
     if (view === 'gates') payload = await handleGates();
     else if (view === 'graduation') payload = await handleGraduation();
     else if (view === 'scorecard') payload = await handleScorecard();
-    else return res.status(400).json({ error: 'Unknown or missing ?view= — expected gates, graduation, or scorecard' });
+    else if (view === 'scorecard-daily') {
+      const menteeId = req.query.mentee_id;
+      if (!menteeId) return res.status(400).json({ error: 'mentee_id is required for scorecard-daily' });
+      payload = await handleScorecardDaily(menteeId, req.query.week_start);
+    }
+    else return res.status(400).json({ error: 'Unknown or missing ?view= — expected gates, graduation, scorecard, or scorecard-daily' });
 
     return res.status(200).json(payload);
   } catch (err) {
