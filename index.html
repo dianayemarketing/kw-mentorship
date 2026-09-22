@@ -246,6 +246,17 @@ tr.scorecard-row:hover { background: var(--red-light); }
   transform: translateY(8px); transition: all 0.25s; pointer-events: none; z-index: 999;
 }
 .toast.show { opacity: 1; transform: translateY(0); }
+
+/* ---------- Help FAB ---------- */
+.help-fab {
+  position: fixed; bottom: 24px; left: 24px; z-index: 100;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--red); color: #fff; text-decoration: none;
+  padding: 12px 18px; border-radius: 30px; box-shadow: var(--shadow);
+  font-size: 13px; font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.help-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.18); }
 </style>
 </head>
 <body>
@@ -373,6 +384,8 @@ tr.scorecard-row:hover { background: var(--red-light); }
     </div>
 
   </main>
+
+  <a class="help-fab" href="https://claude.ai/code/artifact/5295fcaf-3160-47dc-93f6-f64b2605cb07" target="_blank" rel="noopener" title="Mentor Dashboard Guide">📘 Guide</a>
 </div>
 
 <div class="toast" id="toast"></div>
