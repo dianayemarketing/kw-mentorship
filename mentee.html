@@ -707,16 +707,17 @@ const WHAT_TO_DO = {
   },
   day90_level1: {
     summary: 'Have a current 1-year business plan, complete your state/local compliance module, and close 3 real supervised transactions (do-it-with-me, do-it-with-support, show-me-you-can).',
-    labNote: 'This is real production work, not a simulation — the Transaction Lab (once built) will help you prepare, but it can\u2019t stand in for the 3 actual transactions.'
+    labNote: null
   }
 };
 
 // Written scenarios, sourced from the Transaction Lab cases
 // (Level_1_Launch_Full_System_with_Transaction_Lab.xlsx: TL_Buyer_Case,
-// TL_Seller_Case, TL_Release_Cards, TL_Overview). Only gates with an
-// actual case in that workbook get one — Wk1, Wk2, and the 90-Day gate
-// don't have a fictional scenario in the source material.
+// TL_Seller_Case, TL_Release_Cards, TL_Overview) — except day90_level1,
+// whose case is the mentee's own real business, not a Transaction Lab
+// fictional case. Wk1 and Wk2 still have no case in the source material.
 const SCENARIOS = {
+  day90_level1: 'Your Own Business Case — the Level 1 Launch Assessment. No fictional client this time: the case is your real business after 90 days. Before your debrief with your coach, submit: (1) your finalized 1-year business plan and budget — production target, lead-source assumptions, key activities, income target, core expenses, marketing allowance, and taxes/savings assumptions; (2) your next-90-day action plan built from your actual pipeline and conversion ratios; (3) a pipeline report listing your top active opportunities, each with a specific next step and date; (4) your state/brokerage/local compliance module sign-off; and (5) a file for each of your 3 supervised transactions — #1 do-it-with-me, #2 do-it-with-support, #3 show-me-you-can — covering the client, timeline, the key issue you handled, and what you did without help. At the debrief, walk your coach through transaction #3 as an oral defense: why you made each key decision, and where you escalated or would escalate next time. If any transactions are still open, bring your Production Completion Plan showing how and when you will close the rest.',
   wk3_buyerconsult: 'Buyer Case — Alex Chen & Grace Liu: married first-time buyers renting in Santa Clara, hoping to move before their lease ends in about 4 months. Budget: prefer at or below $1,500,000, pre-approved to $1,600,000 with 25% down. Need 3+ bed / 2+ bath, a home office, a reasonable commute, and usable outdoor space — and are worried about overpaying, bidding wars, and not understanding the contract. Run a full mock consultation, then rank the three fictional shortlisted properties (A: 1888 Orchard Grove Ave, B: 742 Marigold Court, C: 1056 Juniper Lane) and prepare a buyer-side CMA.',
   wk4_offer: 'Continuing the Buyer Case: Grace texts that they want to write on Property B (742 Marigold Court, listed at $1,425,000) tonight — offers are due tomorrow at 4 PM, multiple offers are expected, and the seller wants a smooth close with 21 days of post-closing occupancy. Prepare your offer strategy memo first (price, terms, financing, contingencies, timeline, seller priorities), then write the mock offer on current forms and prepare a 5-minute plain-language explanation for your buyers.',
   wk5_transaction: 'Continuing the Buyer Case: the offer is accepted at $1,500,000 — 21-day close, 7-day inspection period, 10-day appraisal period, 17-day loan period, 21 days of seller occupancy after closing. Build a dated transaction timeline and client communication plan. Then inspection turns up an aging roof (~$18k), a sewer lateral repair (~$6.5k), and HVAC service (~$1.2k) — buyers want it all fixed or they\u2019ll walk. Prepare their options and a client call, then handle the seller\u2019s actual response: no repairs, but a $7,500 credit.',
