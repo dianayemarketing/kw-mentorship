@@ -199,6 +199,18 @@ tr.mentee-row:hover { background: var(--red-light); }
 .traffic.amber { background: var(--amber); }
 .traffic.red { background: var(--red); }
 
+tr.scorecard-row { cursor: pointer; }
+tr.scorecard-row:hover { background: var(--red-light); }
+.drill-row td { padding: 0; border-bottom: 1px solid var(--gray-200); }
+.drill-wrap { padding: 14px 18px 18px; background: var(--gray-100); }
+.drill-loading { padding: 14px 18px; font-size: 12px; color: var(--gray-500); }
+.drill-table { width: 100%; border-collapse: collapse; font-size: 12px; background: var(--white); border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); }
+.drill-table th { background: var(--gray-100); font-weight: 500; font-size: 10.5px; color: var(--gray-500); padding: 8px 10px; text-align: center; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
+.drill-table th:first-child, .drill-table td:first-child { text-align: left; }
+.drill-table td { padding: 7px 10px; text-align: center; border-bottom: 1px solid var(--gray-100); color: var(--gray-700); }
+.drill-table tr:last-child td { border-bottom: none; }
+.drill-table td.no-entry { color: var(--gray-200); }
+
 /* ---------- Graduation ---------- */
 .grad-card {
   background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow);
@@ -606,16 +618,18 @@ document.getElementById('flag-toggle').addEventListener('click', function(){
 });
 
 // ---------------- Scorecard ----------------
+let scorecardData = [];
 async function loadScorecard(){
   const body = document.getElementById('scorecard-body');
   try {
     const data = await apiGet('/api/mentor?view=scorecard');
     const mentees = data.mentees || [];
+    scorecardData = mentees;
     document.getElementById('scorecard-sub').textContent =
-      `9-metric weekly activity score · week of ${data.week_start} – ${data.week_end}`;
+      `9-metric weekly activity score · week of ${data.week_start} – ${data.week_end} · click a mentee for daily detail`;
     if (!mentees.length) { body.innerHTML = `<tr><td colspan="8" class="empty">No active mentees.</td></tr>`; return; }
     body.innerHTML = mentees.map(m => `
-      <tr>
+      <tr class="scorecard-row" data-mentee-id="${m.mentee_id}" onclick="toggleDrill('${m.mentee_id}')">
         <td class="mentee-name">${m.name}<span class="sub">Wk ${m.program_week}</span></td>
         ${['leadgen_hours','new_conversations','followup_conversations','roleplay_sessions','database_contacts','open_houses']
           .map(k => `<td><div class="metric-cell"><span class="traffic ${m.metrics[k]}"></span></div></td>`).join('')}
@@ -624,6 +638,57 @@ async function loadScorecard(){
   } catch (e) {
     if (e.message !== 'unauthorized') body.innerHTML = `<tr><td colspan="8" class="loading load-error">Couldn't load scorecard — ${e.message}</td></tr>`;
   }
+}
+
+// Click a scorecard row -> expand an inline 7-day breakdown for that mentee.
+// Only one drill-down open at a time; clicking the open row again collapses it.
+async function toggleDrill(menteeId){
+  const existing = document.getElementById('drill-' + menteeId);
+  document.querySelectorAll('.drill-row').forEach(r => r.remove());
+  if (existing) return;
+
+  const rowEl = document.querySelector(`tr.scorecard-row[data-mentee-id="${menteeId}"]`);
+  if (!rowEl) return;
+  const mentee = scorecardData.find(m => m.mentee_id === menteeId);
+
+  const tr = document.createElement('tr');
+  tr.className = 'drill-row';
+  tr.id = 'drill-' + menteeId;
+  tr.innerHTML = `<td colspan="8"><div class="drill-loading">Loading daily activity for ${mentee ? mentee.name : 'mentee'}…</div></td>`;
+  rowEl.after(tr);
+
+  try {
+    const data = await apiGet(`/api/mentor?view=scorecard-daily&mentee_id=${menteeId}`);
+    const cur = document.getElementById('drill-' + menteeId);
+    if (cur) renderDrill(cur, data);
+  } catch (e) {
+    const cur = document.getElementById('drill-' + menteeId);
+    if (cur) cur.querySelector('td').innerHTML = `<div class="drill-loading load-error">Couldn't load daily activity — ${e.message}</div>`;
+  }
+}
+
+const DOW_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+function renderDrill(tr, data){
+  const headerCells = data.days.map(d => {
+    const dow = DOW_LABELS[(new Date(d.date + 'T12:00:00Z').getUTCDay() + 6) % 7];
+    return `<th>${dow}<br>${d.date.slice(5)}</th>`;
+  }).join('');
+  const rows = data.metrics.map(mt => {
+    const cells = data.days.map(d => {
+      const v = d.values[mt.key];
+      return v === null ? `<td class="no-entry">–</td>` : `<td>${v}</td>`;
+    }).join('');
+    return `<tr><td>${mt.label}</td>${cells}</tr>`;
+  }).join('');
+  tr.innerHTML = `
+    <td colspan="8">
+      <div class="drill-wrap">
+        <table class="drill-table">
+          <thead><tr><th>Daily — ${data.name}</th>${headerCells}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </td>`;
 }
 
 // ---------------- Graduation ----------------
