@@ -295,6 +295,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 .rg-whattodo { background: var(--gray-100); border-radius: 10px; padding: 12px 14px; margin: 14px 1.25rem 0; font-size: 13px; color: #2E2A26; line-height: 1.5; }
 .rg-whattodo-label { font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gray-500); margin-bottom: 5px; }
 .rg-whattodo-labnote { display: block; margin-top: 6px; font-size: 11.5px; color: var(--amber); }
+.rg-scenario { background: var(--gold-pale); border: 1px solid var(--gold-border); border-radius: 10px; padding: 12px 14px; margin: 10px 1.25rem 0; font-size: 13px; color: #2E2A26; line-height: 1.5; }
+.rg-scenario-label { font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin-bottom: 5px; }
 
 /* ── DASHBOARD ── */
 .dash-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -812,6 +814,19 @@ const WHAT_TO_DO = {
     labNote: 'This is real production work, not a simulation — the Transaction Lab (once built) will help you prepare, but it can\u2019t stand in for the 3 actual transactions.'
   }
 };
+
+// Written scenarios, sourced from the Transaction Lab cases
+// (Level_1_Launch_Full_System_with_Transaction_Lab.xlsx: TL_Buyer_Case,
+// TL_Seller_Case, TL_Release_Cards, TL_Overview). Only gates with an
+// actual case in that workbook get one — Wk1, Wk2, and the 90-Day gate
+// don't have a fictional scenario in the source material.
+const SCENARIOS = {
+  wk3_buyerconsult: 'Buyer Case — Alex Chen & Grace Liu: married first-time buyers renting in Santa Clara, hoping to move before their lease ends in about 4 months. Budget: prefer at or below $1,500,000, pre-approved to $1,600,000 with 25% down. Need 3+ bed / 2+ bath, a home office, a reasonable commute, and usable outdoor space — and are worried about overpaying, bidding wars, and not understanding the contract. Run a full mock consultation, then rank the three fictional shortlisted properties (A: 1888 Orchard Grove Ave, B: 742 Marigold Court, C: 1056 Juniper Lane) and prepare a buyer-side CMA.',
+  wk4_offer: 'Continuing the Buyer Case: Grace texts that they want to write on Property B (742 Marigold Court, listed at $1,425,000) tonight — offers are due tomorrow at 4 PM, multiple offers are expected, and the seller wants a smooth close with 21 days of post-closing occupancy. Prepare your offer strategy memo first (price, terms, financing, contingencies, timeline, seller priorities), then write the mock offer on current forms and prepare a 5-minute plain-language explanation for your buyers.',
+  wk5_transaction: 'Continuing the Buyer Case: the offer is accepted at $1,500,000 — 21-day close, 7-day inspection period, 10-day appraisal period, 17-day loan period, 21 days of seller occupancy after closing. Build a dated transaction timeline and client communication plan. Then inspection turns up an aging roof (~$18k), a sewer lateral repair (~$6.5k), and HVAC service (~$1.2k) — buyers want it all fixed or they\u2019ll walk. Prepare their options and a client call, then handle the seller\u2019s actual response: no repairs, but a $7,500 credit.',
+  wk6_listing: 'Seller Case — Linda Wu: owner-occupied 3-bedroom home at 926 Willow Bend Drive, Sunnyvale, relocating to Seattle for work and hoping to move within 8\u201310 weeks without feeling rushed. Estimated loan balance ~$520,000. Home is well maintained but has dated paint, worn carpet in two rooms, and landscaping that needs cleanup. Linda cares more about net proceeds and certainty than a fast sale — but a neighbor told her it should list for at least $1,950,000. Run a full seller consultation, build a CMA/pricing recommendation off the three fictional comps, and be ready to respond professionally when she pushes back on price.',
+  wk8_negotiation: 'Two linked scenarios. Buyer side: the appraisal on the Buyer Case comes back at $1,470,000 against the $1,500,000 contract, with the appraisal contingency still active — buyers are upset and ask if they overpaid. Seller side: Linda Wu\u2019s fictional listing gets two offers — Offer A at $1,860,000 with more conditions, Offer B at $1,835,000 with fewer conditions and better timing for her move — with some terms deliberately withheld until you ask. Prepare a calm client conversation for each: options framing for the buyers, and a full price/net/certainty/timing comparison for Linda.'
+};
 let rgData = [];
 let rgSelectedKey = null;
 
@@ -935,6 +950,10 @@ function renderReadiness() {
   const whatToDoHtml = wtd
     ? `<div class="rg-whattodo"><div class="rg-whattodo-label">What's expected</div>${wtd.summary}${wtd.labNote ? `<span class="rg-whattodo-labnote">🔧 ${wtd.labNote}</span>` : ''}</div>`
     : '';
+  const scenario = SCENARIOS[g.key];
+  const scenarioHtml = scenario
+    ? `<div class="rg-scenario"><div class="rg-scenario-label">Scenario</div>${scenario}</div>`
+    : '';
 
   document.getElementById('rg-detail-container').innerHTML = `
     <div class="checklist-section">
@@ -945,6 +964,7 @@ function renderReadiness() {
         <div class="section-right"><span class="rg-pill ${pillClass}">${pillText}</span></div>
       </div>
       ${whatToDoHtml}
+      ${scenarioHtml}
       <div class="task-list open">${compsHtml}${submitLinkHtml}</div>
     </div>`;
 }
