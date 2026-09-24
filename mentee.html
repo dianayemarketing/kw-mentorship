@@ -24,18 +24,42 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 .sidebar {
   width: var(--sidebar-w); flex-shrink: 0; background: var(--white); color: var(--dark);
   border-right: 1px solid var(--gray-200);
-  display: flex; flex-direction: column; padding: 1.25rem 0;
+  display: flex; flex-direction: column; padding: 1.25rem 0.75rem;
   position: sticky; top: 0; height: 100vh; z-index: 100;
 }
-.sidebar-brand { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--red); padding: 0 1.25rem 1.25rem; }
+.sidebar-brand-row { display: flex; align-items: center; gap: 10px; padding: 2px 0.5rem 22px; }
+.sidebar-brand-mark {
+  width: 32px; height: 32px; border-radius: 9px; background: var(--red); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-family: 'DM Serif Display', serif;
+  font-size: 16px; flex-shrink: 0;
+}
+.sidebar-brand { font-family: 'DM Serif Display', serif; font-size: 16.5px; color: var(--dark); line-height: 1.15; margin: 0; }
+.sidebar-brand-sub { font-size: 10px; color: var(--gray-500); letter-spacing: 0.06em; text-transform: uppercase; }
+.nav-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--gray-500); padding: 12px 0.5rem 6px;
+}
 .nav-item {
-  padding: 12px 1.25rem; font-size: 13.5px; font-weight: 500; color: var(--gray-700);
-  cursor: pointer; border-left: 3px solid transparent; transition: all 0.2s;
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 0.5rem; border-radius: 9px; font-size: 13.5px; font-weight: 500; color: var(--gray-700);
+  cursor: pointer; border-left: none; transition: background .15s, color .15s;
   background: none; border-top: none; border-right: none; border-bottom: none;
-  font-family: inherit; text-align: left; width: 100%; white-space: nowrap;
+  font-family: inherit; text-align: left; width: 100%; white-space: nowrap; margin-bottom: 2px;
 }
 .nav-item:hover { color: var(--red); background: var(--gray-100); }
-.nav-item.active { color: var(--red); border-left-color: var(--red); background: var(--red-light); }
+.nav-item.active { color: var(--red); background: var(--red-light); }
+.nav-icon { width: 17px; height: 17px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.nav-icon svg { width: 17px; height: 17px; }
+.sidebar-spacer { flex: 1; }
+.mentee-chip {
+  display: flex; align-items: center; gap: 10px; padding: 12px 0.5rem 2px; border-top: 1px solid var(--gray-200); margin-top: 4px;
+}
+.mentee-avatar {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--gold); color: #fff; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 700;
+}
+.mentee-chip-meta .name { font-size: 13px; font-weight: 600; color: var(--dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mentee-chip-meta .role { font-size: 11px; color: var(--gray-500); }
 .page-main { flex: 1; min-width: 0; }
 
 @media (max-width: 720px) {
@@ -45,9 +69,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
     flex-direction: row; align-items: center; overflow-x: auto;
     padding: 0 0.5rem;
   }
-  .sidebar-brand { padding: 0 0.75rem; flex-shrink: 0; }
-  .nav-item { border-left: none; border-bottom: 3px solid transparent; padding: 14px 14px; }
-  .nav-item.active { border-left-color: transparent; border-bottom-color: var(--red); }
+  .sidebar-brand-row { padding: 0 0.5rem; flex-shrink: 0; }
+  .sidebar-brand-sub { display: none; }
+  .nav-label, .sidebar-spacer, .mentee-chip { display: none; }
+  .nav-item { border-left: none; border-bottom: 3px solid transparent; border-radius: 0; padding: 14px 12px; }
+  .nav-item.active { border-left-color: transparent; border-bottom-color: var(--red); background: none; }
 }
 
 .hero {
@@ -264,11 +290,41 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 <div class="shell">
 
 <nav class="sidebar" id="tab-nav" style="display:none">
-  <div class="sidebar-brand">KW Thrive</div>
-  <button class="nav-item active" onclick="switchTab('dashboard',this)">🏠 Dashboard</button>
-  <button class="nav-item" onclick="switchTab('scorecard',this)">📊 Scorecard</button>
-  <button class="nav-item" onclick="switchTab('readiness',this)">🎯 Readiness Gate</button>
-  <button class="nav-item" onclick="switchTab('checklist',this)">📋 My Checklist</button>
+  <div class="sidebar-brand-row">
+    <div class="sidebar-brand-mark">K</div>
+    <div>
+      <p class="sidebar-brand">KW Thrive</p>
+      <p class="sidebar-brand-sub">My Portal</p>
+    </div>
+  </div>
+
+  <div class="nav-label">Program</div>
+  <button class="nav-item active" onclick="switchTab('dashboard',this)">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></span>
+    Dashboard
+  </button>
+  <button class="nav-item" onclick="switchTab('scorecard',this)">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></span>
+    Scorecard
+  </button>
+  <button class="nav-item" onclick="switchTab('readiness',this)">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span>
+    Readiness Gate
+  </button>
+  <button class="nav-item" onclick="switchTab('checklist',this)">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>
+    My Checklist
+  </button>
+
+  <div class="sidebar-spacer"></div>
+
+  <div class="mentee-chip">
+    <div class="mentee-avatar" id="mentee-chip-avatar">–</div>
+    <div class="mentee-chip-meta">
+      <div class="name" id="mentee-chip-name">Loading…</div>
+      <div class="role">Mentee</div>
+    </div>
+  </div>
 </nav>
 
 <main class="page-main">
@@ -920,6 +976,8 @@ function renderHero() {
   document.title = `${menteeData.name} · KW Thrive`;
   document.getElementById('hero-name').textContent = menteeData.name;
   document.getElementById('dash-hero-name').textContent = `Hi, ${menteeData.name.split(' ')[0]}!`;
+  document.getElementById('mentee-chip-name').textContent = menteeData.name;
+  document.getElementById('mentee-chip-avatar').textContent = menteeData.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
   const onboard = menteeData.onboard_date
     ? 'Onboarded ' + new Date(menteeData.onboard_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : 'Chinese Mentorship Program · KW Thrive';
