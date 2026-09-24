@@ -21,9 +21,12 @@
   --green-light: #e3f5ef;
   --amber: #b45309;
   --amber-light: #fef3cd;
+  --gold: #b8922a;
+  --gold-light: #fbf5e8;
+  --gold-line: rgba(184,146,42,0.3);
   --radius: 12px;
   --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
-  --sidebar-w: 220px;
+  --sidebar-w: 236px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: var(--dark); min-height: 100vh; }
@@ -60,34 +63,63 @@ body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: v
 /* ---------- Sidebar ---------- */
 .sidebar {
   width: var(--sidebar-w); flex-shrink: 0; background: var(--white);
-  border-right: 1px solid var(--gray-200); padding: 28px 18px; display: flex; flex-direction: column;
+  border-right: 1px solid var(--gray-200); padding: 22px 14px 76px; display: flex; flex-direction: column;
 }
-.brand { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--red); margin: 0 0 2px; }
-.brand-sub { font-size: 11px; color: var(--gray-500); margin: 0 0 34px; letter-spacing: 0.02em; text-transform: uppercase; }
+.brand-row { display: flex; align-items: center; gap: 10px; padding: 2px 10px 22px; }
+.brand-mark {
+  width: 34px; height: 34px; border-radius: 9px; background: var(--red); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-family: 'DM Serif Display', serif;
+  font-size: 17px; flex-shrink: 0;
+}
+.brand { font-family: 'DM Serif Display', serif; font-size: 16.5px; color: var(--dark); margin: 0; line-height: 1.15; }
+.brand-sub { font-size: 10px; color: var(--gray-500); margin: 0; letter-spacing: 0.06em; text-transform: uppercase; }
+.nav-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--gray-500); padding: 12px 12px 6px;
+}
 .nav-item {
-  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px;
+  display: flex; align-items: center; gap: 11px; padding: 9px 12px; border-radius: 9px;
   color: var(--gray-700); font-size: 13.5px; font-weight: 500; cursor: pointer;
-  margin-bottom: 3px; transition: background .15s, color .15s;
+  margin-bottom: 2px; transition: background .15s, color .15s;
 }
 .nav-item:hover { background: var(--gray-100); }
 .nav-item.active { background: var(--red-light); color: var(--red); }
-.nav-item .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gray-200); flex-shrink: 0; }
-.nav-item.active .dot { background: var(--red); }
+.nav-icon { width: 17px; height: 17px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.nav-icon svg { width: 17px; height: 17px; }
 .nav-badge {
   margin-left: auto; font-size: 10.5px; background: var(--red); color: #fff;
   padding: 1px 6px; border-radius: 20px; font-weight: 600;
 }
-.sidebar-foot {
-  margin-top: auto; padding-top: 18px; border-top: 1px solid var(--gray-200);
-  font-size: 11px; color: var(--gray-500); line-height: 1.6;
+.sidebar-spacer { flex: 1; }
+.sidebar-card {
+  background: var(--gold-light); border: 1px solid var(--gold-line); border-radius: 10px;
+  padding: 12px 13px; margin: 6px 4px 10px;
 }
-.sidebar-foot .flag { color: var(--amber); font-weight: 600; }
-.sidebar-foot .logout { color: var(--gray-500); cursor: pointer; text-decoration: underline; margin-top: 8px; display: inline-block; }
+.sidebar-card .lbl { font-size: 9.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+.sidebar-card .val { font-size: 12.5px; color: var(--dark); line-height: 1.45; }
+.sidebar-card.empty .val { color: var(--gray-500); }
+.mentor-chip {
+  display: flex; align-items: center; gap: 10px; padding: 12px 10px 2px; border-top: 1px solid var(--gray-200); margin-top: 4px;
+}
+.mentor-avatar {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--red); color: #fff; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 700;
+}
+.mentor-meta .name { font-size: 13px; font-weight: 600; color: var(--dark); }
+.mentor-meta .role { font-size: 11px; color: var(--gray-500); }
+.mentor-logout { margin-left: auto; color: var(--gray-500); cursor: pointer; font-size: 11px; text-decoration: underline; }
 
 /* ---------- Main ---------- */
-main { flex: 1; padding: 2rem 2.5rem 3rem; max-width: 1320px; }
-.page-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 14px; }
-h1 { font-family: 'DM Serif Display', serif; font-size: 1.6rem; margin: 0 0 4px; }
+.main-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+main { flex: 1; padding: 1.75rem 2.5rem 3rem; max-width: 1320px; }
+.page-head {
+  display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+  padding: 16px 2.5rem; margin: -1.75rem -2.5rem 1.5rem; border-bottom: 1px solid var(--gray-200);
+  background: var(--white); position: sticky; top: 0; z-index: 5;
+}
+.crumb { font-size: 11.5px; color: var(--gray-500); margin-bottom: 3px; }
+.crumb b { color: var(--gray-700); font-weight: 600; }
+h1 { font-family: 'DM Serif Display', serif; font-size: 1.4rem; margin: 0 0 4px; }
 .page-sub { color: var(--gray-500); font-size: 13.5px; margin: 0; }
 .head-actions { display: flex; gap: 10px; align-items: center; }
 
@@ -119,7 +151,17 @@ h1 { font-family: 'DM Serif Display', serif; font-size: 1.6rem; margin: 0 0 4px;
 .kpi.accent-red { border-top-color: var(--red); }
 .kpi.accent-green { border-top-color: var(--green); }
 .kpi.accent-amber { border-top-color: var(--amber); }
-.kpi .num { font-size: 30px; font-weight: 600; color: var(--dark); line-height: 1; }
+.kpi.accent-gold { border-top-color: var(--gold); }
+.kpi-icon {
+  width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  margin-bottom: 10px; color: var(--gray-500); background: var(--gray-100);
+}
+.kpi-icon svg { width: 14px; height: 14px; }
+.kpi.accent-red .kpi-icon { background: var(--red-light); color: var(--red); }
+.kpi.accent-green .kpi-icon { background: var(--green-light); color: var(--green); }
+.kpi.accent-amber .kpi-icon { background: var(--amber-light); color: var(--amber); }
+.kpi.accent-gold .kpi-icon { background: var(--gold-light); color: var(--gold); }
+.kpi .num { font-size: 30px; font-weight: 600; color: var(--dark); line-height: 1; font-variant-numeric: tabular-nums; }
 .kpi .num.warn { color: var(--amber); }
 .kpi .num.danger { color: var(--red); }
 .kpi .lbl { font-size: 12px; color: var(--gray-500); margin-top: 6px; }
@@ -233,7 +275,7 @@ tr.scorecard-row:hover { background: var(--red-light); }
 .grad-status .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-weight: 600; font-size: 11px; }
 .badge.eligible { background: var(--amber-light); color: var(--amber); }
 .badge.progress { background: var(--gray-100); color: var(--gray-700); }
-.badge.certified { background: var(--green-light); color: var(--green); }
+.badge.certified { background: var(--gold-light); color: var(--gold); border: 1px solid var(--gold-line); }
 .mismatch-note { font-size: 10.5px; color: var(--amber); margin-top: 4px; display: block; }
 
 .tabpage { display: none; }
@@ -274,26 +316,56 @@ tr.scorecard-row:hover { background: var(--red-light); }
 <div class="shell" id="shell" style="display:none;">
 
   <div class="sidebar">
-    <p class="brand">KW Thrive</p>
-    <p class="brand-sub">Mentor Dashboard</p>
+    <div class="brand-row">
+      <div class="brand-mark">K</div>
+      <div>
+        <p class="brand">KW Thrive</p>
+        <p class="brand-sub">Mentor Dashboard</p>
+      </div>
+    </div>
 
-    <div class="nav-item active" data-tab="roster"><span class="dot"></span> Roster</div>
-    <div class="nav-item" data-tab="gates"><span class="dot"></span> Readiness Gates <span class="nav-badge" id="gates-badge" style="display:none;"></span></div>
-    <div class="nav-item" data-tab="scorecard"><span class="dot"></span> Scorecard</div>
-    <div class="nav-item" data-tab="graduation"><span class="dot"></span> Graduation</div>
+    <div class="nav-label">Program</div>
+    <div class="nav-item active" data-tab="roster">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg></span>
+      Roster
+    </div>
+    <div class="nav-item" data-tab="gates">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span>
+      Readiness Gates <span class="nav-badge" id="gates-badge" style="display:none;"></span>
+    </div>
+    <div class="nav-item" data-tab="scorecard">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></span>
+      Scorecard
+    </div>
+    <div class="nav-item" data-tab="graduation">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 7 10 5 10-5"/><circle cx="12" cy="17" r="4"/></svg></span>
+      Graduation
+    </div>
 
-    <div class="sidebar-foot" id="sidebar-foot">
-      Loading…
-      <span class="logout" onclick="logout()">Log out</span>
+    <div class="sidebar-spacer"></div>
+
+    <div class="sidebar-card" id="sidebar-flag-card">
+      <div class="lbl">Oldest open flag</div>
+      <div class="val">Loading…</div>
+    </div>
+
+    <div class="mentor-chip">
+      <div class="mentor-avatar">DY</div>
+      <div class="mentor-meta">
+        <div class="name">Diana Ye</div>
+        <div class="role" id="sidebar-mentee-count">Coach</div>
+      </div>
+      <span class="mentor-logout" onclick="logout()">Log out</span>
     </div>
   </div>
 
+  <div class="main-col">
   <main>
 
     <!-- ---------------- ROSTER ---------------- -->
     <div class="tabpage active" id="tab-roster">
       <div class="page-head">
-        <div><h1>Roster</h1><p class="page-sub">All active mentees, one row each — click a row to open their page</p></div>
+        <div><div class="crumb">KW Thrive / <b>Roster</b></div><h1>Roster</h1><p class="page-sub">All active mentees, one row each — click a row to open their page</p></div>
         <div class="head-actions">
           <button class="sync-btn" id="sync-btn" onclick="syncMonday()"><span class="sync-icon">⟳</span> Sync from Monday</button>
         </div>
@@ -335,7 +407,7 @@ tr.scorecard-row:hover { background: var(--red-light); }
     <!-- ---------------- READINESS GATES ---------------- -->
     <div class="tabpage" id="tab-gates">
       <div class="page-head">
-        <div><h1>Readiness Gates</h1><p class="page-sub">Mentee × gate — mirrors the Monday "All Gates" master view</p></div>
+        <div><div class="crumb">KW Thrive / <b>Readiness Gates</b></div><h1>Readiness Gates</h1><p class="page-sub">Mentee × gate — mirrors the Monday "All Gates" master view</p></div>
         <a class="review-btn" href="https://forms.monday.com/forms/7f0a8bdb0bde3b30ce61ae0e4c67680f?r=use1" target="_blank" rel="noopener">+ Log a Gate Review</a>
       </div>
 
@@ -359,7 +431,7 @@ tr.scorecard-row:hover { background: var(--red-light); }
     <!-- ---------------- SCORECARD ---------------- -->
     <div class="tabpage" id="tab-scorecard">
       <div class="page-head">
-        <div><h1 id="scorecard-title">Scorecard — This Week</h1><p class="page-sub" id="scorecard-sub">9-metric weekly activity score, per mentee</p></div>
+        <div><div class="crumb">KW Thrive / <b>Scorecard</b></div><h1 id="scorecard-title">Scorecard — This Week</h1><p class="page-sub" id="scorecard-sub">9-metric weekly activity score, per mentee</p></div>
       </div>
 
       <div class="panel">
@@ -378,12 +450,13 @@ tr.scorecard-row:hover { background: var(--red-light); }
     <!-- ---------------- GRADUATION ---------------- -->
     <div class="tabpage" id="tab-graduation">
       <div class="page-head">
-        <div><h1>Graduation</h1><p class="page-sub">Certificate of Completion — 90 days, all gates, 3 transactions, coach sign-off</p></div>
+        <div><div class="crumb">KW Thrive / <b>Graduation</b></div><h1>Graduation</h1><p class="page-sub">Certificate of Completion — 90 days, all gates, 3 transactions, coach sign-off</p></div>
       </div>
       <div id="graduation-list"><div class="loading">Loading graduation status…</div></div>
     </div>
 
   </main>
+  </div>
 
   <a class="help-fab" href="https://drive.google.com/file/d/1jxUGH2c9pHZe4KXs7hm3UIIfaey7Jhvk/view?usp=drive_link" target="_blank" rel="noopener" title="Mentor Dashboard Guide">📘 Guide</a>
 </div>
@@ -454,21 +527,33 @@ async function loadRoster(){
 
     const totalFlags = allMentees.reduce((s,m)=>s+(m.flag_count||0),0);
     const oldestFlag = allMentees.reduce((max,m)=> (m.flag_age_days!=null && m.flag_age_days>max) ? m.flag_age_days : max, 0);
+    const oldestFlagMentee = allMentees.find(m => m.flag_age_days === oldestFlag && oldestFlag > 0);
     const avgPct = allMentees.length ? Math.round(allMentees.reduce((a,m)=>a+m.pct,0) / allMentees.length) : 0;
     const onTrack = allMentees.filter(m => m.pct >= 50).length;
 
+    const icon = {
+      mentees: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+      trend: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>',
+      track: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 7 10 5 10-5"/><circle cx="12" cy="17" r="4"/></svg>',
+      flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+      clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+    };
     document.getElementById('roster-kpis').innerHTML = `
-      <div class="kpi accent-red"><div class="num">${allMentees.length}</div><div class="lbl">Active mentees</div></div>
-      <div class="kpi accent-green"><div class="num">${avgPct}%</div><div class="lbl">Avg. completion</div></div>
-      <div class="kpi"><div class="num">${onTrack}</div><div class="lbl">On track (≥50%)</div></div>
-      <div class="kpi accent-amber"><div class="num ${totalFlags>0?'warn':''}">${totalFlags}</div><div class="lbl">Open gate flags</div></div>
-      <div class="kpi"><div class="num ${oldestFlag>=7?'danger':''}">${oldestFlag}d</div><div class="lbl">Oldest flag, unresolved</div></div>
+      <div class="kpi accent-red"><div class="kpi-icon">${icon.mentees}</div><div class="num">${allMentees.length}</div><div class="lbl">Active mentees</div></div>
+      <div class="kpi accent-green"><div class="kpi-icon">${icon.trend}</div><div class="num">${avgPct}%</div><div class="lbl">Avg. completion</div></div>
+      <div class="kpi accent-gold"><div class="kpi-icon">${icon.track}</div><div class="num">${onTrack}</div><div class="lbl">On track (≥50%)</div></div>
+      <div class="kpi accent-amber"><div class="kpi-icon">${icon.flag}</div><div class="num ${totalFlags>0?'warn':''}">${totalFlags}</div><div class="lbl">Open gate flags</div></div>
+      <div class="kpi"><div class="kpi-icon">${icon.clock}</div><div class="num ${oldestFlag>=7?'danger':''}">${oldestFlag}d</div><div class="lbl">Oldest flag, unresolved</div></div>
     `;
-    document.getElementById('sidebar-foot').innerHTML = `
-      ${allMentees.length} mentees active<br>
-      <span class="flag">${totalFlags} flagged gates</span> · oldest ${oldestFlag}d<br>
-      <span class="logout" onclick="logout()">Log out</span>
-    `;
+    const flagCard = document.getElementById('sidebar-flag-card');
+    if (oldestFlagMentee) {
+      flagCard.classList.remove('empty');
+      flagCard.innerHTML = `<div class="lbl">Oldest open flag</div><div class="val">${oldestFlag}d · ${oldestFlagMentee.name}${oldestFlagMentee.current_week ? ', ' + oldestFlagMentee.current_week : ''}</div>`;
+    } else {
+      flagCard.classList.add('empty');
+      flagCard.innerHTML = `<div class="lbl">Oldest open flag</div><div class="val">No open flags</div>`;
+    }
+    document.getElementById('sidebar-mentee-count').textContent = `Coach · ${allMentees.length} active mentees`;
     if (totalFlags > 0) {
       document.getElementById('gates-badge').style.display = 'inline-block';
       document.getElementById('gates-badge').textContent = totalFlags;
