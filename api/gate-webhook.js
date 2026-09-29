@@ -89,6 +89,15 @@ const GATE_MAP = {
       { id: 'numbercirykvpa', label: 'Seller Disclosure Requirements' }
     ]
   },
+  'Wk7 - Farm & Pipeline': {
+    key: 'wk7_farmpipeline',
+    competencies: [
+      { id: 'numeric_mm7n79ke', label: 'Geographic Farm Selection' },
+      { id: 'numeric_mm7n7s4b', label: 'Farm Market Analysis' },
+      { id: 'numeric_mm7ne18', label: 'Pipeline Follow-Up' },
+      { id: 'numeric_mm7n1dth', label: 'Touch Cadence / Database Discipline' }
+    ]
+  },
   'Wk8 - Negotiation': {
     key: 'wk8_negotiation',
     competencies: [

@@ -36,6 +36,7 @@ const LABEL_TO_GATE_KEY = {
   'Wk4 - Offer': 'wk4_offer',
   'Wk5 - Transaction': 'wk5_transaction',
   'Wk6 - Listing': 'wk6_listing',
+  'Wk7 - Farm & Pipeline': 'wk7_farmpipeline',
   'Wk8 - Negotiation': 'wk8_negotiation',
   '90-Day - Level 1': 'day90_level1'
 };
